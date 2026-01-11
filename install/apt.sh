@@ -82,17 +82,27 @@ install_cargo_packages_minimal() {
 
     print_section "Cargo Packages (ARM-optimized)"
     print_info "Installing only packages not available via apt"
+    print_info "Compiling from source - this may take several minutes per package on ARM"
+    echo ""
+
+    local total=${#CARGO_PACKAGES_ARM[@]}
+    local current=0
 
     for package in "${CARGO_PACKAGES_ARM[@]}"; do
+        current=$((current + 1))
         if cargo install --list | grep -q "^$package "; then
             print_skip "$package"
         else
-            print_package "$package"
-            if run_with_spinner "Installing $package" cargo install "$package"; then
+            echo -e "  ${SYMBOL_PACKAGE} ${BOLD}[$current/$total]${RESET} Compiling ${BOLD}$package${RESET}..."
+            echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
+            if cargo install "$package" 2>&1 | sed 's/^/    /'; then
+                echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
                 print_success "$package installed"
             else
+                echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
                 print_error "Failed to install $package"
             fi
+            echo ""
         fi
     done
 }

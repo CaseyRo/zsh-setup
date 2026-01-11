@@ -1,13 +1,15 @@
 # setup-installer Specification
 
 ## Purpose
-TBD - created by archiving change add-installer-v2. Update Purpose after archive.
+Provides automated installation and setup of zsh-manager on new machines, with cross-platform support for macOS, Linux, and Raspberry Pi/ARM.
+
 ## Requirements
+
 ### Requirement: One-Liner Remote Installation
-The system SHALL provide a bootstrap script that can be executed via `curl | sh` to install zsh-manager on a fresh machine.
+The system SHALL provide a bootstrap script that can be executed via `bash -c "$(curl ...)"` to install zsh-manager on a fresh machine.
 
 #### Scenario: Fresh installation
-- **WHEN** user runs `curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh`
+- **WHEN** user runs `bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh)"`
 - **THEN** the repository is cloned to `~/.zsh-manager`
 - **AND** the full setup script is executed
 
@@ -20,8 +22,13 @@ The system SHALL provide a bootstrap script that can be executed via `curl | sh`
 - **THEN** the system performs a git pull to update
 - **AND** runs the setup script
 
+#### Scenario: Git detection on dash-based systems
+- **WHEN** bootstrap runs on a system where /bin/sh is dash (Debian/Ubuntu)
+- **THEN** git is correctly detected if installed
+- **AND** a helpful error message is shown if git is not installed
+
 ### Requirement: Cargo-First Package Installation
-The system SHALL install Rust-based CLI tools via Cargo rather than Homebrew for better cross-platform consistency.
+The system SHALL install Rust-based CLI tools via Cargo with clear progress feedback.
 
 #### Scenario: Cargo packages installed
 - **WHEN** the setup script runs
@@ -29,14 +36,21 @@ The system SHALL install Rust-based CLI tools via Cargo rather than Homebrew for
 
 #### Scenario: Homebrew packages installed
 - **WHEN** the setup script runs
-- **THEN** zsh, fzf, byobu, and fastfetch are installed via Homebrew
+- **THEN** zsh, fzf, byobu, btop, and fastfetch are installed via Homebrew
+
+#### Scenario: Compilation progress feedback
+- **WHEN** cargo packages are being compiled
+- **THEN** an informational message is displayed about expected compilation time
+- **AND** actual cargo compilation output is visible to the user
+- **AND** package progress is shown (e.g., "Package 2 of 6")
 
 ### Requirement: Sticky Progress Bar
-The system SHALL display a progress bar fixed at the bottom of the terminal during installation.
+The system SHALL display a progress bar fixed at the bottom of the terminal during installation with proper screen management.
 
 #### Scenario: Progress bar initialization
 - **WHEN** the setup script starts installation steps
-- **THEN** a progress bar appears at the bottom of the terminal
+- **THEN** the screen is cleared
+- **AND** a progress bar appears at the bottom of the terminal
 - **AND** installation output scrolls above the progress bar
 
 #### Scenario: Progress updates
@@ -63,3 +77,16 @@ The system SHALL use fastfetch for displaying system information on shell startu
 - **AND** hyfetch is installed
 - **THEN** hyfetch displays system information
 
+### Requirement: Auto-Upgrade on Update
+The system SHALL automatically install new packages added to the configuration after a git pull.
+
+#### Scenario: New package in config
+- **WHEN** a git pull brings in new packages in packages.sh
+- **THEN** the upgrade script detects missing packages
+- **AND** installs them automatically
+
+#### Scenario: Manual update command
+- **WHEN** user runs `zsh-update`
+- **THEN** git pull is performed
+- **AND** any new packages are installed
+- **AND** shell config is reloaded

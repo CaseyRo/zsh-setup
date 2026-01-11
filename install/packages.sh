@@ -13,6 +13,7 @@ BREW_PACKAGES=(
     "fzf"        # fuzzy finder (keybindings install better via brew)
     "byobu"      # terminal multiplexer
     "fastfetch"  # fast system info (faster alternative to hyfetch)
+    "btop"       # modern system monitor (successor to bashtop)
 )
 
 # Additional brew packages for Linux only (skipped on macOS)
@@ -54,6 +55,7 @@ APT_PACKAGES=(
     "fd-find"
     "ripgrep"
     "fastfetch"  # may fall back to neofetch
+    "btop"       # modern system monitor (successor to bashtop)
 )
 
 # Cargo packages for ARM - only what's NOT available via apt

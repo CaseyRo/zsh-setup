@@ -145,6 +145,10 @@ progress_init() {
     # Get terminal height
     local term_height=$(tput lines)
 
+    # Clear screen and move cursor to top before setting up scroll region
+    # This prevents content from the confirmation prompt from being overwritten unexpectedly
+    printf "\033[2J\033[H"
+
     # Set scrolling region to leave 2 lines at bottom for progress bar
     # CSI r = set scrolling region, CSI H = move cursor home
     printf "\033[1;$((term_height-2))r"

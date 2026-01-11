@@ -51,13 +51,13 @@ zsh-manager/
 Run this one-liner to install everything on a fresh machine:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh)"
 ```
 
 This will:
 - Clone zsh-manager to `~/.zsh-manager`
 - Install Homebrew, Rust, NVM, and Oh My Zsh
-- Install git and GitHub CLI (gh)
+- Install git, GitHub CLI (gh), and btop (system monitor)
 - Install CLI tools via Cargo (bat, eza, ripgrep, fd, zoxide, topgrade)
 - Install Docker & Docker Compose (Linux only)
 - Install Node.js LTS and global npm packages

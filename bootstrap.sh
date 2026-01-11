@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 # ============================================================================
 # ZSH-Manager Bootstrap Script
 # ============================================================================
-# One-liner installation:
-#   curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh
-# or:
+# One-liner installation (recommended):
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh)"
+#
+# Alternative (if bash is not available):
+#   curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh
 # ============================================================================
 
 set -e
@@ -24,9 +25,14 @@ echo ""
 echo "  Bootstrap Installer"
 echo ""
 
-# Check for git
-if ! command -v git &> /dev/null; then
+# Check for git (POSIX-compatible check using 'command')
+if ! command -v git >/dev/null 2>&1; then
     echo "  Error: git is required but not installed."
+    echo ""
+    echo "  Install git first:"
+    echo "    macOS:  xcode-select --install"
+    echo "    Ubuntu: sudo apt install git"
+    echo "    Fedora: sudo dnf install git"
     exit 1
 fi
 

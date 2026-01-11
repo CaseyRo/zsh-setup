@@ -21,13 +21,17 @@ _zsh_manager_check_update() {
         # Update timestamp immediately to prevent multiple checks
         echo "$current_time" > "$ZSH_Manager_LAST_UPDATE_FILE"
 
-        # Pull in background
+        # Pull in background and run upgrade if there were changes
         (
             cd "$ZSH_Manager_FOLDER" && \
             git fetch --quiet && \
             local behind=$(git rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0)
             if [[ "$behind" -gt 0 ]]; then
                 git pull --quiet && \
+                # Install any new packages added in the update
+                if [[ -f "$ZSH_Manager_FOLDER/install/upgrade.sh" ]]; then
+                    bash "$ZSH_Manager_FOLDER/install/upgrade.sh"
+                fi
                 echo "[zsh-manager] Updated! Restart shell to apply changes."
             fi
         ) &>/dev/null &
@@ -41,6 +45,11 @@ _zsh_manager_check_update
 zsh-update() {
     echo "Updating zsh-manager..."
     git -C "$ZSH_Manager_FOLDER" pull
+    # Install any new packages added in the update
+    if [[ -f "$ZSH_Manager_FOLDER/install/upgrade.sh" ]]; then
+        echo "Checking for new packages..."
+        bash "$ZSH_Manager_FOLDER/install/upgrade.sh"
+    fi
     echo "Reloading shell config..."
     source ~/.zshrc
     echo "Done!"
