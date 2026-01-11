@@ -5,17 +5,20 @@
 # ============================================================================
 
 # Homebrew packages (installed via brew install)
+# Only packages not available via cargo or that work better via brew
 BREW_PACKAGES=(
     "zsh"
-    "bat"
-    "zoxide"
-    "topgrade"
-    "hyfetch"
-    "eza"        # modern ls replacement
-    "ripgrep"    # fast grep
-    "fd"         # fast find
-    "fzf"        # fuzzy finder
+    "git"        # version control
+    "gh"         # GitHub CLI
+    "fzf"        # fuzzy finder (keybindings install better via brew)
     "byobu"      # terminal multiplexer
+    "fastfetch"  # fast system info (faster alternative to hyfetch)
+)
+
+# Additional brew packages for Linux only (skipped on macOS)
+BREW_PACKAGES_LINUX=(
+    "docker"
+    "docker-compose"
 )
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)
@@ -26,14 +29,43 @@ BREW_CASKS=(
 )
 
 # Cargo packages (installed via cargo install)
-# Used for packages not available in brew, or if you prefer cargo versions
+# Prefer cargo for Rust-based CLI tools
 CARGO_PACKAGES=(
-    # Add cargo packages here if needed, e.g.:
-    # "du-dust"
-    # "bottom"
+    "bat"        # cat with syntax highlighting
+    "zoxide"     # smarter cd
+    "eza"        # modern ls replacement
+    "ripgrep"    # fast grep (rg)
+    "fd-find"    # fast find (fd)
+    "topgrade"   # system updater
 )
 
+# ============================================================================
+# APT Packages (for ARM Linux / Raspberry Pi)
+# ============================================================================
+# Pre-built packages are much faster than compiling via cargo on ARM
+
+APT_PACKAGES=(
+    "zsh"
+    "git"
+    "gh"         # GitHub CLI (needs repo setup)
+    "fzf"
+    "byobu"
+    "bat"
+    "fd-find"
+    "ripgrep"
+    "fastfetch"  # may fall back to neofetch
+)
+
+# Cargo packages for ARM - only what's NOT available via apt
+CARGO_PACKAGES_ARM=(
+    "zoxide"     # smarter cd (not in apt)
+    "eza"        # modern ls (not in apt)
+    "topgrade"   # system updater (not in apt)
+)
+
+# ============================================================================
 # Global npm packages (installed via npm install -g)
+# ============================================================================
 NPM_GLOBAL_PACKAGES=(
     "pm2"
     "node-red"

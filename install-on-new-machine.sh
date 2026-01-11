@@ -15,6 +15,14 @@
 
 set -e
 
+# Cleanup on exit/interrupt
+cleanup_on_exit() {
+    # Reset terminal scroll region if we were interrupted
+    printf "\033[r" 2>/dev/null || true
+    printf "\033[?25h" 2>/dev/null || true  # Show cursor
+}
+trap cleanup_on_exit EXIT INT TERM
+
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="$SCRIPT_DIR/install"
@@ -23,6 +31,7 @@ INSTALL_DIR="$SCRIPT_DIR/install"
 source "$INSTALL_DIR/utils.sh"
 source "$INSTALL_DIR/packages.sh"
 source "$INSTALL_DIR/brew.sh"
+source "$INSTALL_DIR/apt.sh"
 source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
@@ -36,9 +45,35 @@ main() {
 
     print_header "ZSH-Manager: New Machine Setup"
 
+    # Detect platform early for display
+    local USE_APT=false
+    local IS_MACOS=false
+    local PLATFORM_NAME="Linux"
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        IS_MACOS=true
+        PLATFORM_NAME="macOS"
+    elif should_use_apt; then
+        USE_APT=true
+        if is_raspberry_pi; then
+            PLATFORM_NAME="Raspberry Pi"
+        else
+            PLATFORM_NAME="ARM Linux"
+        fi
+    fi
+
     echo -e "  ${DIM}This script will install:${RESET}"
-    echo -e "  ${SYMBOL_BULLET} Homebrew + CLI tools (bat, zoxide, eza, etc.)"
-    echo -e "  ${SYMBOL_BULLET} Rust & Cargo"
+    if [[ "$USE_APT" == true ]]; then
+        echo -e "  ${SYMBOL_BULLET} APT packages (git, gh, bat, ripgrep, fd, etc.)"
+        echo -e "  ${SYMBOL_BULLET} Rust & Cargo (minimal - eza, zoxide, topgrade)"
+        echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
+    else
+        echo -e "  ${SYMBOL_BULLET} Homebrew + CLI tools (git, gh, bat, eza, etc.)"
+        echo -e "  ${SYMBOL_BULLET} Rust & Cargo"
+        if [[ "$IS_MACOS" == false ]]; then
+            echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
+        fi
+    fi
     echo -e "  ${SYMBOL_BULLET} NVM + Node.js LTS + global packages (pm2, node-red)"
     echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
     echo -e "  ${SYMBOL_BULLET} ZSH-Manager configuration"
@@ -56,32 +91,93 @@ main() {
 
     # Detect OS
     print_section "System Detection"
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        print_info "Detected: macOS"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        print_info "Detected: Linux"
-        if [[ -f /etc/os-release ]]; then
-            source /etc/os-release
-            print_info "Distribution: $PRETTY_NAME"
-        fi
+    print_info "Detected: $PLATFORM_NAME"
+    if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        print_info "Distribution: $PRETTY_NAME"
+    fi
+    if is_arm; then
+        print_info "Architecture: ARM ($(uname -m))"
+    fi
+    if [[ "$USE_APT" == true ]]; then
+        print_info "Install method: APT + minimal Cargo"
     else
-        print_info "Detected: $OSTYPE"
+        print_info "Install method: Homebrew + Cargo"
     fi
 
-    # Install components
-    install_homebrew
-    install_brew_packages
-    install_brew_casks
+    # Calculate step count based on platform
+    # Base: 8 steps (rust, nvm, node, npm, omz, plugins, symlink, done)
+    # APT: +3 (apt repos, apt packages, docker) = 11
+    # Brew macOS: +3 (brew, packages, casks) = 11
+    # Brew Linux: +4 (brew, packages, casks, docker) = 12
+    local STEP_COUNT=11
+    if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
+        STEP_COUNT=12
+    fi
+    progress_init $STEP_COUNT
+
+    # =========================================================================
+    # Platform-specific package installation
+    # =========================================================================
+
+    if [[ "$USE_APT" == true ]]; then
+        # ARM Linux (Raspberry Pi) - use APT
+        setup_apt_repos
+        progress_update "APT repositories configured"
+
+        install_apt_packages
+        progress_update "APT packages installed"
+
+        install_docker_apt
+        progress_update "Docker installed"
+
+    else
+        # macOS or x86 Linux - use Homebrew
+        install_homebrew
+        progress_update "Homebrew installed"
+
+        install_brew_packages
+        progress_update "Brew packages installed"
+
+        install_brew_casks
+        progress_update "Brew casks installed"
+
+        # Docker for Linux (non-macOS) via Homebrew
+        if [[ "$IS_MACOS" == false ]]; then
+            install_brew_packages_linux
+            progress_update "Docker installed"
+        fi
+    fi
+
+    # =========================================================================
+    # Common installation (all platforms)
+    # =========================================================================
 
     install_rust
-    install_cargo_packages
+    progress_update "Rust installed"
+
+    if [[ "$USE_APT" == true ]]; then
+        install_cargo_packages_minimal
+        progress_update "Cargo packages installed (ARM)"
+    else
+        install_cargo_packages
+        progress_update "Cargo packages installed"
+    fi
 
     install_nvm
+    progress_update "NVM installed"
+
     install_node
+    progress_update "Node.js installed"
+
     install_npm_global_packages
+    progress_update "NPM packages installed"
 
     install_oh_my_zsh
+    progress_update "Oh My Zsh installed"
+
     install_zsh_plugins
+    progress_update "ZSH plugins installed"
 
     # Setup zsh-manager symlink
     print_section "ZSH-Manager Configuration"
@@ -100,6 +196,8 @@ main() {
         ln -s "$SCRIPT_DIR/.zshrc" "$ZSHRC_TARGET"
         print_success "~/.zshrc → $SCRIPT_DIR/.zshrc"
     fi
+
+    progress_update "ZSH-Manager configured"
 
     # Done!
     print_summary

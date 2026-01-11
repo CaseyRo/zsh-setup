@@ -21,45 +21,70 @@
 ```
 zsh-manager/
 ├── README.md                           # Documentation
-├── run-to-symlink.sh                     # Setup script to symlink .zshrc
+├── bootstrap.sh                        # One-liner remote install script
+├── install-on-new-machine.sh           # Full setup script with progress bar
+├── run-to-symlink.sh                   # Quick symlink-only setup
 ├── .zshrc                              # Main ZSH configuration file
+├── install/                            # Installation modules
+│   ├── packages.sh                     # Package lists (brew, cargo, npm)
+│   ├── utils.sh                        # CLI styling and progress bar
+│   ├── brew.sh                         # Homebrew installation
+│   ├── rust.sh                         # Rust/Cargo installation
+│   ├── nvm.sh                          # NVM installation
+│   └── oh-my-zsh.sh                    # Oh My Zsh installation
 ├── preload_configs/                    # OS-specific preloaded configurations
 │   ├── common/                         # Shared configurations
 │   ├── linux/                          # Linux-specific configs
-│   │   └── path.sh                     # Linux-specific path configurations
-│   ├── macos/                          # macOS-specific modules
-│   │   └── path.sh                     # macOS-specific path configurations
-│   ├── windows/                        # Windows-specific configs
-│   │   └── path.sh                     # Windows-specific path configurations
+│   ├── macos/                          # macOS-specific configs
+│   └── windows/                        # Windows-specific configs
 ├── modules/                            # Custom modules (aliases, functions, etc.)
 │   ├── common/                         # Cross-platform modules
 │   ├── linux/                          # Linux-specific modules
 │   ├── macos/                          # macOS-specific modules
-│   ├── windows/                        # Windows-specific modules
+│   └── windows/                        # Windows-specific modules
 ```
 
 ## 📦 Installation & Setup
 
-### 1️⃣ Clone the Repository
+### Quick Install (Recommended)
+
+Run this one-liner to install everything on a fresh machine:
 
 ```bash
-git clone git@github.com:MRZ07/zsh-manager.git
+curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh
 ```
 
-### 2️⃣ Move Your Existing ZSH Configuration
-Move your existing `.zshrc` file to the framework’s root folder
+This will:
+- Clone zsh-manager to `~/.zsh-manager`
+- Install Homebrew, Rust, NVM, and Oh My Zsh
+- Install git and GitHub CLI (gh)
+- Install CLI tools via Cargo (bat, eza, ripgrep, fd, zoxide, topgrade)
+- Install Docker & Docker Compose (Linux only)
+- Install Node.js LTS and global npm packages
+- Set up your `.zshrc` symlink
 
-### 3️⃣ Run the Setup Script
+**Raspberry Pi / ARM Linux**: Automatically detected! Uses APT for pre-built packages instead of compiling from source.
+
+### Manual Installation
+
+#### 1️⃣ Clone the Repository
+
 ```bash
-./run-to-symlink.sh
+git clone git@github.com:CaseyRo/zsh-manager.git ~/.zsh-manager
 ```
-This script will create a **symlink** to the recently moved configuration in the framework’s root folder.
 
-### 4️⃣ Customize Your Configuration
+#### 2️⃣ Run the Setup Script
+```bash
+cd ~/.zsh-manager
+./install-on-new-machine.sh
+```
+
+#### 3️⃣ Customize Your Configuration
 
 - Add **OS-specific** preloaded configs in `preload_configs/`
-- Add **OS-specific** Environment/Path configs in `preload_configs/*os*/path.sh"`
-- Extend functionality with  **custom modules** in `modules/`
+- Add **OS-specific** Environment/Path configs in `preload_configs/*os*/path.sh`
+- Extend functionality with **custom modules** in `modules/`
+- Edit package lists in `install/packages.sh`
 
 ## ⚙️ How ZSH-Manager Works
 
@@ -112,16 +137,15 @@ Place your custom ZSH scripts inside the corresponding **modules/** folder:
 ```bash
 modules/
 ├── common/
-│   ├── aliases.sh   # Shared aliases
-│   ├── functions.sh # Shared functions
-│   ├── style/
-│   │   └── starship.toml  # Custom Starship prompt config
+│   ├── aliases.sh         # Shared aliases
+│   ├── functions.sh       # Shared functions
+│   └── startup.sh         # Commands run on shell start (e.g., fastfetch)
 ├── linux/
-│   ├── linux_aliases.sh  # Linux-specific aliases
+│   └── linux_aliases.sh   # Linux-specific aliases
 ├── macos/
-│   ├── macos_shortcuts.sh # macOS-specific functions
-├── windows/
-│   ├── win_helpers.sh     # Windows-specific helpers
+│   └── macos_shortcuts.sh # macOS-specific functions
+└── windows/
+    └── win_helpers.sh     # Windows-specific helpers
 ```
 
 ### **Ignoring Folders & Scripts**
@@ -146,6 +170,49 @@ We welcome contributions! Feel free to submit issues, feature requests, or pull 
 
 ## 📜 License
 ZSH-Manager is open-source and available under the **MIT License**.
+
+---
+
+## 📋 Changelog
+
+### v2.0.0 (January 2026)
+
+#### New Features
+- **One-liner installation**: Run `curl ... | sh` to set up a fresh machine instantly
+- **Sticky progress bar**: Setup script now shows a progress bar fixed at the bottom of the terminal while installation output scrolls above
+- **Bootstrap script**: New `bootstrap.sh` for remote installation
+- **Raspberry Pi / ARM Linux support**: Automatic detection uses APT for pre-built packages instead of slow compilation
+- **Docker & Docker Compose**: Automatically installed on Linux (skipped on macOS)
+
+#### Changes
+- **Cargo-first package installation**: Moved core CLI tools from Homebrew to Cargo for better cross-platform consistency:
+  - `bat` - cat with syntax highlighting
+  - `eza` - modern ls replacement
+  - `ripgrep` - fast grep (rg)
+  - `fd-find` - fast find (fd)
+  - `zoxide` - smarter cd
+  - `topgrade` - system updater
+- **Faster system info**: Replaced `hyfetch` with `fastfetch` (written in C, significantly faster startup)
+- **Improved terminal handling**: Setup script now properly resets terminal on Ctrl+C interrupt
+
+#### Platform-specific installation
+| Platform | Package Manager | Docker |
+|----------|----------------|--------|
+| macOS | Homebrew + Cargo | No |
+| Linux x86 | Homebrew + Cargo | Yes (brew) |
+| Raspberry Pi / ARM | APT + minimal Cargo | Yes (apt) |
+
+#### Homebrew packages (macOS/Linux x86)
+- `zsh` - shell itself
+- `git` - version control
+- `gh` - GitHub CLI
+- `fzf` - fuzzy finder (keybindings install better via brew)
+- `byobu` - terminal multiplexer
+- `fastfetch` - fast system info display
+
+#### APT packages (Raspberry Pi / ARM Linux)
+- Pre-built: `zsh`, `git`, `gh`, `fzf`, `byobu`, `bat`, `fd-find`, `ripgrep`, `fastfetch`
+- Via Cargo (only what's not in APT): `eza`, `zoxide`, `topgrade`
 
 ---
 

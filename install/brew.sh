@@ -77,3 +77,29 @@ install_brew_casks() {
         fi
     done
 }
+
+install_brew_packages_linux() {
+    # Only run on Linux (not macOS)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        return 0
+    fi
+
+    if [[ ${#BREW_PACKAGES_LINUX[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    print_section "Linux Packages (Docker)"
+
+    for package in "${BREW_PACKAGES_LINUX[@]}"; do
+        if brew list "$package" &>/dev/null; then
+            print_skip "$package"
+        else
+            print_package "$package"
+            if run_with_spinner "Installing $package" brew install "$package"; then
+                print_success "$package installed"
+            else
+                print_error "Failed to install $package"
+            fi
+        fi
+    done
+}
