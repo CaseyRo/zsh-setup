@@ -124,6 +124,33 @@ upgrade_npm_packages() {
     done
 }
 
+upgrade_tailscale() {
+    # Skip if already installed
+    if command_exists tailscale; then
+        return 0
+    fi
+
+    # On macOS, check if app is installed (cask doesn't add CLI to PATH immediately)
+    if [[ "$OSTYPE" == "darwin"* ]] && [[ -d "/Applications/Tailscale.app" ]]; then
+        return 0
+    fi
+
+    INSTALLED_SOMETHING=true
+    echo -e "${SYMBOL_PACKAGE} Installing new package: ${BOLD}tailscale${RESET}"
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: Install via Homebrew cask
+        brew install --cask tailscale &>/dev/null && \
+            echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} Tailscale installed" || \
+            echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install Tailscale"
+    else
+        # Linux: Use official install script
+        curl -fsSL https://tailscale.com/install.sh | sh &>/dev/null && \
+            echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} Tailscale installed" || \
+            echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install Tailscale"
+    fi
+}
+
 # ============================================================================
 # Main Upgrade Function
 # ============================================================================
@@ -138,6 +165,7 @@ run_upgrade() {
 
     upgrade_cargo_packages
     upgrade_npm_packages
+    upgrade_tailscale
 
     if [[ "$INSTALLED_SOMETHING" == true ]]; then
         echo -e "${GREEN}${SYMBOL_SUCCESS}${RESET} Upgrade complete!"

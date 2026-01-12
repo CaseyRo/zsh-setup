@@ -35,6 +35,7 @@ source "$INSTALL_DIR/apt.sh"
 source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
+source "$INSTALL_DIR/tailscale.sh"
 
 # ============================================================================
 # Main Installation
@@ -76,6 +77,7 @@ main() {
     fi
     echo -e "  ${SYMBOL_BULLET} NVM + Node.js LTS + global packages (pm2, node-red)"
     echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
+    echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     echo -e "  ${SYMBOL_BULLET} ZSH-Manager configuration"
     echo ""
     echo -e "  ${DIM}Safe to re-run - already installed items will be skipped.${RESET}"
@@ -106,13 +108,13 @@ main() {
     fi
 
     # Calculate step count based on platform
-    # Base: 8 steps (rust, nvm, node, npm, omz, plugins, symlink, done)
-    # APT: +3 (apt repos, apt packages, docker) = 11
-    # Brew macOS: +3 (brew, packages, casks) = 11
-    # Brew Linux: +4 (brew, packages, casks, docker) = 12
-    local STEP_COUNT=11
+    # Base: 9 steps (rust, nvm, node, npm, omz, plugins, tailscale, symlink, done)
+    # APT: +3 (apt repos, apt packages, docker) = 12
+    # Brew macOS: +3 (brew, packages, casks) = 12
+    # Brew Linux: +4 (brew, packages, casks, docker) = 13
+    local STEP_COUNT=12
     if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
-        STEP_COUNT=12
+        STEP_COUNT=13
     fi
     progress_init $STEP_COUNT
 
@@ -178,6 +180,9 @@ main() {
 
     install_zsh_plugins
     progress_update "ZSH plugins installed"
+
+    install_tailscale
+    progress_update "Tailscale installed"
 
     # Setup zsh-manager symlink
     print_section "ZSH-Manager Configuration"
