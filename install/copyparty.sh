@@ -14,8 +14,21 @@ install_copyparty() {
         return 0
     fi
 
-    # Check if pipx is available (preferred), otherwise use pip
-    if command_exists pipx; then
+    # Check if uv is available (preferred for uv-managed Python), otherwise use pipx/pip
+    if command_exists uv; then
+        print_step "Installing Copyparty via uv"
+        if run_with_spinner "Installing Copyparty" uv tool install copyparty; then
+            print_success "Copyparty installed"
+            track_installed "Copyparty"
+        elif run_with_spinner "Installing Copyparty (uv pip)" uv pip install --user copyparty; then
+            print_success "Copyparty installed"
+            track_installed "Copyparty"
+        else
+            print_error "Failed to install Copyparty"
+            track_failed "Copyparty"
+            return 1
+        fi
+    elif command_exists pipx; then
         print_step "Installing Copyparty via pipx"
         if run_with_spinner "Installing Copyparty" pipx install copyparty; then
             print_success "Copyparty installed"

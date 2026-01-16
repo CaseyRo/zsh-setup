@@ -10,7 +10,7 @@
 #   If no password provided, generates a random one
 copyparty-home() {
     if ! command -v copyparty &>/dev/null; then
-        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: pip install copyparty"
+        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
         return 1
     fi
 
@@ -60,7 +60,7 @@ copyparty-home() {
 # Usage: copyparty-share <folder> [password]
 copyparty-share() {
     if ! command -v copyparty &>/dev/null; then
-        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: pip install copyparty"
+        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
         return 1
     fi
 
@@ -103,7 +103,7 @@ copyparty-share() {
 # Usage: copyparty-quick
 copyparty-quick() {
     if ! command -v copyparty &>/dev/null; then
-        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: pip install copyparty"
+        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
         return 1
     fi
 
