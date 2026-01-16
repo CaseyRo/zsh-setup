@@ -11,3 +11,7 @@ The system SHALL install uv and use it to provision a stable Python version duri
 - **WHEN** uv is available
 - **THEN** the latest stable Python is installed via uv
 - **AND** the installed Python is set as the default for the user
+
+#### Scenario: uv shims missing on PATH
+- **WHEN** uv is installed but its shims directory is not on PATH
+- **THEN** the installer prints an OS-aware hint to update PATH

@@ -61,6 +61,7 @@ This will:
 - Install CLI tools via Cargo (bat, eza, ripgrep, fd, zoxide, topgrade)
 - Install Docker & Docker Compose (Linux only)
 - Install Node.js stable and global npm packages
+- Install uv and latest stable Python
 - Install Nerd Fonts for terminal glyphs (desktop only)
 - Set up your `.zshrc` symlink
 

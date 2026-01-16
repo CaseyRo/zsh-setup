@@ -101,6 +101,7 @@ source "$INSTALL_DIR/brew.sh"
 source "$INSTALL_DIR/apt.sh"
 source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
+source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/tailscale.sh"
 source "$INSTALL_DIR/copyparty.sh"
@@ -150,6 +151,7 @@ main() {
         fi
     fi
     echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
+    echo -e "  ${SYMBOL_BULLET} uv + Python stable"
     echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
@@ -182,13 +184,13 @@ main() {
     fi
 
     # Calculate step count based on platform
-    # Base: 11 steps (rust, nvm, node, npm, omz, plugins, tailscale, copyparty, nerd-fonts, symlink, done)
-    # APT: +3 (apt repos, apt packages, docker) = 14
-    # Brew macOS: +3 (brew, packages, casks) = 14
-    # Brew Linux: +4 (brew, packages, casks, docker) = 15
-    local STEP_COUNT=14
+    # Base: 13 steps (rust, uv, python, nvm, node, npm, omz, plugins, tailscale, copyparty, nerd-fonts, symlink, done)
+    # APT: +3 (apt repos, apt packages, docker) = 16
+    # Brew macOS: +3 (brew, packages, casks) = 16
+    # Brew Linux: +4 (brew, packages, casks, docker) = 17
+    local STEP_COUNT=16
     if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
-        STEP_COUNT=15
+        STEP_COUNT=17
     fi
     progress_init $STEP_COUNT
 
@@ -239,6 +241,12 @@ main() {
         install_cargo_packages
         progress_update "Cargo packages installed"
     fi
+
+    install_uv
+    progress_update "uv installed"
+
+    install_python_uv
+    progress_update "Python installed"
 
     install_nvm
     progress_update "NVM installed"
