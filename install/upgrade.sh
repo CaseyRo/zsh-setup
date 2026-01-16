@@ -14,6 +14,7 @@ INSTALL_DIR="$SCRIPT_DIR"
 source "$INSTALL_DIR/utils.sh"
 source "$INSTALL_DIR/packages.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
+source "$INSTALL_DIR/git-confirmer.sh"
 
 # Track if we installed anything
 INSTALLED_SOMETHING=false
@@ -205,6 +206,7 @@ run_upgrade() {
     upgrade_npm_packages
     upgrade_tailscale
     upgrade_nerd_fonts
+    upgrade_git_confirmer
 
     if [[ "$INSTALLED_SOMETHING" == true ]]; then
         echo -e "${GREEN}${SYMBOL_SUCCESS}${RESET} Upgrade complete!"

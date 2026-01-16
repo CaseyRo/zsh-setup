@@ -77,3 +77,4 @@ $RECYCLE.BIN/
 # ZSH-Manager
 .last-update-check
 *.zwc
+.git-confirmer-prompted

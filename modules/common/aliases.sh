@@ -20,11 +20,11 @@ if command -v git_confirmer >/dev/null 2>&1; then
     alias gcs="git_confirmer --ship"
 else
     gc() {
-        echo "git_confirmer not found. Install it (cargo install git_confirmer) to enable gc."
+        echo "git_confirmer not found. Run \"$ZSH_Manager_FOLDER/install.sh\" and opt in to enable gc."
         return 127
     }
     gcs() {
-        echo "git_confirmer not found. Install it (cargo install git_confirmer) to enable gcs."
+        echo "git_confirmer not found. Run \"$ZSH_Manager_FOLDER/install.sh\" and opt in to enable gcs."
         return 127
     }
 fi

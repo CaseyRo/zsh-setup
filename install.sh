@@ -106,6 +106,7 @@ source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/tailscale.sh"
 source "$INSTALL_DIR/copyparty.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
+source "$INSTALL_DIR/git-confirmer.sh"
 
 # ============================================================================
 # Main Installation
@@ -123,6 +124,7 @@ main() {
     # Detect platform early for display
     local USE_APT=false
     local IS_MACOS=false
+    local IS_UBUNTU=false
     local PLATFORM_NAME="Linux"
 
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -134,6 +136,12 @@ main() {
             PLATFORM_NAME="Raspberry Pi"
         else
             PLATFORM_NAME="ARM Linux"
+        fi
+    fi
+    if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        if [[ "$ID" == "ubuntu" || "$ID_LIKE" == *"ubuntu"* ]]; then
+            IS_UBUNTU=true
         fi
     fi
     ui_set_context "$PLATFORM_NAME"
@@ -157,6 +165,9 @@ main() {
     echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
     echo -e "  ${SYMBOL_BULLET} Nerd Fonts (terminal glyphs for prompts)"
     echo -e "  ${SYMBOL_BULLET} ZSH-Manager configuration"
+    if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
+        echo -e "  ${SYMBOL_BULLET} Optional: git_confirmer (prompt at end)"
+    fi
     echo ""
     echo -e "  ${DIM}Safe to re-run - already installed items will be skipped.${RESET}"
     echo ""
@@ -191,6 +202,9 @@ main() {
     local STEP_COUNT=16
     if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
         STEP_COUNT=17
+    fi
+    if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
+        STEP_COUNT=$((STEP_COUNT + 1))
     fi
     progress_init $STEP_COUNT
 
@@ -293,6 +307,11 @@ main() {
     fi
 
     progress_update "ZSH-Manager configured"
+
+    if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
+        install_git_confirmer_optional
+        progress_update "git_confirmer checked"
+    fi
 
     # Done!
     print_summary
