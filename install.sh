@@ -26,6 +26,8 @@ set -e
 # ============================================================================
 
 export VERBOSE=false
+UI_MODE="${ZSH_MANAGER_UI:-auto}"
+UI_THEME="${ZSH_MANAGER_THEME:-classic}"
 
 show_help() {
     echo "ZSH-Manager Setup Script"
@@ -35,8 +37,15 @@ show_help() {
     echo "Options:"
     echo "  -v, --verbose    Show detailed output from all commands"
     echo "  -h, --help       Show this help message"
+    echo "  --ui MODE        UI mode: auto, classic, gum, plain"
+    echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
     echo "Safe to re-run - already installed items will be skipped."
+    echo ""
+    echo "Environment:"
+    echo "  NO_COLOR         Disable color output"
+    echo "  ZSH_MANAGER_UI   Same as --ui"
+    echo "  ZSH_MANAGER_THEME Same as --theme"
     exit 0
 }
 
@@ -44,6 +53,22 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--verbose)
             export VERBOSE=true
+            shift
+            ;;
+        --ui)
+            UI_MODE="$2"
+            shift 2
+            ;;
+        --ui=*)
+            UI_MODE="${1#*=}"
+            shift
+            ;;
+        --theme)
+            UI_THEME="$2"
+            shift 2
+            ;;
+        --theme=*)
+            UI_THEME="${1#*=}"
             shift
             ;;
         -h|--help)
@@ -86,9 +111,13 @@ source "$INSTALL_DIR/nerd-fonts.sh"
 # ============================================================================
 
 main() {
-    clear
+    ui_init "$UI_MODE" "$UI_THEME"
+    ui_clear
 
     print_header "ZSH-Manager: New Machine Setup"
+    if [[ "$UI_WARN_GUM_MISSING" == true ]]; then
+        print_warning "gum requested but not found; falling back to classic UI."
+    fi
 
     # Detect platform early for display
     local USE_APT=false
@@ -106,6 +135,7 @@ main() {
             PLATFORM_NAME="ARM Linux"
         fi
     fi
+    ui_set_context "$PLATFORM_NAME"
 
     echo -e "  ${DIM}This script will install:${RESET}"
     if [[ "$USE_APT" == true ]]; then
@@ -119,7 +149,7 @@ main() {
             echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
         fi
     fi
-    echo -e "  ${SYMBOL_BULLET} NVM + Node.js LTS + global packages (pm2, node-red)"
+    echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
     echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
@@ -130,9 +160,7 @@ main() {
     echo ""
 
     # Confirm before proceeding
-    read -p "  Continue? [Y/n] " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
+    if ! ui_confirm "Continue?"; then
         echo -e "  ${YELLOW}Aborted.${RESET}"
         exit 0
     fi

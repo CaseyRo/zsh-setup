@@ -8,6 +8,7 @@ The current installer output is functional but visually basic. A more structured
 - Introduce theming with consistent palettes, `NO_COLOR` support, and TTY detection.
 - Add an optional rich mode powered by `gum` with graceful fallback.
 - Add a sticky "now" status line and last-error indicator for quick feedback.
+- Add a completion summary line with counts and elapsed time.
 
 ## Impact
 - Affected specs: setup-installer

@@ -39,3 +39,11 @@ The system SHALL display the current step status in a fixed position during inst
 #### Scenario: Step status updates
 - **WHEN** the installer advances to a new step
 - **THEN** the sticky current-step line updates to the new step label
+
+### Requirement: Completion Summary
+The system SHALL display an end-of-run summary with counts and elapsed time.
+
+#### Scenario: Summary after completion
+- **WHEN** installation completes
+- **THEN** the installer prints counts of installed, skipped, and failed items
+- **AND** the elapsed time is shown

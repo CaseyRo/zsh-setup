@@ -7,17 +7,29 @@ declare -a INSTALLED_ITEMS=()
 declare -a SKIPPED_ITEMS=()
 declare -a FAILED_ITEMS=()
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[0;37m'
-BOLD='\033[1m'
-DIM='\033[2m'
-RESET='\033[0m'
+# Base colors (themeable)
+COLOR_RED=$'\033[0;31m'
+COLOR_GREEN=$'\033[0;32m'
+COLOR_YELLOW=$'\033[0;33m'
+COLOR_BLUE=$'\033[0;34m'
+COLOR_MAGENTA=$'\033[0;35m'
+COLOR_CYAN=$'\033[0;36m'
+COLOR_WHITE=$'\033[0;37m'
+COLOR_BOLD=$'\033[1m'
+COLOR_DIM=$'\033[2m'
+COLOR_RESET=$'\033[0m'
+
+# Active theme colors (set in ui_init)
+RED="$COLOR_RED"
+GREEN="$COLOR_GREEN"
+YELLOW="$COLOR_YELLOW"
+BLUE="$COLOR_BLUE"
+MAGENTA="$COLOR_MAGENTA"
+CYAN="$COLOR_CYAN"
+WHITE="$COLOR_WHITE"
+BOLD="$COLOR_BOLD"
+DIM="$COLOR_DIM"
+RESET="$COLOR_RESET"
 
 # Symbols
 SYMBOL_SUCCESS="✓"
@@ -30,6 +42,26 @@ SYMBOL_WRENCH="🔧"
 SYMBOL_ROCKET="🚀"
 SYMBOL_CHECK="✅"
 SYMBOL_WARN="⚠️"
+
+# ============================================================================
+# UI Layout / Theme
+# ============================================================================
+
+UI_MODE="${ZSH_MANAGER_UI:-auto}"
+UI_THEME="${ZSH_MANAGER_THEME:-classic}"
+UI_TTY=false
+UI_HAS_TUI=false
+UI_GUM=false
+UI_NO_COLOR=false
+UI_WARN_GUM_MISSING=false
+UI_START_TIME=0
+UI_WIDTH=80
+UI_HEIGHT=24
+UI_HEADER_LINES=2
+UI_FOOTER_LINES=3
+UI_PLATFORM="Unknown"
+UI_LAST_ERROR=""
+UI_STATUS_NOW="Starting..."
 
 # Print a styled header
 print_header() {
@@ -55,6 +87,7 @@ print_success() {
 # Print error message
 print_error() {
     echo -e "  ${RED}${SYMBOL_FAIL}${RESET} $1"
+    ui_set_error "$1"
 }
 
 # Print warning/skip message
@@ -75,6 +108,7 @@ track_skipped() {
 # Track a failed item (for summary)
 track_failed() {
     FAILED_ITEMS+=("$1")
+    ui_set_error "$1"
 }
 
 # Print info message
@@ -82,9 +116,15 @@ print_info() {
     echo -e "  ${BLUE}${SYMBOL_BULLET}${RESET} $1"
 }
 
+# Print warning message
+print_warning() {
+    echo -e "  ${YELLOW}${SYMBOL_WARN}${RESET} $1"
+}
+
 # Print step being executed
 print_step() {
     echo -e "  ${CYAN}${SYMBOL_ARROW}${RESET} $1..."
+    ui_set_now "$1"
 }
 
 # Print package installation
@@ -92,9 +132,351 @@ print_package() {
     echo -e "  ${SYMBOL_PACKAGE} Installing ${BOLD}$1${RESET}..."
 }
 
+# Confirm prompt (gum-aware)
+ui_confirm() {
+    local prompt="$1"
+
+    if [[ "$UI_GUM" == true ]]; then
+        gum confirm "$prompt"
+        return $?
+    fi
+
+    read -p "  $prompt [Y/n] " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
+        return 1
+    fi
+    return 0
+}
+
+# Clear screen safely
+ui_clear() {
+    if [[ "$UI_HAS_TUI" == true ]]; then
+        printf "\033[2J\033[H"
+    fi
+}
+
 # Check if command exists
 command_exists() {
     command -v "$1" &> /dev/null
+}
+
+# Detect if terminal supports TTY output
+ui_is_tty() {
+    [[ -t 1 && -t 0 && "${TERM:-}" != "dumb" ]]
+}
+
+# Disable color output
+ui_disable_colors() {
+    RED=""
+    GREEN=""
+    YELLOW=""
+    BLUE=""
+    MAGENTA=""
+    CYAN=""
+    WHITE=""
+    BOLD=""
+    DIM=""
+    RESET=""
+}
+
+# Apply theme colors
+ui_apply_theme() {
+    case "$UI_THEME" in
+        classic)
+            RED="$COLOR_RED"
+            GREEN="$COLOR_GREEN"
+            YELLOW="$COLOR_YELLOW"
+            BLUE="$COLOR_BLUE"
+            MAGENTA="$COLOR_MAGENTA"
+            CYAN="$COLOR_CYAN"
+            WHITE="$COLOR_WHITE"
+            BOLD="$COLOR_BOLD"
+            DIM="$COLOR_DIM"
+            RESET="$COLOR_RESET"
+            ;;
+        mono)
+            ui_disable_colors
+            ;;
+        minimal)
+            RED="$COLOR_RED"
+            GREEN="$COLOR_GREEN"
+            YELLOW="$COLOR_YELLOW"
+            BLUE=""
+            MAGENTA=""
+            CYAN=""
+            WHITE=""
+            BOLD="$COLOR_BOLD"
+            DIM="$COLOR_DIM"
+            RESET="$COLOR_RESET"
+            ;;
+        *)
+            UI_THEME="classic"
+            ui_apply_theme
+            ;;
+    esac
+}
+
+# Initialize UI settings
+ui_init() {
+    local requested_mode="${1:-$UI_MODE}"
+    local requested_theme="${2:-$UI_THEME}"
+
+    UI_MODE="$requested_mode"
+    UI_THEME="$requested_theme"
+    UI_NO_COLOR=false
+    UI_WARN_GUM_MISSING=false
+    UI_TTY=false
+    UI_GUM=false
+    UI_HAS_TUI=false
+
+    if [[ -n "${NO_COLOR:-}" ]]; then
+        UI_NO_COLOR=true
+    fi
+
+    if ui_is_tty; then
+        UI_TTY=true
+    fi
+
+    case "$UI_MODE" in
+        ""|auto)
+            if [[ "$UI_TTY" == true ]]; then
+                UI_MODE="classic"
+            else
+                UI_MODE="plain"
+            fi
+            ;;
+        plain|classic|gum)
+            ;;
+        *)
+            UI_MODE="classic"
+            ;;
+    esac
+
+    if [[ "$UI_MODE" == "plain" || "$UI_TTY" == false ]]; then
+        UI_HAS_TUI=false
+        UI_NO_COLOR=true
+    else
+        UI_HAS_TUI=true
+    fi
+
+    if [[ "$UI_MODE" == "gum" ]]; then
+        if [[ "$UI_TTY" == true && "$UI_NO_COLOR" == false ]] && command_exists gum; then
+            UI_GUM=true
+        else
+            UI_GUM=false
+            UI_WARN_GUM_MISSING=true
+            UI_MODE="classic"
+            UI_HAS_TUI=true
+        fi
+    fi
+
+    if [[ "$UI_NO_COLOR" == true ]]; then
+        ui_disable_colors
+    else
+        ui_apply_theme
+    fi
+
+    UI_START_TIME=$SECONDS
+}
+
+ui_set_context() {
+    UI_PLATFORM="$1"
+}
+
+ui_set_now() {
+    UI_STATUS_NOW="$1"
+}
+
+ui_set_error() {
+    UI_LAST_ERROR="$1"
+    if [[ "$UI_HAS_TUI" == true ]]; then
+        progress_draw "$UI_STATUS_NOW"
+    fi
+}
+
+ui_refresh_dimensions() {
+    if [[ "$UI_HAS_TUI" == true ]]; then
+        UI_WIDTH=$(tput cols 2>/dev/null || echo 80)
+        UI_HEIGHT=$(tput lines 2>/dev/null || echo 24)
+    else
+        UI_WIDTH=80
+        UI_HEIGHT=24
+    fi
+}
+
+ui_format_elapsed() {
+    local elapsed=$((SECONDS - UI_START_TIME))
+    local minutes=$((elapsed / 60))
+    local seconds=$((elapsed % 60))
+    printf "%02d:%02d" "$minutes" "$seconds"
+}
+
+ui_pad_line() {
+    local left="$1"
+    local right="$2"
+    local width="$UI_WIDTH"
+    local pad=$((width - ${#left} - ${#right}))
+
+    if (( pad < 1 )); then
+        local max_left=$((width - ${#right} - 1))
+        if (( max_left < 0 )); then
+            max_left=0
+        fi
+        left="${left:0:max_left}"
+        pad=$((width - ${#left} - ${#right}))
+        if (( pad < 1 )); then
+            right="${right:0:$((width - ${#left} - 1))}"
+            pad=$((width - ${#left} - ${#right}))
+        fi
+    fi
+
+    printf "%s%*s%s" "$left" "$pad" "" "$right"
+}
+
+ui_gum_style() {
+    local text="$1"
+    shift
+    if [[ "$UI_GUM" == true ]]; then
+        gum style "$@" <<<"$text" 2>/dev/null | tr -d '\n'
+    else
+        printf "%s" "$text"
+    fi
+}
+
+ui_render_line() {
+    local text="$1"
+    local style="$2"
+
+    if [[ "$UI_GUM" == true ]]; then
+        case "$style" in
+            header1)
+                ui_gum_style "$text" --bold
+                ;;
+            header2)
+                ui_gum_style "$text"
+                ;;
+            status)
+                ui_gum_style "$text"
+                ;;
+            separator)
+                ui_gum_style "$text"
+                ;;
+            progress)
+                ui_gum_style "$text"
+                ;;
+            *)
+                ui_gum_style "$text"
+                ;;
+        esac
+        return 0
+    fi
+
+    case "$style" in
+        header1)
+            printf "%s%s%s" "${BOLD}${MAGENTA}" "$text" "${RESET}"
+            ;;
+        header2)
+            printf "%s%s%s" "${DIM}" "$text" "${RESET}"
+            ;;
+        status)
+            printf "%s%s%s" "${CYAN}" "$text" "${RESET}"
+            ;;
+        separator)
+            printf "%s%s%s" "${DIM}" "$text" "${RESET}"
+            ;;
+        progress)
+            printf "%s" "$text"
+            ;;
+        *)
+            printf "%s" "$text"
+            ;;
+    esac
+}
+
+ui_draw_header() {
+    [[ "$UI_HAS_TUI" == true ]] || return 0
+
+    ui_refresh_dimensions
+
+    local left1="ZSH-Manager Setup"
+    local right1=""
+    local elapsed
+    elapsed=$(ui_format_elapsed)
+    local left2="Platform: ${UI_PLATFORM}"
+    local right2="Steps: ${PROGRESS_CURRENT}/${PROGRESS_TOTAL}  Elapsed: ${elapsed}"
+
+    local line1
+    local line2
+    line1=$(ui_pad_line "$left1" "$right1")
+    line2=$(ui_pad_line "$left2" "$right2")
+
+    printf "\033[s"
+    printf "\033[1;1H"
+    printf "\033[K"
+    ui_render_line "$line1" "header1"
+    printf "\033[2;1H"
+    printf "\033[K"
+    ui_render_line "$line2" "header2"
+    printf "\033[u"
+}
+
+ui_draw_footer() {
+    local message="$1"
+
+    [[ "$UI_HAS_TUI" == true ]] || return 0
+    ui_refresh_dimensions
+
+    if [[ -n "$message" ]]; then
+        UI_STATUS_NOW="$message"
+    fi
+
+    local term_height=$UI_HEIGHT
+    local sep_line
+    sep_line=$(printf "%*s" "$UI_WIDTH" "" | tr ' ' '─')
+
+    local status_left="Now: ${UI_STATUS_NOW}"
+    local status_right=""
+    if [[ -n "$UI_LAST_ERROR" ]]; then
+        status_right="Last error: ${UI_LAST_ERROR}"
+    fi
+    local status_line
+    status_line=$(ui_pad_line "$status_left" "$status_right")
+
+    local percent=0
+    if (( PROGRESS_TOTAL > 0 )); then
+        percent=$((PROGRESS_CURRENT * 100 / PROGRESS_TOTAL))
+    fi
+    local bar_width=$((UI_WIDTH - 20))
+    if (( bar_width < 10 )); then
+        bar_width=10
+    elif (( bar_width > 60 )); then
+        bar_width=60
+    fi
+    local filled=0
+    if (( PROGRESS_TOTAL > 0 )); then
+        filled=$((PROGRESS_CURRENT * bar_width / PROGRESS_TOTAL))
+    fi
+    local empty=$((bar_width - filled))
+
+    local bar=""
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    for ((i=0; i<empty; i++)); do bar+="░"; done
+
+    local progress_line
+    progress_line=$(ui_pad_line "Progress [${bar}] ${percent}%" "")
+
+    printf "\033[s"
+    printf "\033[$((term_height-2));1H"
+    printf "\033[K"
+    ui_render_line "$sep_line" "separator"
+    printf "\033[$((term_height-1));1H"
+    printf "\033[K"
+    ui_render_line "$status_line" "status"
+    printf "\033[$((term_height));1H"
+    printf "\033[K"
+    ui_render_line "$progress_line" "progress"
+    printf "\033[u"
 }
 
 # Run command, respecting VERBOSE flag
@@ -149,6 +531,11 @@ spinner() {
     local spin='⣾⣽⣻⢿⡿⣟⣯⣷'
     local i=0
 
+    if [[ "$UI_HAS_TUI" != true ]]; then
+        wait $pid
+        return $?
+    fi
+
     while kill -0 $pid 2>/dev/null; do
         i=$(( (i+1) % ${#spin} ))
         printf "\r  ${CYAN}${spin:$i:1}${RESET} ${message}..."
@@ -165,6 +552,9 @@ run_with_spinner() {
     if [[ "$VERBOSE" == true ]]; then
         echo -e "  ${CYAN}${SYMBOL_ARROW}${RESET} $message..."
         "$@"
+        return $?
+    elif [[ "$UI_HAS_TUI" != true ]]; then
+        "$@" &>/dev/null
         return $?
     else
         "$@" &>/dev/null &
@@ -188,21 +578,32 @@ progress_init() {
     PROGRESS_TOTAL=$1
     PROGRESS_CURRENT=0
 
+    if [[ "$UI_HAS_TUI" != true ]]; then
+        return 0
+    fi
+
+    ui_refresh_dimensions
+    if (( UI_HEIGHT < UI_HEADER_LINES + UI_FOOTER_LINES + 3 )); then
+        UI_HAS_TUI=false
+        return 0
+    fi
+
     # Get terminal height
-    local term_height=$(tput lines)
+    local term_height=$UI_HEIGHT
 
     # Clear screen and move cursor to top before setting up scroll region
     # This prevents content from the confirmation prompt from being overwritten unexpectedly
     printf "\033[2J\033[H"
 
-    # Set scrolling region to leave 2 lines at bottom for progress bar
+    # Set scrolling region to leave header/footer space
     # CSI r = set scrolling region, CSI H = move cursor home
-    printf "\033[1;$((term_height-2))r"
+    printf "\033[$((UI_HEADER_LINES+1));$((term_height-UI_FOOTER_LINES))r"
 
     # Move cursor to top of scrolling region
-    printf "\033[1;1H"
+    printf "\033[$((UI_HEADER_LINES+1));1H"
 
     # Draw initial progress bar
+    ui_draw_header
     progress_draw "Starting..."
 }
 
@@ -210,48 +611,32 @@ progress_init() {
 progress_draw() {
     local message=$1
 
-    local percent=$((PROGRESS_CURRENT * 100 / PROGRESS_TOTAL))
-    local filled=$((PROGRESS_CURRENT * PROGRESS_WIDTH / PROGRESS_TOTAL))
-    local empty=$((PROGRESS_WIDTH - filled))
+    if [[ "$UI_HAS_TUI" != true ]]; then
+        if [[ -n "$message" ]]; then
+            echo "  [${PROGRESS_CURRENT}/${PROGRESS_TOTAL}] $message"
+        fi
+        return 0
+    fi
 
-    # Build the bar
-    local bar=""
-    for ((i=0; i<filled; i++)); do bar+="█"; done
-    for ((i=0; i<empty; i++)); do bar+="░"; done
-
-    local term_height=$(tput lines)
-
-    # Save cursor position
-    printf "\033[s"
-
-    # Move to bottom line (outside scroll region)
-    printf "\033[$((term_height-1));1H"
-
-    # Clear line and draw separator
-    printf "\033[K"
-    echo -e "${DIM}─────────────────────────────────────────────────────────────────${RESET}"
-
-    # Move to last line
-    printf "\033[$((term_height));1H"
-    printf "\033[K"
-
-    # Print progress bar
-    printf "  ${DIM}[${RESET}${GREEN}${bar}${RESET}${DIM}]${RESET} ${BOLD}%3d%%${RESET} ${CYAN}%s${RESET}" "$percent" "$message"
-
-    # Restore cursor position
-    printf "\033[u"
+    ui_draw_header
+    ui_draw_footer "$message"
 }
 
 # Update progress
 progress_update() {
     local message=$1
     PROGRESS_CURRENT=$((PROGRESS_CURRENT + 1))
+    ui_set_now "$message"
     progress_draw "$message"
 }
 
 # Clean up: reset scroll region and clear progress bar area
 progress_cleanup() {
-    local term_height=$(tput lines)
+    if [[ "$UI_HAS_TUI" != true ]]; then
+        return 0
+    fi
+
+    local term_height=$UI_HEIGHT
 
     # Reset scrolling region to full screen
     printf "\033[r"
@@ -276,37 +661,55 @@ print_summary() {
 
     # Show completed progress bar inline
     local bar=""
-    for ((i=0; i<PROGRESS_WIDTH; i++)); do bar+="█"; done
+    local width=$PROGRESS_WIDTH
+    if [[ "$UI_HAS_TUI" == true ]]; then
+        width=$((UI_WIDTH - 20))
+        if (( width < 10 )); then
+            width=10
+        elif (( width > 60 )); then
+            width=60
+        fi
+    fi
+    for ((i=0; i<width; i++)); do bar+="█"; done
     echo ""
     echo -e "  ${DIM}[${RESET}${GREEN}${bar}${RESET}${DIM}]${RESET} ${BOLD}100%%${RESET} ${GREEN}All done!${RESET}"
+
+    local elapsed
+    elapsed=$(ui_format_elapsed)
+    local installed_count=${#INSTALLED_ITEMS[@]}
+    local skipped_count=${#SKIPPED_ITEMS[@]}
+    local failed_count=${#FAILED_ITEMS[@]}
 
     echo ""
     echo -e "${BOLD}${GREEN}╔════════════════════════════════════════════════════════════╗${RESET}"
     echo -e "${BOLD}${GREEN}║${RESET}  ${SYMBOL_SPARKLE} ${BOLD}${WHITE}Setup Complete!${RESET} ${SYMBOL_SPARKLE}"
     echo -e "${BOLD}${GREEN}╚════════════════════════════════════════════════════════════╝${RESET}"
 
+    echo ""
+    echo -e "  ${DIM}Summary:${RESET} Installed ${installed_count}, Skipped ${skipped_count}, Failed ${failed_count}, Elapsed ${elapsed}"
+
     # Show what was installed
-    if [[ ${#INSTALLED_ITEMS[@]} -gt 0 ]]; then
+    if [[ $installed_count -gt 0 ]]; then
         echo ""
-        echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} ${BOLD}Installed (${#INSTALLED_ITEMS[@]}):${RESET}"
+        echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} ${BOLD}Installed (${installed_count}):${RESET}"
         for item in "${INSTALLED_ITEMS[@]}"; do
             echo -e "     ${DIM}•${RESET} $item"
         done
     fi
 
     # Show what was skipped
-    if [[ ${#SKIPPED_ITEMS[@]} -gt 0 ]]; then
+    if [[ $skipped_count -gt 0 ]]; then
         echo ""
-        echo -e "  ${YELLOW}${SYMBOL_ARROW}${RESET} ${BOLD}Already installed (${#SKIPPED_ITEMS[@]}):${RESET}"
+        echo -e "  ${YELLOW}${SYMBOL_ARROW}${RESET} ${BOLD}Already installed (${skipped_count}):${RESET}"
         for item in "${SKIPPED_ITEMS[@]}"; do
             echo -e "     ${DIM}•${RESET} $item"
         done
     fi
 
     # Show failures
-    if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
+    if [[ $failed_count -gt 0 ]]; then
         echo ""
-        echo -e "  ${RED}${SYMBOL_FAIL}${RESET} ${BOLD}Failed (${#FAILED_ITEMS[@]}):${RESET}"
+        echo -e "  ${RED}${SYMBOL_FAIL}${RESET} ${BOLD}Failed (${failed_count}):${RESET}"
         for item in "${FAILED_ITEMS[@]}"; do
             echo -e "     ${DIM}•${RESET} $item"
         done
@@ -314,8 +717,8 @@ print_summary() {
 
     # Show summary counts
     echo ""
-    local total=$((${#INSTALLED_ITEMS[@]} + ${#SKIPPED_ITEMS[@]} + ${#FAILED_ITEMS[@]}))
-    if [[ ${#INSTALLED_ITEMS[@]} -eq 0 ]] && [[ ${#FAILED_ITEMS[@]} -eq 0 ]]; then
+    local total=$((installed_count + skipped_count + failed_count))
+    if [[ $installed_count -eq 0 ]] && [[ $failed_count -eq 0 ]]; then
         echo -e "  ${DIM}Everything was already installed - nothing to do!${RESET}"
     fi
 

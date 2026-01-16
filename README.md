@@ -60,7 +60,7 @@ This will:
 - Install git, GitHub CLI (gh), and btop (system monitor)
 - Install CLI tools via Cargo (bat, eza, ripgrep, fd, zoxide, topgrade)
 - Install Docker & Docker Compose (Linux only)
-- Install Node.js LTS and global npm packages
+- Install Node.js stable and global npm packages
 - Install Nerd Fonts for terminal glyphs (desktop only)
 - Set up your `.zshrc` symlink
 
@@ -78,6 +78,16 @@ git clone git@github.com:CaseyRo/zsh-manager.git ~/.zsh-manager
 ```bash
 cd ~/.zsh-manager
 ./install.sh
+```
+
+Optional UI flags:
+```bash
+./install.sh --ui gum --theme minimal
+```
+
+Environment alternatives:
+```bash
+NO_COLOR=1 ZSH_MANAGER_UI=plain ./install.sh
 ```
 
 #### 3️⃣ Customize Your Configuration

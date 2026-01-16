@@ -55,30 +55,30 @@ install_node() {
         print_skip "Node.js ($current_version)"
         print_step "Checking for updates"
 
-        # Check if there's a newer LTS version
-        local latest_lts=$(nvm version-remote --lts 2>/dev/null)
-        if [[ "$current_version" != "$latest_lts" ]] && [[ -n "$latest_lts" ]]; then
-            print_info "Newer LTS available: $latest_lts"
-            print_step "Installing Node.js $latest_lts"
-            run_cmd nvm install --lts
-            run_cmd nvm use --lts
-            run_cmd nvm alias default 'lts/*'
-            print_success "Node.js updated to $latest_lts"
-            track_installed "Node.js $latest_lts"
+        # Check if there's a newer stable version
+        local latest_stable=$(nvm version-remote node 2>/dev/null)
+        if [[ "$current_version" != "$latest_stable" ]] && [[ -n "$latest_stable" ]]; then
+            print_info "Newer stable available: $latest_stable"
+            print_step "Installing Node.js $latest_stable"
+            run_cmd nvm install node
+            run_cmd nvm use node
+            run_cmd nvm alias default node
+            print_success "Node.js updated to $latest_stable"
+            track_installed "Node.js $latest_stable"
         else
-            print_success "Already on latest LTS"
+            print_success "Already on latest stable"
             track_skipped "Node.js ($current_version)"
         fi
     else
-        print_step "Installing Node.js LTS"
+        print_step "Installing Node.js stable"
         if [[ "$VERBOSE" == true ]]; then
-            nvm install --lts
-            nvm use --lts
-            nvm alias default 'lts/*'
+            nvm install node
+            nvm use node
+            nvm alias default node
         else
-            nvm install --lts &>/dev/null
-            nvm use --lts &>/dev/null
-            nvm alias default 'lts/*' &>/dev/null
+            nvm install node &>/dev/null
+            nvm use node &>/dev/null
+            nvm alias default node &>/dev/null
         fi
 
         if command_exists node; then
