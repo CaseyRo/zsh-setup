@@ -5,11 +5,11 @@
 
 # Command replacements
 # alias ls="eza -l"
-# alias cd="z"
+alias cd="z"
 alias cat="bat"
 alias top="htop"
 alias docker-compose="docker compose"
-alias dm="dockmate"
+alias lzg="lazygit"
 
 # Docker shortcuts
 alias dcdcu="docker-compose down && docker-compose up -d"

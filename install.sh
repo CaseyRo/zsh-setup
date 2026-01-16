@@ -105,7 +105,7 @@ source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/tailscale.sh"
 source "$INSTALL_DIR/copyparty.sh"
-source "$INSTALL_DIR/dockmate.sh"
+source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 
@@ -176,7 +176,7 @@ main() {
         echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
     else
         echo -e "  ${SYMBOL_BULLET} Homebrew + CLI tools (git, gh, bat, eza, etc.)"
-        echo -e "  ${SYMBOL_BULLET} DockMate (Docker management CLI)"
+        echo -e "  ${SYMBOL_BULLET} Lazygit (Git TUI)"
         echo -e "  ${SYMBOL_BULLET} Rust & Cargo"
         if [[ "$IS_MACOS" == false ]]; then
             echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
@@ -221,8 +221,8 @@ main() {
     # Calculate step count based on platform
     # Base: 13 steps (rust, uv, python, nvm, node, npm, omz, plugins, tailscale, copyparty, nerd-fonts, symlink, done)
     # APT: +3 (apt repos, apt packages, docker) = 16
-    # Brew macOS: +5 (brew, taps, packages, dockmate, casks) = 18
-    # Brew Linux: +6 (brew, taps, packages, dockmate, casks, docker) = 19
+    # Brew macOS: +5 (brew, taps, packages, lazygit, casks) = 18
+    # Brew Linux: +6 (brew, taps, packages, lazygit, casks, docker) = 19
     local STEP_COUNT=16
     if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
         STEP_COUNT=17
@@ -262,8 +262,8 @@ main() {
         install_brew_packages
         progress_update "Brew packages installed"
 
-        install_dockmate
-        progress_update "DockMate installed"
+        install_lazygit
+        progress_update "Lazygit installed"
 
         install_brew_casks
         progress_update "Brew casks installed"

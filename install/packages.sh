@@ -5,9 +5,7 @@
 # ============================================================================
 
 # Homebrew taps (additional repositories)
-BREW_TAPS=(
-    "shubh-io/tap"
-)
+BREW_TAPS=()
 
 # Homebrew packages (installed via brew install)
 # Only packages not available via cargo or that work better via brew

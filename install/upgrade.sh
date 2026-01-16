@@ -85,35 +85,20 @@ upgrade_brew_packages() {
     fi
 }
 
-upgrade_dockmate() {
-    if command_exists dockmate; then
+upgrade_lazygit() {
+    if command_exists lazygit; then
         return 0
     fi
 
-    local is_ubuntu=false
-    if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f /etc/os-release ]]; then
-        source /etc/os-release
-        if [[ "$ID" == "ubuntu" || "$ID_LIKE" == *"ubuntu"* ]]; then
-            is_ubuntu=true
-        fi
+    if ! command_exists brew; then
+        return 0
     fi
 
-    if [[ "$OSTYPE" == "darwin"* ]] || [[ "$is_ubuntu" == false ]]; then
-        if ! command_exists brew; then
-            return 0
-        fi
-        INSTALLED_SOMETHING=true
-        echo -e "${SYMBOL_PACKAGE} Installing new package: ${BOLD}dockmate${RESET}"
-        brew install "shubh-io/tap/dockmate" &>/dev/null && \
-            echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} DockMate installed" || \
-            echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install DockMate"
-    else
-        INSTALLED_SOMETHING=true
-        echo -e "${SYMBOL_PACKAGE} Installing new package: ${BOLD}dockmate${RESET}"
-        sh -c "curl -fsSL https://raw.githubusercontent.com/shubh-io/DockMate/main/install.sh | sh" &>/dev/null && \
-            echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} DockMate installed" || \
-            echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install DockMate"
-    fi
+    INSTALLED_SOMETHING=true
+    echo -e "${SYMBOL_PACKAGE} Installing new package: ${BOLD}lazygit${RESET}"
+    brew install "lazygit" &>/dev/null && \
+        echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} Lazygit installed" || \
+        echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install Lazygit"
 }
 
 upgrade_apt_packages() {
@@ -252,7 +237,7 @@ run_upgrade() {
     else
         upgrade_brew_taps
         upgrade_brew_packages
-        upgrade_dockmate
+        upgrade_lazygit
     fi
 
     upgrade_cargo_packages
