@@ -121,7 +121,10 @@ log_init() {
     local old_count
     local remove_count
 
-    mapfile -t old_logs < <(ls -1t "$base_dir"/install-*.log 2>/dev/null)
+    # Avoid mapfile for macOS bash 3.2 compatibility.
+    while IFS= read -r line; do
+        old_logs+=("$line")
+    done < <(ls -1t "$base_dir"/install-*.log 2>/dev/null)
     old_count=${#old_logs[@]}
     if (( old_count > keep_logs )); then
         remove_count=$((old_count - keep_logs))
