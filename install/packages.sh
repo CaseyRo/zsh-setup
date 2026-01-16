@@ -28,9 +28,7 @@ BREW_PACKAGES_LINUX=(
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)
 BREW_CASKS=(
-    # Add any GUI apps here, e.g.:
-    # "iterm2"
-    # "visual-studio-code"
+    "raycast"    # spotlight replacement & productivity launcher
 )
 
 # Cargo packages (installed via cargo install)
