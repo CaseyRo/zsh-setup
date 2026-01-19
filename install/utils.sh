@@ -200,9 +200,8 @@ ui_confirm() {
 
 # Clear screen safely
 ui_clear() {
-    if [[ "$UI_HAS_TUI" == true ]]; then
-        printf "\033[2J\033[H"
-    fi
+    # Screen clearing disabled - no-op
+    return 0
 }
 
 # Check if command exists

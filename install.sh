@@ -84,9 +84,8 @@ done
 
 # Cleanup on exit/interrupt
 cleanup_on_exit() {
-    # Reset terminal scroll region if we were interrupted
-    printf "\033[r" 2>/dev/null || true
-    printf "\033[?25h" 2>/dev/null || true  # Show cursor
+    # Show cursor (keep this for safety)
+    printf "\033[?25h" 2>/dev/null || true
 }
 trap cleanup_on_exit EXIT INT TERM
 
