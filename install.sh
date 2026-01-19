@@ -218,24 +218,6 @@ main() {
         print_info "Install method: Homebrew + Cargo"
     fi
 
-    # Calculate step count based on platform
-    # Base: 14 steps (rust, uv, python, nvm, node, npm, omz, plugins, tailscale, copyparty, nerd-fonts, symlink, topgrade, done)
-    # APT: +3 (apt repos, apt packages, docker) = 17
-    # Brew macOS: +5 (brew, taps, packages, lazygit, casks) = 19
-    # Brew Linux: +6 (brew, taps, packages, lazygit, casks, docker) = 20
-    local STEP_COUNT=17
-    if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
-        STEP_COUNT=18
-    fi
-    if [[ "$USE_APT" == false ]]; then
-        STEP_COUNT=$((STEP_COUNT + 1))
-        STEP_COUNT=$((STEP_COUNT + 1))
-    fi
-    if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
-        STEP_COUNT=$((STEP_COUNT + 1))
-    fi
-    progress_init $STEP_COUNT
-
     # =========================================================================
     # Platform-specific package installation
     # =========================================================================
@@ -243,35 +225,26 @@ main() {
     if [[ "$USE_APT" == true ]]; then
         # ARM Linux (Raspberry Pi) - use APT
         setup_apt_repos
-        progress_update "APT repositories configured"
 
         install_apt_packages
-        progress_update "APT packages installed"
 
         install_docker_apt
-        progress_update "Docker installed"
 
     else
         # macOS or x86 Linux - use Homebrew
         install_homebrew
-        progress_update "Homebrew installed"
 
         install_brew_taps
-        progress_update "Brew taps configured"
 
         install_brew_packages
-        progress_update "Brew packages installed"
 
         install_lazygit
-        progress_update "Lazygit installed"
 
         install_brew_casks
-        progress_update "Brew casks installed"
 
         # Docker for Linux (non-macOS) via Homebrew
         if [[ "$IS_MACOS" == false ]]; then
             install_brew_packages_linux
-            progress_update "Docker installed"
         fi
     fi
 
@@ -280,45 +253,32 @@ main() {
     # =========================================================================
 
     install_rust
-    progress_update "Rust installed"
 
     if [[ "$USE_APT" == true ]]; then
         install_cargo_packages_minimal
-        progress_update "Cargo packages installed (ARM)"
     else
         install_cargo_packages
-        progress_update "Cargo packages installed"
     fi
 
     install_uv
-    progress_update "uv installed"
 
     install_python_uv
-    progress_update "Python installed"
 
     install_nvm
-    progress_update "NVM installed"
 
     install_node
-    progress_update "Node.js installed"
 
     install_npm_global_packages
-    progress_update "NPM packages installed"
 
     install_oh_my_zsh
-    progress_update "Oh My Zsh installed"
 
     install_zsh_plugins
-    progress_update "ZSH plugins installed"
 
     install_tailscale
-    progress_update "Tailscale installed"
 
     install_copyparty
-    progress_update "Copyparty installed"
 
     install_nerd_fonts
-    progress_update "Nerd Fonts installed"
 
     # Setup zsh-manager symlink
     print_section "ZSH-Manager Configuration"
@@ -339,8 +299,6 @@ main() {
         print_success "~/.zshrc → $SCRIPT_DIR/.zshrc"
         track_installed "zshrc symlink"
     fi
-
-    progress_update "ZSH-Manager configured"
 
     # Setup topgrade config symlink
     print_section "Topgrade Configuration"
@@ -367,11 +325,8 @@ main() {
         track_installed "topgrade config"
     fi
 
-    progress_update "Topgrade configured"
-
     if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
         install_git_confirmer_optional
-        progress_update "git_confirmer checked"
     fi
 
     # Done!

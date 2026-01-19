@@ -634,68 +634,26 @@ PROGRESS_WIDTH=40
 
 # Initialize progress tracking and setup scrolling region
 progress_init() {
-    PROGRESS_TOTAL=$1
-    PROGRESS_CURRENT=0
-
-    if [[ "$UI_HAS_TUI" != true ]]; then
-        return 0
-    fi
-
-    ui_refresh_dimensions
-    if (( UI_HEIGHT < UI_HEADER_LINES + UI_FOOTER_LINES + 3 )); then
-        UI_HAS_TUI=false
-        return 0
-    fi
-
-    # Get terminal height
-    local term_height=$UI_HEIGHT
-
-    # Set scrolling region to leave header/footer space
-    # CSI r = set scrolling region, CSI H = move cursor home
-    printf "\033[$((UI_HEADER_LINES+1));$((term_height-UI_FOOTER_LINES))r"
-
-    # Move cursor to top of scrolling region
-    printf "\033[$((UI_HEADER_LINES+1));1H"
-
-    # Draw initial progress bar
-    ui_draw_header
-    progress_draw "Starting..."
+    # Progress bar disabled - no-op
+    return 0
 }
 
 # Draw progress bar at bottom (without changing scroll position)
 progress_draw() {
-    local message=$1
-
-    if [[ "$UI_HAS_TUI" != true ]]; then
-        if [[ -n "$message" ]]; then
-            echo "  [${PROGRESS_CURRENT}/${PROGRESS_TOTAL}] $message"
-        fi
-        return 0
-    fi
-
-    ui_draw_header
-    ui_draw_footer "$message"
+    # Progress bar disabled - no-op
+    return 0
 }
 
 # Update progress
 progress_update() {
-    local message=$1
-    PROGRESS_CURRENT=$((PROGRESS_CURRENT + 1))
-    ui_set_now "$message"
-    progress_draw "$message"
+    # Progress bar disabled - no-op
+    return 0
 }
 
 # Clean up: reset scroll region and preserve output
 progress_cleanup() {
-    if [[ "$UI_HAS_TUI" != true ]]; then
-        return 0
-    fi
-
-    # Reset scrolling region to full screen
-    printf "\033[r"
-
-    # Move cursor to bottom and continue from there (preserves scroll history)
-    printf "\033[999;1H\n"
+    # Progress bar disabled - no-op
+    return 0
 }
 
 # Legacy function for compatibility
@@ -705,24 +663,6 @@ progress_show() {
 
 # Print final summary
 print_summary() {
-    # Clean up the sticky progress bar
-    progress_cleanup
-
-    # Show completed progress bar inline
-    local bar=""
-    local width=$PROGRESS_WIDTH
-    if [[ "$UI_HAS_TUI" == true ]]; then
-        width=$((UI_WIDTH - 20))
-        if (( width < 10 )); then
-            width=10
-        elif (( width > 60 )); then
-            width=60
-        fi
-    fi
-    for ((i=0; i<width; i++)); do bar+="█"; done
-    echo ""
-    echo -e "  ${DIM}[${RESET}${GREEN}${bar}${RESET}${DIM}]${RESET} ${BOLD}100%%${RESET} ${GREEN}All done!${RESET}"
-
     local elapsed
     elapsed=$(ui_format_elapsed)
     local installed_count=${#INSTALLED_ITEMS[@]}
