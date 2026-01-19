@@ -69,6 +69,15 @@ install_uv() {
     fi
 }
 
+uv_python_installed() {
+    local list_cmd=("uv" "python" "list")
+    if uv python list --help 2>/dev/null | grep -q -- "--installed"; then
+        list_cmd=("uv" "python" "list" "--installed")
+    fi
+
+    "${list_cmd[@]}" 2>/dev/null | grep -Eq '[0-9]+\.[0-9]+'
+}
+
 install_python_uv() {
     print_section "Python (uv)"
 
@@ -76,6 +85,21 @@ install_python_uv() {
         print_error "uv not available, skipping Python installation"
         track_failed "Python (uv not available)"
         return 1
+    fi
+
+    if uv_python_installed; then
+        local py_version=""
+        if command_exists python; then
+            py_version=$(python --version 2>&1 | awk '{print $2}')
+        fi
+        if [[ -n "$py_version" ]]; then
+            print_skip "Python (${py_version})"
+            track_skipped "Python ${py_version}"
+        else
+            print_skip "Python"
+            track_skipped "Python"
+        fi
+        return 0
     fi
 
     local default_flag=""

@@ -58,13 +58,23 @@ install_node() {
         # Check if there's a newer stable version
         local latest_stable=$(nvm version-remote node 2>/dev/null)
         if [[ "$current_version" != "$latest_stable" ]] && [[ -n "$latest_stable" ]]; then
-            print_info "Newer stable available: $latest_stable"
-            print_step "Installing Node.js $latest_stable"
-            run_cmd nvm install node
-            run_cmd nvm use node
-            run_cmd nvm alias default node
-            print_success "Node.js updated to $latest_stable"
-            track_installed "Node.js $latest_stable"
+            local latest_installed
+            latest_installed=$(nvm version "$latest_stable" 2>/dev/null)
+            if [[ "$latest_installed" != "N/A" ]]; then
+                print_info "Latest stable already installed: $latest_stable"
+                run_cmd nvm use node
+                run_cmd nvm alias default node
+                print_success "Already on latest stable"
+                track_skipped "Node.js ($latest_stable)"
+            else
+                print_info "Newer stable available: $latest_stable"
+                print_step "Installing Node.js $latest_stable"
+                run_cmd nvm install node
+                run_cmd nvm use node
+                run_cmd nvm alias default node
+                print_success "Node.js updated to $latest_stable"
+                track_installed "Node.js $latest_stable"
+            fi
         else
             print_success "Already on latest stable"
             track_skipped "Node.js ($current_version)"
