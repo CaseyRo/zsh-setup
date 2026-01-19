@@ -568,6 +568,16 @@ is_debian_based() {
     [[ -f /etc/debian_version ]] || command_exists apt-get
 }
 
+# Detect if running on Ubuntu
+is_ubuntu() {
+    if [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        [[ "$ID" == "ubuntu" || "$ID_LIKE" == *"ubuntu"* ]]
+    else
+        return 1
+    fi
+}
+
 # Should we use apt instead of brew? (ARM Linux where brew is slow)
 should_use_apt() {
     is_arm && is_debian_based && [[ "$OSTYPE" == "linux-gnu"* ]]
@@ -640,10 +650,6 @@ progress_init() {
     # Get terminal height
     local term_height=$UI_HEIGHT
 
-    # Clear screen and move cursor to top before setting up scroll region
-    # This prevents content from the confirmation prompt from being overwritten unexpectedly
-    printf "\033[2J\033[H"
-
     # Set scrolling region to leave header/footer space
     # CSI r = set scrolling region, CSI H = move cursor home
     printf "\033[$((UI_HEADER_LINES+1));$((term_height-UI_FOOTER_LINES))r"
@@ -679,23 +685,17 @@ progress_update() {
     progress_draw "$message"
 }
 
-# Clean up: reset scroll region and clear progress bar area
+# Clean up: reset scroll region and preserve output
 progress_cleanup() {
     if [[ "$UI_HAS_TUI" != true ]]; then
         return 0
     fi
 
-    local term_height=$UI_HEIGHT
-
     # Reset scrolling region to full screen
     printf "\033[r"
 
-    # Move to bottom and clear the progress lines
-    printf "\033[$((term_height-1));1H\033[K"
-    printf "\033[$((term_height));1H\033[K"
-
-    # Move cursor to a good position
-    printf "\033[$((term_height-2));1H"
+    # Move cursor to bottom and continue from there (preserves scroll history)
+    printf "\033[999;1H\n"
 }
 
 # Legacy function for compatibility

@@ -93,7 +93,13 @@ install_node() {
 }
 
 install_npm_global_packages() {
-    if [[ ${#NPM_GLOBAL_PACKAGES[@]} -eq 0 ]]; then
+    # Build package list - add desktop packages for macOS/Ubuntu
+    local packages=("${NPM_GLOBAL_PACKAGES[@]}")
+    if [[ "$OSTYPE" == "darwin"* ]] || is_ubuntu; then
+        packages+=("${NPM_GLOBAL_PACKAGES_DESKTOP[@]}")
+    fi
+
+    if [[ ${#packages[@]} -eq 0 ]]; then
         return 0
     fi
 
@@ -101,13 +107,13 @@ install_npm_global_packages() {
 
     if ! command_exists npm; then
         print_error "npm not available, skipping global packages"
-        for package in "${NPM_GLOBAL_PACKAGES[@]}"; do
+        for package in "${packages[@]}"; do
             track_failed "$package (npm not available)"
         done
         return 1
     fi
 
-    for package in "${NPM_GLOBAL_PACKAGES[@]}"; do
+    for package in "${packages[@]}"; do
         if npm list -g "$package" &>/dev/null; then
             print_skip "$package"
             track_skipped "$package"

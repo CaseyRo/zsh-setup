@@ -75,6 +75,11 @@ NPM_GLOBAL_PACKAGES=(
     "node-red"
 )
 
+# npm packages only for macOS and Ubuntu (not ARM/Raspberry Pi)
+NPM_GLOBAL_PACKAGES_DESKTOP=(
+    "nori-ai-cli"  # Nori AI CLI assistant
+)
+
 # ============================================================================
 # Nerd Fonts (for terminal glyphs/icons)
 # ============================================================================
