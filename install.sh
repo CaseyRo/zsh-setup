@@ -219,13 +219,13 @@ main() {
     fi
 
     # Calculate step count based on platform
-    # Base: 13 steps (rust, uv, python, nvm, node, npm, omz, plugins, tailscale, copyparty, nerd-fonts, symlink, done)
-    # APT: +3 (apt repos, apt packages, docker) = 16
-    # Brew macOS: +5 (brew, taps, packages, lazygit, casks) = 18
-    # Brew Linux: +6 (brew, taps, packages, lazygit, casks, docker) = 19
-    local STEP_COUNT=16
+    # Base: 14 steps (rust, uv, python, nvm, node, npm, omz, plugins, tailscale, copyparty, nerd-fonts, symlink, topgrade, done)
+    # APT: +3 (apt repos, apt packages, docker) = 17
+    # Brew macOS: +5 (brew, taps, packages, lazygit, casks) = 19
+    # Brew Linux: +6 (brew, taps, packages, lazygit, casks, docker) = 20
+    local STEP_COUNT=17
     if [[ "$IS_MACOS" == false ]] && [[ "$USE_APT" == false ]]; then
-        STEP_COUNT=17
+        STEP_COUNT=18
     fi
     if [[ "$USE_APT" == false ]]; then
         STEP_COUNT=$((STEP_COUNT + 1))
@@ -341,6 +341,33 @@ main() {
     fi
 
     progress_update "ZSH-Manager configured"
+
+    # Setup topgrade config symlink
+    print_section "Topgrade Configuration"
+    TOPGRADE_CONFIG_DIR="$HOME/.config"
+    TOPGRADE_TARGET="$TOPGRADE_CONFIG_DIR/topgrade.toml"
+    TOPGRADE_SOURCE="$SCRIPT_DIR/configs/topgrade.toml"
+
+    if [[ -L "$TOPGRADE_TARGET" ]] && [[ "$(readlink "$TOPGRADE_TARGET")" == "$TOPGRADE_SOURCE" ]]; then
+        print_skip "topgrade config symlink"
+        track_skipped "topgrade config"
+    else
+        # Ensure ~/.config exists
+        mkdir -p "$TOPGRADE_CONFIG_DIR"
+
+        if [[ -f "$TOPGRADE_TARGET" ]] || [[ -L "$TOPGRADE_TARGET" ]]; then
+            print_step "Backing up existing topgrade.toml"
+            mv "$TOPGRADE_TARGET" "$TOPGRADE_TARGET.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backup created"
+        fi
+
+        print_step "Creating topgrade config symlink"
+        ln -s "$TOPGRADE_SOURCE" "$TOPGRADE_TARGET"
+        print_success "~/.config/topgrade.toml → $TOPGRADE_SOURCE"
+        track_installed "topgrade config"
+    fi
+
+    progress_update "Topgrade configured"
 
     if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
         install_git_confirmer_optional

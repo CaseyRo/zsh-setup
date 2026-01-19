@@ -1,0 +1,85 @@
+# Topgrade Configuration - Full Auto Mode
+# https://github.com/topgrade-rs/topgrade
+#
+# This config runs all available upgraders automatically without prompts.
+# Managed by zsh-manager: https://github.com/CaseyRo/zsh-manager
+
+# =============================================================================
+# General Settings
+# =============================================================================
+
+[misc]
+# Skip confirmation prompts - just upgrade everything
+assume_yes = true
+
+# Run cleanup commands after upgrading (brew cleanup, etc.)
+cleanup = true
+
+# Don't ask to retry failed steps
+no_retry = true
+
+# Skip sending a notification when done (we're running this manually anyway)
+skip_notify = true
+
+# Display time spent on each step
+display_time = true
+
+# Run updates in parallel where possible
+# Note: Some package managers don't support this well
+# run_in_tmux = false
+
+# =============================================================================
+# Pre/Post Commands
+# =============================================================================
+
+# Commands to run before upgrades
+[pre_commands]
+# "Backup configs" = "echo 'Starting upgrades...'"
+
+# Commands to run after upgrades
+[post_commands]
+# "Cleanup" = "echo 'All upgrades complete!'"
+
+# =============================================================================
+# Git Repositories
+# =============================================================================
+
+[git]
+# Maximum number of concurrent git pulls
+max_concurrency = 5
+
+# Git repos to pull (add your own here)
+# repos = [
+#     "~/dev/my-project",
+#     "~/dotfiles",
+# ]
+
+# =============================================================================
+# Disabled Upgraders (uncomment to skip specific tools)
+# =============================================================================
+
+# Uncomment any of these to disable specific upgraders:
+# [linux]
+# disable = [
+#     "flatpak",
+#     "snap",
+# ]
+
+# [brew]
+# greedy_cask = false  # Don't upgrade casks that auto-update
+
+# =============================================================================
+# NPM Global Packages
+# =============================================================================
+
+[npm]
+# Update all global npm packages (enabled by default)
+# Uses: npm update -g
+
+# =============================================================================
+# Custom Commands
+# =============================================================================
+
+# Add custom upgrade commands here
+[commands]
+# "My Custom Tool" = "custom-upgrade-command"
