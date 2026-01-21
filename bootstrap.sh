@@ -1,18 +1,18 @@
 #!/bin/sh
 # ============================================================================
-# ZSH-Manager Bootstrap Script
+# ZSH-Setup Bootstrap Script
 # ============================================================================
 # One-liner installation (recommended):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-setup/main/bootstrap.sh)"
 #
 # Alternative (if bash is not available):
-#   curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-setup/main/bootstrap.sh | sh
 # ============================================================================
 
 set -e
 
-REPO_URL="https://github.com/CaseyRo/zsh-manager.git"
-INSTALL_DIR="${ZSH_MANAGER_DIR:-$HOME/.zsh-manager}"
+REPO_URL="https://github.com/CaseyRo/zsh-setup.git"
+INSTALL_DIR="${ZSH_SETUP_DIR:-${ZSH_MANAGER_DIR:-$HOME/.zsh-setup}}"
 
 echo ""
 echo "  ███████╗███████╗██╗  ██╗      ███╗   ███╗ █████╗ ███╗   ██╗ █████╗  ██████╗ ███████╗██████╗ "
@@ -42,7 +42,7 @@ if [ -d "$INSTALL_DIR" ]; then
     cd "$INSTALL_DIR"
     git pull --quiet
 else
-    echo "  → Cloning zsh-manager to $INSTALL_DIR..."
+    echo "  → Cloning zsh-setup to $INSTALL_DIR..."
     git clone --quiet "$REPO_URL" "$INSTALL_DIR"
 fi
 

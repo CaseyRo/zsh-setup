@@ -33,6 +33,31 @@ install_copyparty() {
         track_skipped "ffmpeg"
     fi
 
+    # Install cfssl dependency (required for TLS certificate generation)
+    if ! command_exists cfssl; then
+        print_step "Installing cfssl dependency"
+        if command_exists brew; then
+            if run_with_spinner "Installing cfssl" brew install cfssl; then
+                print_success "cfssl installed"
+                track_installed "cfssl"
+            else
+                print_warning "Failed to install cfssl. TLS certificate generation may not work."
+            fi
+        elif command_exists apt-get; then
+            if run_with_spinner "Installing cfssl" sudo apt-get install -y golang-cfssl; then
+                print_success "cfssl installed"
+                track_installed "cfssl"
+            else
+                print_warning "Failed to install cfssl. TLS certificate generation may not work."
+            fi
+        else
+            print_warning "No supported package manager found. Install cfssl manually for TLS certificates."
+        fi
+    else
+        print_skip "cfssl"
+        track_skipped "cfssl"
+    fi
+
     if command_exists copyparty; then
         # Copyparty exists, but check if impacket is available for SMB support
         local copyparty_python=""

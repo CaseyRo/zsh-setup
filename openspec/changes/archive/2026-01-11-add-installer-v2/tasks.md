@@ -2,8 +2,8 @@
 
 ## 1. Bootstrap Script
 - [x] 1.1 Create bootstrap.sh for remote curl installation
-- [x] 1.2 Clone repo to ~/.zsh-manager by default
-- [x] 1.3 Support ZSH_MANAGER_DIR environment variable override
+- [x] 1.2 Clone repo to ~/.zsh-setup by default
+- [x] 1.3 Support ZSH_SETUP_DIR environment variable override
 - [x] 1.4 Handle existing installations (pull updates)
 
 ## 2. Package Management

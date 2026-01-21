@@ -1,12 +1,12 @@
 #!/bin/bash
 # ============================================================================
-# ZSH-Manager: git_confirmer (optional)
+# ZSH-Setup: git_confirmer (optional)
 # ============================================================================
 # Installs and updates git_confirmer from the GitHub repo.
 # ============================================================================
 
 GIT_CONFIRMER_REPO_URL="https://github.com/CaseyRo/git_confirmer.git"
-GIT_CONFIRMER_MANAGER_ROOT="${ZSH_MANAGER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+GIT_CONFIRMER_MANAGER_ROOT="${ZSH_SETUP_ROOT:-${ZSH_MANAGER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}}"
 GIT_CONFIRMER_PROMPT_FILE="$GIT_CONFIRMER_MANAGER_ROOT/.git-confirmer-prompted"
 GIT_CONFIRMER_INSTALL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/git_confirmer"
 

@@ -8,8 +8,8 @@
 #   ███████╗███████║██║  ██║      ██║ ╚═╝ ██║██║  ██║██║ ╚████║██║  ██║╚██████╔╝███████╗██║  ██║
 #   ╚══════╝╚══════╝╚═╝  ╚═╝      ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝
 #
-#   ZSH-Manager Setup Script
-#   https://github.com/CaseyRo/zsh-manager
+#   ZSH-Setup Setup Script
+#   https://github.com/CaseyRo/zsh-setup
 #
 #   Usage: ./install.sh [OPTIONS]
 #
@@ -26,11 +26,11 @@ set -e
 # ============================================================================
 
 export VERBOSE=false
-UI_MODE="${ZSH_MANAGER_UI:-auto}"
-UI_THEME="${ZSH_MANAGER_THEME:-classic}"
+UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
+UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
 
 show_help() {
-    echo "ZSH-Manager Setup Script"
+    echo "ZSH-Setup Setup Script"
     echo ""
     echo "Usage: ./install.sh [OPTIONS]"
     echo ""
@@ -44,8 +44,10 @@ show_help() {
     echo ""
     echo "Environment:"
     echo "  NO_COLOR         Disable color output"
-    echo "  ZSH_MANAGER_UI   Same as --ui"
-    echo "  ZSH_MANAGER_THEME Same as --theme"
+    echo "  ZSH_SETUP_UI     Same as --ui"
+    echo "  ZSH_SETUP_THEME  Same as --theme"
+    echo "  ZSH_MANAGER_UI   Legacy alias for ZSH_SETUP_UI"
+    echo "  ZSH_MANAGER_THEME Legacy alias for ZSH_SETUP_THEME"
     exit 0
 }
 
@@ -112,15 +114,43 @@ source "$INSTALL_DIR/git-confirmer.sh"
 # Main Installation
 # ============================================================================
 
+cleanup_legacy_zsh_manager() {
+    local legacy_dir="${ZSH_MANAGER_DIR:-$HOME/.zsh-manager}"
+    local legacy_state="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-manager"
+    local current_dir="$SCRIPT_DIR"
+    local legacy_real=""
+    local current_real=""
+
+    if [[ -d "$legacy_dir" ]]; then
+        legacy_real="$(cd "$legacy_dir" 2>/dev/null && pwd -P)"
+    fi
+    current_real="$(cd "$current_dir" 2>/dev/null && pwd -P)"
+
+    if [[ -n "$legacy_real" ]] && [[ "$legacy_real" != "$current_real" ]]; then
+        print_section "Legacy Cleanup"
+        print_step "Removing legacy zsh-manager install"
+        rm -rf "$legacy_dir"
+        print_success "Removed $legacy_dir"
+    fi
+
+    if [[ -d "$legacy_state" ]]; then
+        print_step "Removing legacy zsh-manager state logs"
+        rm -rf "$legacy_state"
+        print_success "Removed $legacy_state"
+    fi
+}
+
 main() {
     ui_init "$UI_MODE" "$UI_THEME"
     ui_clear
     log_init
 
-    print_header "ZSH-Manager: New Machine Setup"
+    print_header "ZSH-Setup: New Machine Setup"
     if [[ "$UI_WARN_GUM_MISSING" == true ]]; then
         print_warning "gum requested but not found; falling back to classic UI."
     fi
+
+    cleanup_legacy_zsh_manager
 
     # Detect platform early for display
     local USE_APT=false
@@ -187,7 +217,7 @@ main() {
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
     echo -e "  ${SYMBOL_BULLET} Nerd Fonts (terminal glyphs for prompts)"
-    echo -e "  ${SYMBOL_BULLET} ZSH-Manager configuration"
+    echo -e "  ${SYMBOL_BULLET} ZSH-Setup configuration"
     if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
         echo -e "  ${SYMBOL_BULLET} Optional: git_confirmer (prompt at end)"
     fi
@@ -279,8 +309,8 @@ main() {
 
     install_nerd_fonts
 
-    # Setup zsh-manager symlink
-    print_section "ZSH-Manager Configuration"
+    # Setup zsh-setup symlink
+    print_section "ZSH-Setup Configuration"
     ZSHRC_TARGET="$HOME/.zshrc"
 
     if [[ -L "$ZSHRC_TARGET" ]] && [[ "$(readlink "$ZSHRC_TARGET")" == "$SCRIPT_DIR/.zshrc" ]]; then

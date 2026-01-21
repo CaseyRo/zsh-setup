@@ -1,11 +1,11 @@
 # ============================================================================
-# ZSH-Manager: Tailscale Connection Check
+# ZSH-Setup: Tailscale Connection Check
 # ============================================================================
 # Reminds you to connect Tailscale if it's installed but not running.
 # Only shows the reminder once per shell session.
 # ============================================================================
 
-_zsh_manager_tailscale_check() {
+_zsh_setup_tailscale_check() {
     # Skip if tailscale CLI isn't available
     # On macOS, the CLI is optional (users can use the menu bar app instead)
     if ! command -v tailscale &>/dev/null; then
@@ -27,4 +27,4 @@ _zsh_manager_tailscale_check() {
 }
 
 # Run check on shell startup
-_zsh_manager_tailscale_check
+_zsh_setup_tailscale_check

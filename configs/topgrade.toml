@@ -2,7 +2,7 @@
 # https://github.com/topgrade-rs/topgrade
 #
 # This config runs all available upgraders automatically without prompts.
-# Managed by zsh-manager: https://github.com/CaseyRo/zsh-manager
+# Managed by zsh-setup: https://github.com/CaseyRo/zsh-setup
 
 # =============================================================================
 # General Settings

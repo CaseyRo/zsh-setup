@@ -1,5 +1,5 @@
 # ============================================================================
-# ZSH-Manager: Copyparty File Server
+# ZSH-Setup: Copyparty File Server
 # ============================================================================
 # Provides convenient functions to start copyparty as a local file server.
 # https://github.com/9001/copyparty

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# ZSH-Manager: Upgrade Script
+# ZSH-Setup: Upgrade Script
 # ============================================================================
 # Installs any new packages added to packages.sh after a git pull.
 # Designed to run silently and only output when installing new tools.

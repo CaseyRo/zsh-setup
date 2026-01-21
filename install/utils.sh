@@ -48,8 +48,8 @@ SYMBOL_WARN="⚠️"
 # UI Layout / Theme
 # ============================================================================
 
-UI_MODE="${ZSH_MANAGER_UI:-auto}"
-UI_THEME="${ZSH_MANAGER_THEME:-classic}"
+UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
+UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
 UI_TTY=false
 UI_HAS_TUI=false
 UI_GUM=false
@@ -111,7 +111,7 @@ log_kv() {
 }
 
 log_init() {
-    local base_dir="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-manager"
+    local base_dir="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-setup"
     local ts
 
     mkdir -p "$base_dir"
@@ -137,7 +137,7 @@ log_init() {
     ts=$(date +%Y%m%d_%H%M%S)
     LOG_FILE="$base_dir/install-$ts.log"
 
-    printf "ZSH-Manager install log\n" > "$LOG_FILE"
+    printf "ZSH-Setup install log\n" > "$LOG_FILE"
     printf "Started: %s\n\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG_FILE"
 }
 
@@ -447,7 +447,7 @@ ui_draw_header() {
 
     ui_refresh_dimensions
 
-    local left1="ZSH-Manager Setup"
+    local left1="ZSH-Setup Installer"
     local right1=""
     local elapsed
     elapsed=$(ui_format_elapsed)

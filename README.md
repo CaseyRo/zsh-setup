@@ -1,10 +1,10 @@
-# ZSH-Manager: The Ultimate Cross-Platform ZSH Configuration Framework
+# ZSH-Setup: The Ultimate Cross-Platform ZSH Configuration Framework
 
 ## 🚀 Introduction
 
-**ZSH-Manager** is a powerful, lightweight, and flexible framework that enables you to maintain a single, unified ZSH configuration across **Linux, macOS, and Windows**. Designed for developers, system administrators, and power users, ZSH-Manager ensures a **consistent shell experience** across all operating systems.
+**ZSH-Setup** is a powerful, lightweight, and flexible framework that enables you to maintain a single, unified ZSH configuration across **Linux, macOS, and Windows**. Designed for developers, system administrators, and power users, ZSH-Setup ensures a **consistent shell experience** across all operating systems.
 
-## 🔥 Why Choose ZSH-Manager?
+## 🔥 Why Choose ZSH-Setup?
 
 - ✅ **Seamless Cross-Platform Support**: Works flawlessly on **Linux, macOS, and Windows**.
 - ✅ **Support Environment variables**: Easy and extensive way to use Environment variables.
@@ -19,7 +19,7 @@
 ## 🏗️ Directory Structure
 
 ```
-zsh-manager/
+zsh-setup/
 ├── README.md                           # Documentation
 ├── bootstrap.sh                        # One-liner remote install script
 ├── install.sh                          # Full setup script with progress bar
@@ -51,11 +51,11 @@ zsh-manager/
 Run this one-liner to install everything on a fresh machine:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-setup/main/bootstrap.sh)"
 ```
 
 This will:
-- Clone zsh-manager to `~/.zsh-manager`
+- Clone zsh-setup to `~/.zsh-setup`
 - Install Homebrew, Rust, NVM, and Oh My Zsh
 - Install git, GitHub CLI (gh), and btop (system monitor)
 - Install CLI tools via Cargo (bat, eza, ripgrep, fd, zoxide, topgrade)
@@ -72,12 +72,12 @@ This will:
 #### 1️⃣ Clone the Repository
 
 ```bash
-git clone git@github.com:CaseyRo/zsh-manager.git ~/.zsh-manager
+git clone git@github.com:CaseyRo/zsh-setup.git ~/.zsh-setup
 ```
 
 #### 2️⃣ Run the Setup Script
 ```bash
-cd ~/.zsh-manager
+cd ~/.zsh-setup
 ./install.sh
 ```
 
@@ -88,7 +88,7 @@ Optional UI flags:
 
 Environment alternatives:
 ```bash
-NO_COLOR=1 ZSH_MANAGER_UI=plain ./install.sh
+NO_COLOR=1 ZSH_SETUP_UI=plain ./install.sh
 ```
 
 #### 3️⃣ Customize Your Configuration
@@ -98,10 +98,10 @@ NO_COLOR=1 ZSH_MANAGER_UI=plain ./install.sh
 - Extend functionality with **custom modules** in `modules/`
 - Edit package lists in `install/packages.sh`
 
-## ⚙️ How ZSH-Manager Works
+## ⚙️ How ZSH-Setup Works
 
 ### **1️⃣ Dynamic Configuration Loading**
-ZSH-Manager **automatically detects your operating system** and loads the appropriate configurations.
+ZSH-Setup **automatically detects your operating system** and loads the appropriate configurations.
 
 - **Common settings** (`preload_configs/common/`) are loaded first.
 - **OS-specific settings** (`preload_configs/linux/`, `macos/`, `windows/`) are applied afterward.
@@ -181,7 +181,7 @@ export ENV_VAR1="Value1"
 We welcome contributions! Feel free to submit issues, feature requests, or pull requests.
 
 ## 📜 License
-ZSH-Manager is open-source and available under the **MIT License**.
+ZSH-Setup is open-source and available under the **MIT License**.
 
 ---
 
@@ -229,4 +229,4 @@ ZSH-Manager is open-source and available under the **MIT License**.
 
 ---
 
-🔥 **Start using ZSH-Manager today and streamline your ZSH configuration across all platforms!** 🚀
+🔥 **Start using ZSH-Setup today and streamline your ZSH configuration across all platforms!** 🚀

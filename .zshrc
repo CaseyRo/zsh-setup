@@ -6,7 +6,7 @@ compinit
 # OPENSPEC:END
 
 # ============================================================================
-# ZSH-Manager: Main Configuration Loader
+# ZSH-Setup: Main Configuration Loader
 # ============================================================================
 # This file automatically loads configurations based on your operating system.
 # - Common configs are loaded first
@@ -27,11 +27,16 @@ compinit
 # ============================================================================
 
 # 1. CONFIGURATION PATHS
-ZSH_Manager_FOLDER=$(dirname $(realpath $HOME/.zshrc))
-ZSH_Manager_PRELOAD_CONFIGS_FOLDER=${ZSH_Manager_FOLDER}/preload_configs
-ZSH_Manager_MODULES_FOLDER=${ZSH_Manager_FOLDER}/modules
+ZSH_SETUP_FOLDER=$(dirname $(realpath $HOME/.zshrc))
+ZSH_SETUP_PRELOAD_CONFIGS_FOLDER=${ZSH_SETUP_FOLDER}/preload_configs
+ZSH_SETUP_MODULES_FOLDER=${ZSH_SETUP_FOLDER}/modules
 
-local BASE_FOLDERS=("$ZSH_Manager_PRELOAD_CONFIGS_FOLDER" "$ZSH_Manager_MODULES_FOLDER")
+# Legacy aliases for external scripts
+ZSH_Manager_FOLDER="$ZSH_SETUP_FOLDER"
+ZSH_Manager_PRELOAD_CONFIGS_FOLDER="$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER"
+ZSH_Manager_MODULES_FOLDER="$ZSH_SETUP_MODULES_FOLDER"
+
+local BASE_FOLDERS=("$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER" "$ZSH_SETUP_MODULES_FOLDER")
 
 # 2. OS DETECTION
 local OS_FOLDER=""
@@ -64,8 +69,10 @@ if [[ -n "$OS_FOLDER" ]]; then
 fi
 
 # Export for use in modules
-export ZSH_Manager_OS_FOLDER="$OS_FOLDER"
-export ZSH_Manager_OS_SUBFOLDER="$OS_SUBFOLDER"
+export ZSH_SETUP_OS_FOLDER="$OS_FOLDER"
+export ZSH_SETUP_OS_SUBFOLDER="$OS_SUBFOLDER"
+export ZSH_Manager_OS_FOLDER="$ZSH_SETUP_OS_FOLDER"
+export ZSH_Manager_OS_SUBFOLDER="$ZSH_SETUP_OS_SUBFOLDER"
 
 # 3. HELPER FUNCTION
 include () {
@@ -74,13 +81,13 @@ include () {
 
 # 4. LOAD PATH CONFIGURATION FIRST
 # Load common path config
-include "$ZSH_Manager_PRELOAD_CONFIGS_FOLDER/common/path.sh"
+include "$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER/common/path.sh"
 
 # Load OS-specific path config
 if [[ -n "$OS_SUBFOLDER" ]]; then
-    include "$ZSH_Manager_PRELOAD_CONFIGS_FOLDER/$OS_FOLDER/$OS_SUBFOLDER/path.sh"
+    include "$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER/$OS_FOLDER/$OS_SUBFOLDER/path.sh"
 else
-    include "$ZSH_Manager_PRELOAD_CONFIGS_FOLDER/$OS_FOLDER/path.sh"
+    include "$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER/$OS_FOLDER/path.sh"
 fi
 
 # Load user environment variables

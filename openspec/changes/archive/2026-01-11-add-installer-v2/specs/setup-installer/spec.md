@@ -3,19 +3,19 @@
 ## ADDED Requirements
 
 ### Requirement: One-Liner Remote Installation
-The system SHALL provide a bootstrap script that can be executed via `curl | sh` to install zsh-manager on a fresh machine.
+The system SHALL provide a bootstrap script that can be executed via `curl | sh` to install zsh-setup on a fresh machine.
 
 #### Scenario: Fresh installation
-- **WHEN** user runs `curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-manager/main/bootstrap.sh | sh`
-- **THEN** the repository is cloned to `~/.zsh-manager`
+- **WHEN** user runs `curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-setup/main/bootstrap.sh | sh`
+- **THEN** the repository is cloned to `~/.zsh-setup`
 - **AND** the full setup script is executed
 
 #### Scenario: Custom install directory
-- **WHEN** user sets ZSH_MANAGER_DIR environment variable before running bootstrap
+- **WHEN** user sets ZSH_SETUP_DIR environment variable before running bootstrap
 - **THEN** the repository is cloned to the specified directory
 
 #### Scenario: Existing installation
-- **WHEN** zsh-manager directory already exists
+- **WHEN** zsh-setup directory already exists
 - **THEN** the system performs a git pull to update
 - **AND** runs the setup script
 

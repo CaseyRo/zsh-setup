@@ -1,7 +1,7 @@
 # Project Context
 
 ## Purpose
-ZSH-Manager is a cross-platform ZSH configuration framework that enables users to maintain a single, unified shell configuration across Linux, macOS, and Windows. It provides a modular, portable approach to managing shell settings, aliases, functions, and environment variables.
+ZSH-Setup is a cross-platform ZSH configuration framework that enables users to maintain a single, unified shell configuration across Linux, macOS, and Windows. It provides a modular, portable approach to managing shell settings, aliases, functions, and environment variables.
 
 ### Goals
 - Provide seamless cross-platform ZSH support (Linux, macOS, Windows/WSL/Git Bash/Cygwin/MSYS2)
@@ -22,7 +22,7 @@ ZSH-Manager is a cross-platform ZSH configuration framework that enables users t
 - Shell scripts use `.sh` extension
 - Configuration files are organized by OS: `common/`, `linux/`, `macos/`, `windows/`
 - Use `#` prefix on filenames/folders to exclude them from loading (e.g., `#deprecated.sh`)
-- Environment variables use `ZSH_Manager_` prefix for framework internals
+- Environment variables use `ZSH_SETUP_` prefix for framework internals
 - Include function wraps file sourcing with existence check
 
 ### Architecture Patterns
