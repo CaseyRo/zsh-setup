@@ -34,23 +34,44 @@ setup_apt_repos() {
 
     # Update package lists with 120s timeout to avoid hanging
     print_step "Updating package lists"
+    echo "  [DEBUG] Starting apt update sequence..."
+
     # Validate sudo credentials first (will prompt if needed)
-    sudo -v || { print_error "sudo authentication failed"; return 1; }
+    echo "  [DEBUG] Validating sudo credentials..."
+    if ! sudo -v; then
+        print_error "sudo authentication failed"
+        return 1
+    fi
+    echo "  [DEBUG] sudo credentials validated"
+
+    echo "  [DEBUG] Spawning background apt-get update..."
     (sudo apt-get update -qq &>/dev/null) &
     local pid=$!
+    echo "  [DEBUG] Background PID: $pid"
+
     local count=0
     while kill -0 $pid 2>/dev/null && [[ $count -lt 120 ]]; do
+        if [[ $((count % 10)) -eq 0 ]]; then
+            echo "  [DEBUG] Waiting... ${count}s elapsed (PID $pid still running)"
+        fi
         sleep 1
         ((count++))
     done
+
+    echo "  [DEBUG] Loop exited at ${count}s"
     if kill -0 $pid 2>/dev/null; then
+        echo "  [DEBUG] Process still running, killing..."
         kill $pid 2>/dev/null
         wait $pid 2>/dev/null
         print_warning "apt update timed out (120s), continuing anyway"
     else
+        echo "  [DEBUG] Process completed naturally"
         wait $pid 2>/dev/null
+        local exit_code=$?
+        echo "  [DEBUG] Exit code: $exit_code"
         print_success "Package lists updated"
     fi
+    echo "  [DEBUG] apt update sequence finished"
 }
 
 install_apt_packages() {
