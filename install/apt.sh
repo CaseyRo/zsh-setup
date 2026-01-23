@@ -32,10 +32,23 @@ setup_apt_repos() {
         track_skipped "Docker repository"
     fi
 
-    # Update package lists
+    # Update package lists with 120s timeout to avoid hanging
     print_step "Updating package lists"
-    run_with_spinner "Updating apt" sudo apt-get update -qq
-    print_success "Package lists updated"
+    (sudo apt-get update -qq &>/dev/null) &
+    local pid=$!
+    local count=0
+    while kill -0 $pid 2>/dev/null && [[ $count -lt 120 ]]; do
+        sleep 1
+        ((count++))
+    done
+    if kill -0 $pid 2>/dev/null; then
+        kill $pid 2>/dev/null
+        wait $pid 2>/dev/null
+        print_warning "apt update timed out (120s), continuing anyway"
+    else
+        wait $pid 2>/dev/null
+        print_success "Package lists updated"
+    fi
 }
 
 install_apt_packages() {

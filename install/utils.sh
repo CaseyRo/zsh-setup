@@ -185,6 +185,12 @@ print_package() {
 ui_confirm() {
     local prompt="$1"
 
+    # Auto-confirm if -y flag was passed
+    if [[ "${YES_TO_ALL:-false}" == true ]]; then
+        echo -e "  $prompt ${DIM}(auto-confirmed)${RESET}"
+        return 0
+    fi
+
     if [[ "$UI_GUM" == true ]]; then
         gum confirm "$prompt"
         return $?

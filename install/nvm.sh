@@ -55,8 +55,25 @@ install_node() {
         print_skip "Node.js ($current_version)"
         print_step "Checking for updates"
 
-        # Check if there's a newer stable version
-        local latest_stable=$(nvm version-remote node 2>/dev/null)
+        # Check if there's a newer stable version (with 10s timeout to avoid hanging)
+        local latest_stable=""
+        local tmpfile=$(mktemp)
+        (nvm version-remote node > "$tmpfile" 2>/dev/null) &
+        local pid=$!
+        local count=0
+        while kill -0 $pid 2>/dev/null && [[ $count -lt 10 ]]; do
+            sleep 1
+            ((count++))
+        done
+        if kill -0 $pid 2>/dev/null; then
+            kill $pid 2>/dev/null
+            wait $pid 2>/dev/null
+            print_warning "Update check timed out, skipping"
+        else
+            wait $pid 2>/dev/null
+            latest_stable=$(cat "$tmpfile" 2>/dev/null)
+        fi
+        rm -f "$tmpfile"
         if [[ "$current_version" != "$latest_stable" ]] && [[ -n "$latest_stable" ]]; then
             local latest_installed
             latest_installed=$(nvm version "$latest_stable" 2>/dev/null)

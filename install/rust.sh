@@ -10,8 +10,28 @@ install_rust() {
         print_skip "Rust/Cargo"
         track_skipped "Rust"
         print_step "Updating Rust"
-        run_with_spinner "Updating Rust" rustup update
-        print_success "Rust updated"
+
+        # Run rustup update with 60s timeout to avoid hanging
+        local update_success=false
+        (rustup update &>/dev/null) &
+        local pid=$!
+        local count=0
+        while kill -0 $pid 2>/dev/null && [[ $count -lt 60 ]]; do
+            sleep 1
+            ((count++))
+        done
+        if kill -0 $pid 2>/dev/null; then
+            kill $pid 2>/dev/null
+            wait $pid 2>/dev/null
+            print_warning "Rust update timed out (60s), skipping"
+        else
+            wait $pid 2>/dev/null
+            if [[ $? -eq 0 ]]; then
+                print_success "Rust updated"
+            else
+                print_warning "Rust update failed, continuing anyway"
+            fi
+        fi
     else
         print_step "Installing Rust via rustup"
         if [[ "$VERBOSE" == true ]]; then
