@@ -29,6 +29,7 @@ BREW_PACKAGES_LINUX=(
 # Homebrew casks (macOS GUI apps, skipped on Linux)
 BREW_CASKS=(
     "raycast"    # spotlight replacement & productivity launcher
+    "setapp"     # app subscription service
 )
 
 # Cargo packages (installed via cargo install)
