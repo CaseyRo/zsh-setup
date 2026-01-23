@@ -9,6 +9,13 @@ install_rust() {
     if command_exists rustc && command_exists cargo; then
         print_skip "Rust/Cargo"
         track_skipped "Rust"
+
+        # Fix permissions if cargo binaries aren't executable
+        if [[ -d "$HOME/.cargo/bin" ]] && [[ ! -x "$HOME/.cargo/bin/cargo" ]]; then
+            print_step "Fixing cargo binary permissions"
+            chmod +x "$HOME/.cargo/bin"/* 2>/dev/null || true
+        fi
+
         print_step "Updating Rust"
         if rustup update; then
             print_success "Rust updated"
@@ -59,12 +66,15 @@ install_cargo_packages() {
         else
             echo -e "  ${SYMBOL_PACKAGE} ${BOLD}[$current/$total]${RESET} Compiling ${BOLD}$package${RESET}..."
             echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
-            if cargo install "$package" 2>&1 | sed 's/^/    /'; then
-                echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
+            local install_output
+            local install_status
+            install_output=$(cargo install "$package" 2>&1) && install_status=0 || install_status=$?
+            echo "$install_output" | sed 's/^/    /'
+            echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
+            if [[ $install_status -eq 0 ]]; then
                 print_success "$package installed"
                 track_installed "$package"
             else
-                echo -e "  ${DIM}─────────────────────────────────────────${RESET}"
                 print_error "Failed to install $package"
                 track_failed "$package"
             fi
