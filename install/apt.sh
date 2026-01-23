@@ -34,6 +34,8 @@ setup_apt_repos() {
 
     # Update package lists with 120s timeout to avoid hanging
     print_step "Updating package lists"
+    # Validate sudo credentials first (will prompt if needed)
+    sudo -v || { print_error "sudo authentication failed"; return 1; }
     (sudo apt-get update -qq &>/dev/null) &
     local pid=$!
     local count=0
