@@ -53,12 +53,27 @@ install_node() {
     if nvm list 2>/dev/null | grep -q "v[0-9]"; then
         local current_version=$(nvm current 2>/dev/null)
         if [[ -z "$current_version" || "$current_version" == "none" || "$current_version" == "system" ]]; then
-            # No version active, use the latest installed
+            # No version active, try to activate and set default
             nvm use node &>/dev/null || true
+            nvm alias default node &>/dev/null || true
             current_version=$(nvm current 2>/dev/null)
         fi
-        print_skip "Node.js ($current_version)"
-        track_skipped "Node.js ($current_version)"
+        # If still no active version, force reinstall
+        if [[ -z "$current_version" || "$current_version" == "none" ]]; then
+            print_step "Reinstalling Node.js (activation failed)"
+            nvm install node
+            nvm use node
+            nvm alias default node
+            current_version=$(nvm current 2>/dev/null)
+        fi
+        if [[ -n "$current_version" && "$current_version" != "none" ]]; then
+            print_skip "Node.js ($current_version)"
+            track_skipped "Node.js ($current_version)"
+        else
+            print_error "Node.js activation failed"
+            track_failed "Node.js"
+            return 1
+        fi
     else
         print_step "Installing Node.js stable"
         if [[ "$VERBOSE" == true ]]; then
