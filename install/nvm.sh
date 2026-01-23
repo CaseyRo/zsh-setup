@@ -11,8 +11,8 @@ install_nvm() {
     if [[ -d "$NVM_DIR" ]] && [[ -s "$NVM_DIR/nvm.sh" ]]; then
         print_skip "NVM"
         track_skipped "NVM"
-        # Load nvm for this session
-        source "$NVM_DIR/nvm.sh"
+        # Load nvm for this session (|| true to prevent set -e exit)
+        source "$NVM_DIR/nvm.sh" || true
     else
         print_step "Installing NVM"
         if [[ "$VERBOSE" == true ]]; then
@@ -23,7 +23,7 @@ install_nvm() {
 
         # Load nvm for this session
         if [[ -s "$NVM_DIR/nvm.sh" ]]; then
-            source "$NVM_DIR/nvm.sh"
+            source "$NVM_DIR/nvm.sh" || true
             print_success "NVM installed"
             track_installed "NVM"
         else
@@ -40,7 +40,7 @@ install_node() {
     if ! command_exists nvm; then
         # Try loading nvm
         export NVM_DIR="$HOME/.nvm"
-        [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+        [[ -s "$NVM_DIR/nvm.sh" ]] && { source "$NVM_DIR/nvm.sh" || true; }
     fi
 
     if ! command_exists nvm; then
