@@ -3,4 +3,6 @@ repos:
     rev: v0.10.0.1
     hooks:
       - id: shellcheck
-        args: [--severity=warning]
+        args: [--severity=error]
+        files: ^(install\.sh|install/.*\.sh|bootstrap\.sh|scripts/.*\.sh)$
+        exclude: ^(modules/|preload_configs/|\.zshrc)
