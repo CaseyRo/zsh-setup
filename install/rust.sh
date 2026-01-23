@@ -12,21 +12,27 @@ install_rust() {
         print_step "Updating Rust"
 
         # Run rustup update with 60s timeout to avoid hanging
-        local update_success=false
-        (rustup update &>/dev/null) &
-        local pid=$!
-        local count=0
-        while kill -0 $pid 2>/dev/null && [[ $count -lt 60 ]]; do
-            sleep 1
-            ((count++))
-        done
-        if kill -0 $pid 2>/dev/null; then
-            kill $pid 2>/dev/null
-            wait $pid 2>/dev/null
-            print_warning "Rust update timed out (60s), skipping"
+        local timeout_cmd=""
+        if command -v timeout &>/dev/null; then
+            timeout_cmd="timeout 60"
+        elif command -v gtimeout &>/dev/null; then
+            timeout_cmd="gtimeout 60"
+        fi
+
+        if [[ -n "$timeout_cmd" ]]; then
+            if $timeout_cmd rustup update &>/dev/null; then
+                print_success "Rust updated"
+            else
+                local exit_code=$?
+                if [[ $exit_code -eq 124 ]]; then
+                    print_warning "Rust update timed out (60s), skipping"
+                else
+                    print_warning "Rust update failed, continuing anyway"
+                fi
+            fi
         else
-            wait $pid 2>/dev/null
-            if [[ $? -eq 0 ]]; then
+            # No timeout command available, run directly
+            if rustup update &>/dev/null; then
                 print_success "Rust updated"
             else
                 print_warning "Rust update failed, continuing anyway"

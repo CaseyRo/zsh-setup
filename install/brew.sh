@@ -12,20 +12,31 @@ install_homebrew() {
         print_step "Updating Homebrew"
 
         # Run brew update with 120s timeout to avoid hanging
-        (brew update &>/dev/null) &
-        local pid=$!
-        local count=0
-        while kill -0 $pid 2>/dev/null && [[ $count -lt 120 ]]; do
-            sleep 1
-            ((count++))
-        done
-        if kill -0 $pid 2>/dev/null; then
-            kill $pid 2>/dev/null
-            wait $pid 2>/dev/null
-            print_warning "Homebrew update timed out (120s), continuing anyway"
+        local timeout_cmd=""
+        if command -v timeout &>/dev/null; then
+            timeout_cmd="timeout 120"
+        elif command -v gtimeout &>/dev/null; then
+            timeout_cmd="gtimeout 120"
+        fi
+
+        if [[ -n "$timeout_cmd" ]]; then
+            if $timeout_cmd brew update &>/dev/null; then
+                print_success "Homebrew updated"
+            else
+                local exit_code=$?
+                if [[ $exit_code -eq 124 ]]; then
+                    print_warning "Homebrew update timed out (120s), continuing anyway"
+                else
+                    print_warning "Homebrew update failed, continuing anyway"
+                fi
+            fi
         else
-            wait $pid 2>/dev/null
-            print_success "Homebrew updated"
+            # No timeout command available, run directly
+            if brew update &>/dev/null; then
+                print_success "Homebrew updated"
+            else
+                print_warning "Homebrew update failed, continuing anyway"
+            fi
         fi
     else
         print_step "Installing Homebrew"

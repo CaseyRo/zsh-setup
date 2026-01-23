@@ -57,23 +57,23 @@ install_node() {
 
         # Check if there's a newer stable version (with 10s timeout to avoid hanging)
         local latest_stable=""
-        local tmpfile=$(mktemp)
-        (nvm version-remote node > "$tmpfile" 2>/dev/null) &
-        local pid=$!
-        local count=0
-        while kill -0 $pid 2>/dev/null && [[ $count -lt 10 ]]; do
-            sleep 1
-            ((count++))
-        done
-        if kill -0 $pid 2>/dev/null; then
-            kill $pid 2>/dev/null
-            wait $pid 2>/dev/null
-            print_warning "Update check timed out, skipping"
-        else
-            wait $pid 2>/dev/null
-            latest_stable=$(cat "$tmpfile" 2>/dev/null)
+        local timeout_cmd=""
+        if command -v timeout &>/dev/null; then
+            timeout_cmd="timeout 10"
+        elif command -v gtimeout &>/dev/null; then
+            timeout_cmd="gtimeout 10"
         fi
-        rm -f "$tmpfile"
+
+        if [[ -n "$timeout_cmd" ]]; then
+            latest_stable=$($timeout_cmd bash -c 'source "$NVM_DIR/nvm.sh" && nvm version-remote node' 2>/dev/null) || true
+            if [[ $? -eq 124 ]]; then
+                print_warning "Update check timed out, skipping"
+                latest_stable=""
+            fi
+        else
+            # No timeout command, try anyway but may hang
+            latest_stable=$(nvm version-remote node 2>/dev/null) || true
+        fi
         if [[ "$current_version" != "$latest_stable" ]] && [[ -n "$latest_stable" ]]; then
             local latest_installed
             latest_installed=$(nvm version "$latest_stable" 2>/dev/null)
