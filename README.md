@@ -1,232 +1,116 @@
-# ZSH-Setup: The Ultimate Cross-Platform ZSH Configuration Framework
+# ZSH-Setup
 
-## 🚀 Introduction
+A cross-platform ZSH configuration framework for Linux, macOS, and Windows (WSL).
 
-**ZSH-Setup** is a powerful, lightweight, and flexible framework that enables you to maintain a single, unified ZSH configuration across **Linux, macOS, and Windows**. Designed for developers, system administrators, and power users, ZSH-Setup ensures a **consistent shell experience** across all operating systems.
-
-## 🔥 Why Choose ZSH-Setup?
-
-- ✅ **Seamless Cross-Platform Support**: Works flawlessly on **Linux, macOS, and Windows**.
-- ✅ **Support Environment variables**: Easy and extensive way to use Environment variables.
-- ✅ **Path Handling**: Easy and extensive way to handle Path variables.
-- ✅ **Portable & Unified ZSH Configuration**: Manage all your shell settings from one place.
-- ✅ **Customizable & Modular**: Use preloaded configurations and extend functionality with custom modules.
-- ✅ **Compatible with All ZSH Frameworks**: Supports **Oh-My-Zsh, Prezto, Antigen, and Zim**.
-- ✅ **Lightweight & Fast**: Minimal dependencies, designed for performance.
-- ✅ **Effortless Synchronization**: Easily sync your settings via **Git, Dropbox, or cloud services**.
-- ✅ **Automated Setup**: Quickly set up using the provided **symlink script**.
-
-## 🏗️ Directory Structure
-
-```
-zsh-setup/
-├── README.md                           # Documentation
-├── bootstrap.sh                        # One-liner remote install script
-├── install.sh                          # Full setup script with progress bar
-├── run-to-symlink.sh                   # Quick symlink-only setup
-├── .zshrc                              # Main ZSH configuration file
-├── install/                            # Installation modules
-│   ├── packages.sh                     # Package lists (brew, cargo, npm)
-│   ├── utils.sh                        # CLI styling and progress bar
-│   ├── brew.sh                         # Homebrew installation
-│   ├── rust.sh                         # Rust/Cargo installation
-│   ├── nvm.sh                          # NVM installation
-│   └── oh-my-zsh.sh                    # Oh My Zsh installation
-├── preload_configs/                    # OS-specific preloaded configurations
-│   ├── common/                         # Shared configurations
-│   ├── linux/                          # Linux-specific configs
-│   ├── macos/                          # macOS-specific configs
-│   └── windows/                        # Windows-specific configs
-├── modules/                            # Custom modules (aliases, functions, etc.)
-│   ├── common/                         # Cross-platform modules
-│   ├── linux/                          # Linux-specific modules
-│   ├── macos/                          # macOS-specific modules
-│   └── windows/                        # Windows-specific modules
-```
-
-## 📦 Installation & Setup
-
-### Quick Install (Recommended)
-
-Run this one-liner to install everything on a fresh machine:
+## Quick Install
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/CaseyRo/zsh-setup/main/bootstrap.sh)"
 ```
 
-This will:
-- Clone zsh-setup to `~/.zsh-setup`
-- Install Homebrew, Rust, NVM, and Oh My Zsh
-- Install git, GitHub CLI (gh), and btop (system monitor)
-- Install CLI tools via Cargo (bat, eza, ripgrep, fd, zoxide, topgrade)
-- Install Docker & Docker Compose (Linux only)
-- Install Node.js stable and global npm packages
-- Install uv and latest stable Python
-- Install Nerd Fonts for terminal glyphs (desktop only)
-- Set up your `.zshrc` symlink
+This installs everything on a fresh machine. Safe to re-run - already installed items are skipped.
 
-**Raspberry Pi / ARM Linux**: Automatically detected! Uses APT for pre-built packages instead of compiling from source.
+### What gets installed
 
-### Manual Installation
+| Category | Tools |
+|----------|-------|
+| Shell | ZSH, Oh My Zsh, zsh-autosuggestions, zsh-syntax-highlighting |
+| CLI tools | bat, eza, ripgrep, fd, fzf, zoxide, btop, fastfetch |
+| Dev tools | git, gh (GitHub CLI), lazygit |
+| Languages | Rust/Cargo, NVM + Node.js, uv + Python |
+| Services | Docker, Tailscale, Copyparty |
+| Fonts | Nerd Fonts (FiraMono, JetBrainsMono, Meslo) - desktop only |
 
-#### 1️⃣ Clone the Repository
+### Platform-specific installation
+
+| Platform | Package Manager | Notes |
+|----------|----------------|-------|
+| macOS | Homebrew + Cargo | No Docker |
+| Linux x86 | Homebrew + Cargo | Docker via Homebrew |
+| Raspberry Pi / ARM | APT + Cargo | Docker via APT, pre-built packages where available |
+
+## Manual Installation
 
 ```bash
 git clone git@github.com:CaseyRo/zsh-setup.git ~/.zsh-setup
-```
-
-#### 2️⃣ Run the Setup Script
-```bash
 cd ~/.zsh-setup
 ./install.sh
 ```
 
-Optional UI flags:
+### Options
+
 ```bash
-./install.sh --ui gum --theme minimal
+./install.sh -y              # Answer yes to all prompts
+./install.sh -v              # Verbose output
+./install.sh --ui gum        # Use gum for prompts (if installed)
+./install.sh --theme minimal # Minimal color theme
 ```
 
-Environment alternatives:
-```bash
-NO_COLOR=1 ZSH_SETUP_UI=plain ./install.sh
+## Directory Structure
+
+```
+zsh-setup/
+├── .zshrc                    # Main ZSH config (symlinked to ~/.zshrc)
+├── install.sh                # Full setup script
+├── bootstrap.sh              # Remote one-liner installer
+├── install/                  # Installation modules
+│   └── packages.sh           # Package lists (customize here)
+├── preload_configs/          # Loaded before modules
+│   ├── common/               # All platforms
+│   ├── linux/                # Linux-specific
+│   ├── macos/                # macOS-specific
+│   └── windows/              # Windows/WSL-specific
+└── modules/                  # Loaded after preload_configs
+    ├── common/               # All platforms
+    ├── linux/                # Linux-specific
+    ├── macos/                # macOS-specific
+    └── windows/              # Windows/WSL-specific
 ```
 
-#### 3️⃣ Customize Your Configuration
+## How It Works
 
-- Add **OS-specific** preloaded configs in `preload_configs/`
-- Add **OS-specific** Environment/Path configs in `preload_configs/*os*/path.sh`
-- Extend functionality with **custom modules** in `modules/`
-- Edit package lists in `install/packages.sh`
+1. **OS Detection**: Automatically detects your OS and loads appropriate configs
+2. **Load Order**: `preload_configs/common/` → `preload_configs/{os}/` → `modules/common/` → `modules/{os}/`
+3. **Symlink**: Your `~/.zshrc` points to the framework's `.zshrc`
 
-## ⚙️ How ZSH-Setup Works
+## Customization
 
-### **1️⃣ Dynamic Configuration Loading**
-ZSH-Setup **automatically detects your operating system** and loads the appropriate configurations.
+### Adding modules
 
-- **Common settings** (`preload_configs/common/`) are loaded first.
-- **OS-specific settings** (`preload_configs/linux/`, `macos/`, `windows/`) are applied afterward.
-
-### **2️⃣ Modular Architecture**
-- Store **custom functions, aliases, and scripts** in `modules/`.
-- Modules are categorized into **common** and **OS-specific** folders.
-- Ignore specific modules or configurations by **prefixing folder names with `#`** (e.g., `#ignored_module/`).
-
-### **3️⃣ Symlink-Based Setup**
-- The **setup script** (`run-to-symlink.sh`) automatically links `.zshrc` to the framework.
-- This allows **easy switching** between configurations without modifying system files.
-
-## 🎯 Key Features
-
-### 🔗 **Cross-Platform Compatibility**
-- Works seamlessly on **Linux, macOS, and Windows (WSL, Git Bash, Cygwin, MSYS2)**.
-
-### 🔄 **Auto-Loading of Preloaded Configurations**
-- Automatically loads common and OS-specific **aliases, functions, and environment variables**.
-
-### 🎨 **Custom Modules & Plugins Support**
-- Organize your scripts with a modular structure.
-- Supports **any additional ZSH plugins or external tools**.
-
-### 🏎️ **Optimized for Speed & Performance**
-- **Lightweight** with minimal overhead.
-- **Fast execution** with optimized loading logic.
-
-### ☁️ **Sync Anywhere**
-- Easily sync configurations across devices using **Git, Dropbox, or cloud services**.
-
-### 🛠️ **Works with Any ZSH Framework**
-- Compatible with **Oh-My-Zsh, Prezto, Antigen, Zim, and more**.
-
-### 🧩 **Fully Customizable**
-- Add, remove, or modify configurations as needed.
-- Ignore specific scripts or modules by naming them with `#`.
-
-## 🛠️ Usage
-
-### **Adding Custom Modules**
-Place your custom ZSH scripts inside the corresponding **modules/** folder:
+Place scripts in `modules/common/` (all platforms) or `modules/{os}/` (OS-specific):
 
 ```bash
 modules/
 ├── common/
 │   ├── aliases.sh         # Shared aliases
-│   ├── functions.sh       # Shared functions
-│   └── startup.sh         # Commands run on shell start (e.g., fastfetch)
+│   └── functions.sh       # Shared functions
 ├── linux/
-│   └── linux_aliases.sh   # Linux-specific aliases
-├── macos/
-│   └── macos_shortcuts.sh # macOS-specific functions
-└── windows/
-    └── win_helpers.sh     # Windows-specific helpers
+│   └── linux_aliases.sh
+└── macos/
+    └── macos_shortcuts.sh
 ```
 
-### **Ignoring Folders & Scripts**
-To prevent specific scripts from being loaded, **prefix the filename or folder with `#`**:
+### Ignoring files
+
+Prefix with `#` to skip loading:
 
 ```bash
-modules/
-├── common/
-│   ├── aliases.sh
-│   ├── #deprecated_aliases.sh  # This file will be ignored
-│   ├── #old_scripts/           # This folder will be ignored
+modules/common/#old_aliases.sh    # Ignored
+modules/#deprecated/              # Entire folder ignored
 ```
 
-### **Using Environment variables**
-Place your env variables inside your home directory **~/.env.sh** folder:
+### Environment variables
+
+Create `~/.env.sh` for private environment variables:
+
 ```bash
-export ENV_VAR1="Value1"
+export MY_API_KEY="secret"
 ```
 
-## 🤝 Contributing
-We welcome contributions! Feel free to submit issues, feature requests, or pull requests.
+### Customizing packages
 
-## 📜 License
-ZSH-Setup is open-source and available under the **MIT License**.
+Edit `install/packages.sh` to add/remove packages from the installation.
 
----
+## License
 
-## 📋 Changelog
-
-### v2.0.0 (January 2026)
-
-#### New Features
-- **One-liner installation**: Run `curl ... | sh` to set up a fresh machine instantly
-- **Sticky progress bar**: Setup script now shows a progress bar fixed at the bottom of the terminal while installation output scrolls above
-- **Bootstrap script**: New `bootstrap.sh` for remote installation
-- **Raspberry Pi / ARM Linux support**: Automatic detection uses APT for pre-built packages instead of slow compilation
-- **Docker & Docker Compose**: Automatically installed on Linux (skipped on macOS)
-- **Nerd Fonts**: Installs FiraMono, JetBrainsMono, and Meslo Nerd Fonts on desktop systems (skipped on headless/servers). Customize in `install/packages.sh`
-
-#### Changes
-- **Cargo-first package installation**: Moved core CLI tools from Homebrew to Cargo for better cross-platform consistency:
-  - `bat` - cat with syntax highlighting
-  - `eza` - modern ls replacement
-  - `ripgrep` - fast grep (rg)
-  - `fd-find` - fast find (fd)
-  - `zoxide` - smarter cd
-  - `topgrade` - system updater
-- **Faster system info**: Replaced `hyfetch` with `fastfetch` (written in C, significantly faster startup)
-- **Improved terminal handling**: Setup script now properly resets terminal on Ctrl+C interrupt
-
-#### Platform-specific installation
-| Platform | Package Manager | Docker |
-|----------|----------------|--------|
-| macOS | Homebrew + Cargo | No |
-| Linux x86 | Homebrew + Cargo | Yes (brew) |
-| Raspberry Pi / ARM | APT + minimal Cargo | Yes (apt) |
-
-#### Homebrew packages (macOS/Linux x86)
-- `zsh` - shell itself
-- `git` - version control
-- `gh` - GitHub CLI
-- `fzf` - fuzzy finder (keybindings install better via brew)
-- `byobu` - terminal multiplexer
-- `fastfetch` - fast system info display
-
-#### APT packages (Raspberry Pi / ARM Linux)
-- Pre-built: `zsh`, `git`, `gh`, `fzf`, `byobu`, `bat`, `fd-find`, `ripgrep`, `fastfetch`
-- Via Cargo (only what's not in APT): `eza`, `zoxide`, `topgrade`
-
----
-
-🔥 **Start using ZSH-Setup today and streamline your ZSH configuration across all platforms!** 🚀
+MIT
