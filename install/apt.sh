@@ -32,28 +32,12 @@ setup_apt_repos() {
         track_skipped "Docker repository"
     fi
 
-    # Update package lists with 120s timeout to avoid hanging
+    # Update package lists
     print_step "Updating package lists"
-
-    # Use timeout command on Linux (much simpler and more reliable)
-    if command -v timeout &>/dev/null; then
-        if timeout 120 sudo apt-get update -qq &>/dev/null; then
-            print_success "Package lists updated"
-        else
-            local exit_code=$?
-            if [[ $exit_code -eq 124 ]]; then
-                print_warning "apt update timed out (120s), continuing anyway"
-            else
-                print_warning "apt update failed (exit $exit_code), continuing anyway"
-            fi
-        fi
+    if sudo apt-get update -qq; then
+        print_success "Package lists updated"
     else
-        # Fallback: just run it directly without timeout
-        if sudo apt-get update -qq &>/dev/null; then
-            print_success "Package lists updated"
-        else
-            print_warning "apt update failed, continuing anyway"
-        fi
+        print_warning "apt update failed, continuing anyway"
     fi
 }
 

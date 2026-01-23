@@ -55,25 +55,9 @@ install_node() {
         print_skip "Node.js ($current_version)"
         print_step "Checking for updates"
 
-        # Check if there's a newer stable version (with 10s timeout to avoid hanging)
+        # Check if there's a newer stable version
         local latest_stable=""
-        local timeout_cmd=""
-        if command -v timeout &>/dev/null; then
-            timeout_cmd="timeout 10"
-        elif command -v gtimeout &>/dev/null; then
-            timeout_cmd="gtimeout 10"
-        fi
-
-        if [[ -n "$timeout_cmd" ]]; then
-            latest_stable=$($timeout_cmd bash -c 'source "$NVM_DIR/nvm.sh" && nvm version-remote node' 2>/dev/null) || true
-            if [[ $? -eq 124 ]]; then
-                print_warning "Update check timed out, skipping"
-                latest_stable=""
-            fi
-        else
-            # No timeout command, try anyway but may hang
-            latest_stable=$(nvm version-remote node 2>/dev/null) || true
-        fi
+        latest_stable=$(nvm version-remote node 2>/dev/null) || true
         if [[ "$current_version" != "$latest_stable" ]] && [[ -n "$latest_stable" ]]; then
             local latest_installed
             latest_installed=$(nvm version "$latest_stable" 2>/dev/null)

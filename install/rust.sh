@@ -10,33 +10,10 @@ install_rust() {
         print_skip "Rust/Cargo"
         track_skipped "Rust"
         print_step "Updating Rust"
-
-        # Run rustup update with 60s timeout to avoid hanging
-        local timeout_cmd=""
-        if command -v timeout &>/dev/null; then
-            timeout_cmd="timeout 60"
-        elif command -v gtimeout &>/dev/null; then
-            timeout_cmd="gtimeout 60"
-        fi
-
-        if [[ -n "$timeout_cmd" ]]; then
-            if $timeout_cmd rustup update &>/dev/null; then
-                print_success "Rust updated"
-            else
-                local exit_code=$?
-                if [[ $exit_code -eq 124 ]]; then
-                    print_warning "Rust update timed out (60s), skipping"
-                else
-                    print_warning "Rust update failed, continuing anyway"
-                fi
-            fi
+        if rustup update; then
+            print_success "Rust updated"
         else
-            # No timeout command available, run directly
-            if rustup update &>/dev/null; then
-                print_success "Rust updated"
-            else
-                print_warning "Rust update failed, continuing anyway"
-            fi
+            print_warning "Rust update failed, continuing anyway"
         fi
     else
         print_step "Installing Rust via rustup"
