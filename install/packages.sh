@@ -81,6 +81,18 @@ NPM_GLOBAL_PACKAGES_DESKTOP=(
 )
 
 # ============================================================================
+# Mac App Store apps (installed via mas on macOS only)
+# ============================================================================
+# Get app IDs with: mas search <name> or mas list (for installed apps)
+MAS_APPS=(
+    "1569813296"  # 1Password for Safari
+    "1160435653"  # AutoMounter
+    "1102004240"  # iHosts
+    "904280696"   # Things
+    "1490879410"  # TrashMe 3
+)
+
+# ============================================================================
 # Nerd Fonts (for terminal glyphs/icons)
 # ============================================================================
 # These provide special characters used by prompts like Powerlevel10k, btop, etc.

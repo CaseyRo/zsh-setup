@@ -115,6 +115,7 @@ source "$INSTALL_DIR/copyparty.sh"
 source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
+source "$INSTALL_DIR/mas.sh"
 
 # ============================================================================
 # Main Installation
@@ -213,7 +214,9 @@ main() {
         echo -e "  ${SYMBOL_BULLET} Homebrew + CLI tools (git, gh, bat, eza, etc.)"
         echo -e "  ${SYMBOL_BULLET} Lazygit (Git TUI)"
         echo -e "  ${SYMBOL_BULLET} Rust & Cargo"
-        if [[ "$IS_MACOS" == false ]]; then
+        if [[ "$IS_MACOS" == true ]]; then
+            echo -e "  ${SYMBOL_BULLET} Mac App Store apps (via mas)"
+        else
             echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
         fi
     fi
@@ -276,6 +279,7 @@ main() {
         install_lazygit
 
         install_brew_casks
+        install_mas_apps
 
         # Docker for Linux (non-macOS) via Homebrew
         if [[ "$IS_MACOS" == false ]]; then
