@@ -61,9 +61,12 @@ echo ""
 echo -e "\033[0;90mPress Ctrl+C to stop the server\033[0m"
 echo ""
 
+# Get full path to copyparty (needed for sudo which doesn't preserve PATH)
+COPYPARTY_BIN=$(command -v copyparty)
+
 # Build copyparty command
 COPYPARTY_CMD=(
-    copyparty
+    "$COPYPARTY_BIN"
     -a "$USER_NAME:$PASSWORD"
     -v "$FOLDER:home:A,$USER_NAME"
     -p "$PORT"
