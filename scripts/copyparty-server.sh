@@ -67,6 +67,7 @@ COPYPARTY_BIN=$(command -v copyparty)
 # Build copyparty command
 COPYPARTY_CMD=(
     "$COPYPARTY_BIN"
+    -q
     -a "$USER_NAME:$PASSWORD"
     -v "$FOLDER:home:A,$USER_NAME"
     -p "$PORT"
