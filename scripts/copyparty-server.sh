@@ -50,11 +50,11 @@ echo -e "\033[0;36m║\033[0m  \033[1mAccess URLs:\033[0m                       
 echo -e "\033[0;36m║\033[0m                                                               \033[0;36m║\033[0m"
 echo -e "\033[0;36m║\033[0m  \033[0;90mLocal:\033[0m                                                      \033[0;36m║\033[0m"
 printf "\033[0;36m║\033[0m    Web:     \033[0;32m%-49s\033[0m \033[0;36m║\033[0m\n" "http://localhost:$PORT"
-printf "\033[0;36m║\033[0m    SMB:     \033[0;32m%-49s\033[0m \033[0;36m║\033[0m\n" "smb://localhost:$SMB_PORT/home"
+printf "\033[0;36m║\033[0m    SMB:     \033[0;32m%-49s\033[0m \033[0;36m║\033[0m\n" "smb://localhost:$SMB_PORT/files"
 echo -e "\033[0;36m║\033[0m                                                               \033[0;36m║\033[0m"
 echo -e "\033[0;36m║\033[0m  \033[0;90mNetwork:\033[0m                                                    \033[0;36m║\033[0m"
 printf "\033[0;36m║\033[0m    Web:     \033[0;32m%-49s\033[0m \033[0;36m║\033[0m\n" "http://$LOCAL_IP:$PORT"
-printf "\033[0;36m║\033[0m    SMB:     \033[0;32m%-49s\033[0m \033[0;36m║\033[0m\n" "smb://$LOCAL_IP:$SMB_PORT/home"
+printf "\033[0;36m║\033[0m    SMB:     \033[0;32m%-49s\033[0m \033[0;36m║\033[0m\n" "smb://$LOCAL_IP:$SMB_PORT/files"
 echo -e "\033[0;36m║\033[0m                                                               \033[0;36m║\033[0m"
 echo -e "\033[0;36m╚═══════════════════════════════════════════════════════════════╝\033[0m"
 echo ""
@@ -69,7 +69,7 @@ COPYPARTY_CMD=(
     "$COPYPARTY_BIN"
     -q
     -a "$USER_NAME:$PASSWORD"
-    -v "$FOLDER:home:A,$USER_NAME"
+    -v "$FOLDER:files:A,$USER_NAME"
     -p "$PORT"
     --smbw
     --smb-port "$SMB_PORT"
