@@ -6,3 +6,9 @@ repos:
         args: [--severity=error]
         files: ^(install\.sh|install/.*\.sh|bootstrap\.sh|scripts/.*\.sh)$
         exclude: ^(modules/|preload_configs/|\.zshrc)
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]

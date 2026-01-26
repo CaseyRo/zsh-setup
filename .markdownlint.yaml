@@ -1,0 +1,17 @@
+# Markdownlint configuration
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Disable line length - too restrictive for documentation
+MD013: false
+
+# Allow first line to not be a heading (common in command files)
+MD041: false
+
+# Allow emphasis as heading (used in some documentation styles)
+MD036: false
+
+# Allow fenced code blocks without language (sometimes intentional)
+MD040: false
+
+# Disable ordered list prefix style - allow any numbering
+MD029: false
