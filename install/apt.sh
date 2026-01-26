@@ -86,6 +86,22 @@ install_apt_packages_ubuntu() {
             fi
         fi
     done
+
+    # Enable and start cockpit if installed
+    if dpkg -s cockpit &>/dev/null; then
+        if systemctl is-active --quiet cockpit.socket; then
+            print_skip "cockpit service (already running)"
+        else
+            print_step "Enabling cockpit service"
+            if sudo systemctl enable --now cockpit.socket &>/dev/null; then
+                print_success "Cockpit enabled and running on port 9090"
+                track_installed "cockpit service"
+            else
+                print_error "Failed to enable cockpit service"
+                track_failed "cockpit service"
+            fi
+        fi
+    fi
 }
 
 install_docker_apt() {
