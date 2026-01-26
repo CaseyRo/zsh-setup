@@ -74,16 +74,16 @@ install_docker_apt() {
         for pkg in "${docker_packages[@]}"; do
             run_with_spinner "Installing $pkg" sudo apt-get install -y -qq "$pkg" || true
         done
-
-        # Add current user to docker group
-        if ! groups | grep -q docker; then
-            print_step "Adding user to docker group"
-            sudo usermod -aG docker "$USER"
-            print_info "Log out and back in for docker group to take effect"
-        fi
-
         print_success "Docker installed"
         track_installed "Docker"
+    fi
+
+    # Always ensure user is in docker group (even if Docker was already installed)
+    if command_exists docker && ! groups | grep -q docker; then
+        print_step "Adding user to docker group"
+        sudo usermod -aG docker "$USER"
+        print_info "Log out and back in for docker group to take effect"
+        track_installed "docker group membership"
     fi
 }
 
