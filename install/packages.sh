@@ -62,6 +62,7 @@ APT_PACKAGES=(
     "fastfetch"  # may fall back to neofetch
     "btop"       # modern system monitor (successor to bashtop)
     "micro"      # simple terminal text editor
+    "unzip"      # required for Nerd Fonts installation
 )
 
 # Cargo packages for ARM - only what's NOT available via apt

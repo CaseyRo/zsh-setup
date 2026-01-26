@@ -59,7 +59,19 @@ install_nerd_font_linux() {
 
     # Download and extract
     if curl -fsSL "$font_url" -o "$temp_dir/${font_name}.zip"; then
-        unzip -q "$temp_dir/${font_name}.zip" -d "$temp_dir/${font_name}" 2>/dev/null
+        # Check if unzip is available
+        if ! command_exists unzip; then
+            echo "unzip not installed, cannot extract fonts" >&2
+            rm -rf "$temp_dir"
+            return 1
+        fi
+
+        # Extract and verify
+        if ! unzip -q "$temp_dir/${font_name}.zip" -d "$temp_dir/${font_name}" 2>/dev/null; then
+            rm -rf "$temp_dir"
+            return 1
+        fi
+
         # Copy only .ttf and .otf files (skip Windows-compatible variants)
         find "$temp_dir/${font_name}" -type f \( -name "*.ttf" -o -name "*.otf" \) \
             ! -name "*Windows*" -exec cp {} "$font_dir/" \;
