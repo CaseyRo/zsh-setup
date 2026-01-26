@@ -109,7 +109,7 @@ upgrade_apt_packages() {
     local need_update=false
 
     for package in "${APT_PACKAGES[@]}"; do
-        if ! dpkg -l "$package" &>/dev/null 2>&1; then
+        if ! dpkg -s "$package" &>/dev/null 2>&1; then
             if [[ "$need_update" == false ]]; then
                 sudo apt-get update -qq &>/dev/null
                 need_update=true

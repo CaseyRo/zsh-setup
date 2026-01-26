@@ -46,7 +46,8 @@ install_apt_packages() {
     print_section "APT Packages"
 
     for package in "${APT_PACKAGES[@]}"; do
-        if dpkg -l "$package" &>/dev/null; then
+        # Use dpkg -s to check if package is actually installed (not just known)
+        if dpkg -s "$package" &>/dev/null; then
             print_skip "$package"
             track_skipped "$package"
         else
