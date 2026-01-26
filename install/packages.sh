@@ -72,6 +72,11 @@ CARGO_PACKAGES_ARM=(
     "topgrade"   # system updater (not in apt)
 )
 
+# APT packages only for Ubuntu (not Raspberry Pi)
+APT_PACKAGES_UBUNTU=(
+    "cockpit"    # web-based server management UI
+)
+
 # ============================================================================
 # Global npm packages (installed via npm install -g)
 # ============================================================================

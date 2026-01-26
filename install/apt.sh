@@ -63,6 +63,31 @@ install_apt_packages() {
     done
 }
 
+install_apt_packages_ubuntu() {
+    # Skip if not Ubuntu or no Ubuntu-specific packages
+    if ! is_ubuntu || [[ ${#APT_PACKAGES_UBUNTU[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    print_section "Ubuntu-specific Packages"
+
+    for package in "${APT_PACKAGES_UBUNTU[@]}"; do
+        if dpkg -s "$package" &>/dev/null; then
+            print_skip "$package"
+            track_skipped "$package"
+        else
+            print_package "$package"
+            if run_with_spinner "Installing $package" sudo apt-get install -y -qq "$package"; then
+                print_success "$package installed"
+                track_installed "$package"
+            else
+                print_error "Failed to install $package"
+                track_failed "$package"
+            fi
+        fi
+    done
+}
+
 install_docker_apt() {
     print_section "Docker"
 

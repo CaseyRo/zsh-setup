@@ -266,6 +266,8 @@ main() {
 
         install_apt_packages
 
+        install_apt_packages_ubuntu
+
         install_docker_apt
 
     else
