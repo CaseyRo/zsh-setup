@@ -106,3 +106,5 @@ for base_folder in "${BASE_FOLDERS[@]}"; do
         fi
     done
 done
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
