@@ -61,6 +61,7 @@ APT_PACKAGES=(
     "ripgrep"
     "fastfetch"  # may fall back to neofetch
     "btop"       # modern system monitor (successor to bashtop)
+    "micro"      # simple terminal text editor
 )
 
 # Cargo packages for ARM - only what's NOT available via apt

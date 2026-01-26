@@ -6,7 +6,20 @@
 # Command replacements
 # alias ls="eza -l"
 alias cd="z"
-alias cat="bat"
+
+# bat: on Debian/Ubuntu it's installed as 'batcat' due to naming conflict
+if command -v bat >/dev/null 2>&1; then
+    alias cat="bat"
+elif command -v batcat >/dev/null 2>&1; then
+    alias cat="batcat"
+    alias bat="batcat"
+fi
+
+# fd: on Debian/Ubuntu it's installed as 'fdfind' due to naming conflict
+if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+    alias fd="fdfind"
+fi
+
 alias top="htop"
 alias docker-compose="docker compose"
 alias lzg="lazygit"
