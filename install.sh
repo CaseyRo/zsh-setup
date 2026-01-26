@@ -111,6 +111,7 @@ source "$INSTALL_DIR/nvm.sh"
 source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/tailscale.sh"
+source "$INSTALL_DIR/network-mounts.sh"
 source "$INSTALL_DIR/copyparty.sh"
 source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
@@ -318,6 +319,8 @@ main() {
     install_tailscale
 
     configure_tailscale
+
+    configure_nfs_mount
 
     install_copyparty
 

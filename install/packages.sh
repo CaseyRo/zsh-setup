@@ -63,6 +63,7 @@ APT_PACKAGES=(
     "btop"       # modern system monitor (successor to bashtop)
     "micro"      # simple terminal text editor
     "unzip"      # required for Nerd Fonts installation
+    "nfs-common" # NFS client for network mounts
 )
 
 # Cargo packages for ARM - only what's NOT available via apt
