@@ -76,7 +76,7 @@ CARGO_PACKAGES_ARM=(
 NPM_GLOBAL_PACKAGES=(
     "pm2"
     "node-red"
-    "openspec.dev"  # spec-driven development for AI assistants
+    "@fission-ai/openspec"  # spec-driven development for AI assistants
 )
 
 # npm packages only for macOS and Ubuntu (not ARM/Raspberry Pi)

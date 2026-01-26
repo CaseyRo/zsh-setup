@@ -368,6 +368,9 @@ main() {
         install_git_confirmer_optional
     fi
 
+    # Set zsh as default shell
+    set_default_shell_zsh
+
     # Done!
     print_summary
 }

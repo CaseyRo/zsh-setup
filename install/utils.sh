@@ -555,6 +555,58 @@ quiet_redirect() {
 }
 
 # ============================================================================
+# Shell Configuration
+# ============================================================================
+
+# Set zsh as the default shell
+set_default_shell_zsh() {
+    print_section "Default Shell"
+
+    # Check if zsh is installed
+    if ! command_exists zsh; then
+        print_error "zsh is not installed - cannot set as default shell"
+        track_failed "default shell"
+        return 1
+    fi
+
+    local zsh_path
+    zsh_path=$(which zsh)
+
+    # Get current shell
+    local current_shell
+    current_shell=$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || echo "$SHELL")
+
+    # Check if zsh is already the default
+    if [[ "$current_shell" == *"zsh"* ]]; then
+        print_skip "zsh is already default shell"
+        track_skipped "default shell"
+        return 0
+    fi
+
+    print_step "Setting zsh as default shell"
+
+    # Ensure zsh is in /etc/shells (required for chsh)
+    if ! grep -q "^${zsh_path}$" /etc/shells 2>/dev/null; then
+        print_step "Adding zsh to /etc/shells"
+        echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+    fi
+
+    # Change the default shell
+    if sudo chsh -s "$zsh_path" "$USER"; then
+        print_success "Default shell changed to zsh"
+        print_info "Log out and back in for the change to take effect"
+        track_installed "default shell (zsh)"
+        # Set flag to indicate shell was changed
+        export SHELL_CHANGED=true
+    else
+        print_error "Failed to change default shell"
+        print_info "You can manually run: chsh -s $(which zsh)"
+        track_failed "default shell"
+        return 1
+    fi
+}
+
+# ============================================================================
 # Platform Detection
 # ============================================================================
 
@@ -724,7 +776,16 @@ print_summary() {
         echo -e "  ${DIM}Install log:${RESET} ${CYAN}$LOG_FILE${RESET}"
     fi
     echo -e "  ${SYMBOL_ROCKET} ${BOLD}Next steps:${RESET}"
-    echo -e "     1. Restart your terminal (or run: ${CYAN}source ~/.zshrc${RESET})"
-    echo -e "     2. Enjoy your new setup!"
+    if [[ "${SHELL_CHANGED:-false}" == true ]]; then
+        echo -e "     1. ${BOLD}Log out and log back in${RESET} to start using zsh"
+        echo -e "     2. Enjoy your new setup!"
+    elif [[ "$SHELL" != *"zsh"* ]]; then
+        echo -e "     1. Run ${CYAN}zsh${RESET} to start using your new shell"
+        echo -e "        Or log out and back in if zsh is your default shell"
+        echo -e "     2. Enjoy your new setup!"
+    else
+        echo -e "     1. Restart your terminal (or run: ${CYAN}source ~/.zshrc${RESET})"
+        echo -e "     2. Enjoy your new setup!"
+    fi
     echo ""
 }
