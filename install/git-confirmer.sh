@@ -123,7 +123,7 @@ install_git_confirmer_optional() {
     local state
     state=$(git_confirmer_prompt_state)
     if [[ "$state" == "yes" ]]; then
-        install_git_confirmer
+        install_git_confirmer || true  # Don't fail the script for optional component
         return 0
     elif [[ "$state" == "no" ]]; then
         return 0
@@ -141,7 +141,7 @@ install_git_confirmer_optional() {
     fi
 
     echo "yes" > "$GIT_CONFIRMER_PROMPT_FILE" 2>/dev/null || true
-    install_git_confirmer
+    install_git_confirmer || true  # Don't fail the script for optional component
 }
 
 upgrade_git_confirmer() {

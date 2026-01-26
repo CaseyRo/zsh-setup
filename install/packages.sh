@@ -50,6 +50,7 @@ CARGO_PACKAGES=(
 # Pre-built packages are much faster than compiling via cargo on ARM
 
 APT_PACKAGES=(
+    "build-essential"  # gcc, make, linker - required for cargo compilation
     "zsh"
     "git"
     "gh"         # GitHub CLI (needs repo setup)
