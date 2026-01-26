@@ -317,6 +317,8 @@ main() {
 
     install_tailscale
 
+    configure_tailscale
+
     install_copyparty
 
     install_nerd_fonts

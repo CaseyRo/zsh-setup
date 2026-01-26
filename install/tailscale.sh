@@ -1,7 +1,63 @@
 # shellcheck shell=bash
 # ============================================================================
-# Tailscale Installation
+# Tailscale Installation & Configuration
 # ============================================================================
+
+# Configure Tailscale with user preferences (SSH, MagicDNS)
+configure_tailscale() {
+    # Skip if Tailscale is not installed
+    if ! command_exists tailscale; then
+        return 0
+    fi
+
+    # Skip on macOS (configured via GUI)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        return 0
+    fi
+
+    # Check if already connected
+    if tailscale status &>/dev/null; then
+        print_skip "Tailscale (already configured)"
+        return 0
+    fi
+
+    print_section "Tailscale Configuration"
+    print_info "Configure Tailscale connection settings"
+    echo ""
+
+    # Build tailscale up command with options
+    local ts_args=()
+
+    # SSH access
+    if ui_confirm "Enable Tailscale SSH? (access this machine via 'tailscale ssh')"; then
+        ts_args+=("--ssh")
+        print_info "SSH access will be enabled"
+    else
+        print_info "SSH access will be disabled"
+    fi
+
+    # MagicDNS
+    if ui_confirm "Enable MagicDNS? (use Tailscale for DNS - may conflict with Docker)"; then
+        ts_args+=("--accept-dns=true")
+        print_info "MagicDNS will be enabled"
+    else
+        ts_args+=("--accept-dns=false")
+        print_info "MagicDNS will be disabled (recommended if using Docker)"
+    fi
+
+    echo ""
+    print_step "Starting Tailscale"
+    print_info "A browser window will open for authentication"
+    echo ""
+
+    # Run tailscale up with collected options
+    if sudo tailscale up "${ts_args[@]}"; then
+        print_success "Tailscale configured and connected"
+        track_installed "Tailscale configuration"
+    else
+        print_warning "Tailscale setup incomplete - run 'sudo tailscale up' manually"
+    fi
+}
 
 install_tailscale() {
     print_section "Tailscale"
