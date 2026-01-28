@@ -24,6 +24,17 @@ alias top="htop"
 alias docker-compose="docker compose"
 alias lzg="lazygit"
 
+# moltbot/clawdbot aliases (future-proofed for rename)
+if command -v moltbot >/dev/null 2>&1; then
+    alias mb="moltbot"
+    alias clawdbot="moltbot"
+    alias mbg="moltbot gateway"
+elif command -v clawdbot >/dev/null 2>&1; then
+    alias mb="clawdbot"
+    alias moltbot="clawdbot"
+    alias mbg="clawdbot gateway"
+fi
+
 # Docker shortcuts
 alias dcdcu="docker-compose down && docker-compose up -d"
 alias dcdcur="docker-compose down && docker-compose pull && docker-compose up -d"
