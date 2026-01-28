@@ -180,9 +180,24 @@ run_server() {
     local folder="${COPYPARTY_FOLDER:-$HOME}"
     local port="${COPYPARTY_PORT:-3923}"
 
-    # Get local IP for network access info
-    local local_ip
-    local_ip=$(hostname -I 2>/dev/null | awk '{print $1}' || ipconfig getifaddr en0 2>/dev/null || echo "localhost")
+    # Get Tailscale IP for network access (preferred), fallback to local IP
+    local local_ip=""
+    # Try Tailscale first (check both PATH and macOS app location)
+    local_ip=$(tailscale ip -4 2>/dev/null)
+    [[ -z "$local_ip" ]] && local_ip=$(/Applications/Tailscale.app/Contents/MacOS/Tailscale ip -4 2>/dev/null)
+
+    # Fallback to local network IP if Tailscale not available
+    if [[ -z "$local_ip" ]]; then
+        if [[ "$(uname)" == "Darwin" ]]; then
+            local_ip=$(ipconfig getifaddr en0 2>/dev/null)
+            [[ -z "$local_ip" ]] && local_ip=$(ipconfig getifaddr en1 2>/dev/null)
+            [[ -z "$local_ip" ]] && local_ip=$(route get default 2>/dev/null | awk '/interface:/ {iface=$2} END {if(iface) system("ipconfig getifaddr " iface)}')
+        else
+            local_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+            [[ -z "$local_ip" ]] && local_ip=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
+        fi
+    fi
+    [[ -z "$local_ip" ]] && local_ip="<your-ip>"
 
     # Display banner
     echo ""
