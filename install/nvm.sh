@@ -16,9 +16,9 @@ install_nvm() {
     else
         print_step "Installing NVM"
         if [[ "$VERBOSE" == true ]]; then
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
         else
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh 2>/dev/null | bash &>/dev/null
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh 2>/dev/null | bash &>/dev/null
         fi
 
         # Load nvm for this session

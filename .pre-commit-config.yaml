@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
         args: [--severity=error]
@@ -8,7 +8,7 @@ repos:
         exclude: ^(modules/|preload_configs/|\.zshrc)
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.43.0
+    rev: v0.47.0
     hooks:
       - id: markdownlint
         args: [--fix]
