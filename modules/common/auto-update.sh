@@ -56,6 +56,10 @@ _zsh_setup_check_update() {
                 fi
                 echo "[zsh-setup] Updated! Restart shell to apply changes."
             fi
+            # Clean up Docker if installed
+            if command -v docker &>/dev/null; then
+                docker system prune -f &>/dev/null
+            fi
         ) &>/dev/null &
     fi
 }
@@ -73,6 +77,11 @@ zsh-update() {
     if [[ -f "$ZSH_SETUP_FOLDER/install/upgrade.sh" ]]; then
         echo "Checking for new packages..."
         bash "$ZSH_SETUP_FOLDER/install/upgrade.sh"
+    fi
+    # Clean up Docker if installed
+    if command -v docker &>/dev/null; then
+        echo "Cleaning up Docker..."
+        docker system prune -f
     fi
     echo "Reloading shell config..."
     source ~/.zshrc
