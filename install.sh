@@ -290,7 +290,7 @@ main() {
         install_docker_apt
 
     else
-        # macOS or x86 Linux - use Homebrew
+        # macOS - use Homebrew
         install_homebrew
 
         install_brew_taps
@@ -301,11 +301,6 @@ main() {
 
         install_brew_casks
         install_mas_apps
-
-        # Docker for Linux (non-macOS) via Homebrew
-        if [[ "$IS_MACOS" == false ]]; then
-            install_brew_packages_linux
-        fi
     fi
 
     # =========================================================================

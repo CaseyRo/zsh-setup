@@ -15,3 +15,6 @@ MD040: false
 
 # Disable ordered list prefix style - allow any numbering
 MD029: false
+
+# Disable table column style - too strict
+MD060: false

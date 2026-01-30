@@ -23,15 +23,9 @@ install_homebrew() {
             NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &>/dev/null
         fi
 
-        # Add brew to PATH for this session
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            if [[ -f /opt/homebrew/bin/brew ]]; then
-                eval "$(/opt/homebrew/bin/brew shellenv)"
-            elif [[ -f /usr/local/bin/brew ]]; then
-                eval "$(/usr/local/bin/brew shellenv)"
-            fi
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        # Add brew to PATH for this session (macOS ARM)
+        if [[ "$OSTYPE" == "darwin"* ]] && [[ -f /opt/homebrew/bin/brew ]]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
         fi
 
         if command_exists brew; then
@@ -113,35 +107,6 @@ install_brew_casks() {
             else
                 print_error "Failed to install $cask"
                 track_failed "$cask"
-            fi
-        fi
-    done
-}
-
-install_brew_packages_linux() {
-    # Only run on Linux (not macOS)
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        return 0
-    fi
-
-    if [[ ${#BREW_PACKAGES_LINUX[@]} -eq 0 ]]; then
-        return 0
-    fi
-
-    print_section "Linux Packages (Docker)"
-
-    for package in "${BREW_PACKAGES_LINUX[@]}"; do
-        if brew list "$package" &>/dev/null; then
-            print_skip "$package"
-            track_skipped "$package"
-        else
-            print_package "$package"
-            if run_with_spinner "Installing $package" brew install "$package"; then
-                print_success "$package installed"
-                track_installed "$package"
-            else
-                print_error "Failed to install $package"
-                track_failed "$package"
             fi
         fi
     done

@@ -58,19 +58,6 @@ upgrade_brew_packages() {
         fi
     done
 
-    # Linux-only packages
-    if [[ "$OSTYPE" != "darwin"* ]]; then
-        for package in "${BREW_PACKAGES_LINUX[@]}"; do
-            if ! brew list "$package" &>/dev/null; then
-                INSTALLED_SOMETHING=true
-                echo -e "${SYMBOL_PACKAGE} Installing new package: ${BOLD}$package${RESET}"
-                brew install "$package" &>/dev/null && \
-                    echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} $package installed" || \
-                    echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install $package"
-            fi
-        done
-    fi
-
     # macOS casks
     if [[ "$OSTYPE" == "darwin"* ]]; then
         for cask in "${BREW_CASKS[@]}"; do

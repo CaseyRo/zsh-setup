@@ -23,12 +23,6 @@ BREW_PACKAGES=(
     "cmatrix"    # Matrix rain effect for splash screen
 )
 
-# Additional brew packages for Linux only (skipped on macOS)
-BREW_PACKAGES_LINUX=(
-    "docker"
-    "docker-compose"
-)
-
 # Homebrew casks (macOS GUI apps, skipped on Linux)
 BREW_CASKS=(
     "raycast"    # spotlight replacement & productivity launcher

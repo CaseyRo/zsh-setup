@@ -26,8 +26,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | Platform | Package Manager | Notes |
 |----------|----------------|-------|
 | macOS | Homebrew + Cargo | No Docker |
-| Linux x86 | Homebrew + Cargo | Docker via Homebrew |
-| Raspberry Pi / ARM | APT + Cargo | Docker via APT, pre-built packages where available |
+| Raspberry Pi / ARM Linux | APT + Cargo | Docker via APT, pre-built packages where available |
 
 ## Manual Installation
 
