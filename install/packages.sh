@@ -42,6 +42,7 @@ CARGO_PACKAGES=(
     "ripgrep"    # fast grep (rg)
     "fd-find"    # fast find (fd)
     "topgrade"   # system updater
+    "cargo-cache" # manage cargo cache disk usage
 )
 
 # ============================================================================
@@ -71,6 +72,7 @@ CARGO_PACKAGES_ARM=(
     "zoxide"     # smarter cd (not in apt)
     "eza"        # modern ls (not in apt)
     "topgrade"   # system updater (not in apt)
+    "cargo-cache" # manage cargo cache disk usage (not in apt)
 )
 
 # APT packages only for Ubuntu (not Raspberry Pi)
