@@ -1,7 +1,6 @@
-#!/bin/bash
-
+# shellcheck shell=bash
 # ============================================================================
-# ZSH-Setup - The Ultimate Matrix Boot Sequence
+# Splash Screen - Matrix-style intro with figlet header
 # ============================================================================
 
 # Function to draw the high-tech progress bar
@@ -48,7 +47,7 @@ show_splash() {
     
     for i in {1..20}; do
         # Generates a flickering line of random characters to look like decryption
-        local junk=$(head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 45)
+        local junk=$(head -c 100 /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 45)
         printf "\r${green}DECRYPTING: ${reset}\033[32m%s${reset}" "$junk"
         sleep 0.04
     done
@@ -59,7 +58,15 @@ show_splash() {
     # 3. Matrix Rain Burst (if cmatrix exists)
     if command -v cmatrix &>/dev/null; then
         # -s: Screensaver mode, -u: delay (speed), -C: Color
-        timeout 2 cmatrix -s -u 10 -C green 2>/dev/null || true
+        local timeout_cmd=""
+        if command -v timeout &>/dev/null; then
+            timeout_cmd="timeout"
+        elif command -v gtimeout &>/dev/null; then
+            timeout_cmd="gtimeout"
+        fi
+        if [[ -n "$timeout_cmd" ]]; then
+            $timeout_cmd 2 cmatrix -s -u 10 -C green 2>/dev/null || true
+        fi
     fi
 
     # 4. Smooth Loading Bar
@@ -72,20 +79,3 @@ show_splash() {
     sleep 0.8
     clear
 }
-
-# --- SCRIPT EXECUTION STARTS HERE ---
-
-show_splash
-
-# Actual Logic Follows
-echo "--- ZSH SETUP UTILITY ---"
-echo "Now proceeding with the actual installation..."
-
-# Example: Check for ZSH installation
-if command -v zsh &>/dev/null; then
-    echo "Check: ZSH is already installed."
-else
-    echo "Action: Installing ZSH..."
-fi
-
-# End of script
