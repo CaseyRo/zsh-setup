@@ -47,7 +47,7 @@ show_splash() {
     
     for i in {1..20}; do
         # Generates a flickering line of random characters to look like decryption
-        local junk=$(head -c 100 /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 45)
+        local junk=$(LC_ALL=C head -c 100 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9' | head -c 45)
         printf "\r${green}DECRYPTING: ${reset}\033[32m%s${reset}" "$junk"
         sleep 0.04
     done
@@ -70,9 +70,11 @@ show_splash() {
     fi
 
     # 4. Smooth Loading Bar
-    for i in {0..100..5}; do
+    local i=0
+    while [[ $i -le 100 ]]; do
         draw_progress $i
         sleep 0.03
+        i=$((i + 5))
     done
     
     echo -e "\n\n${bold_green}INITIALIZATION COMPLETE.${reset}"
