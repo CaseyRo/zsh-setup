@@ -22,6 +22,20 @@
 set -e
 
 # ============================================================================
+# Root/Sudo Check - Prevent running entire script as root
+# ============================================================================
+
+if [[ $EUID -eq 0 ]]; then
+    echo "ERROR: Do not run this script as root or with sudo."
+    echo ""
+    echo "The installer will prompt for sudo when needed (e.g., apt install)."
+    echo "Running the entire script as root creates permission issues for user files."
+    echo ""
+    echo "Usage: ./install.sh"
+    exit 1
+fi
+
+# ============================================================================
 # Argument Parsing
 # ============================================================================
 
@@ -117,6 +131,7 @@ source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/mas.sh"
+source "$INSTALL_DIR/splash.sh"
 
 # ============================================================================
 # Main Installation
@@ -149,6 +164,9 @@ cleanup_legacy_zsh_manager() {
 }
 
 main() {
+    # Show Matrix splash screen (if cmatrix/figlet available)
+    show_splash
+
     ui_init "$UI_MODE" "$UI_THEME"
     ui_clear
     log_init

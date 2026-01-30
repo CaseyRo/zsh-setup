@@ -19,6 +19,8 @@ BREW_PACKAGES=(
     "byobu"      # terminal multiplexer
     "fastfetch"  # fast system info (faster alternative to hyfetch)
     "btop"       # modern system monitor (successor to bashtop)
+    "figlet"     # ASCII art text banners
+    "cmatrix"    # Matrix rain effect for splash screen
 )
 
 # Additional brew packages for Linux only (skipped on macOS)
@@ -65,6 +67,8 @@ APT_PACKAGES=(
     "micro"      # simple terminal text editor
     "unzip"      # required for Nerd Fonts installation
     "nfs-common" # NFS client for network mounts
+    "figlet"     # ASCII art text banners
+    "cmatrix"    # Matrix rain effect for splash screen
 )
 
 # Cargo packages for ARM - only what's NOT available via apt
