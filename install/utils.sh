@@ -216,6 +216,45 @@ command_exists() {
     command -v "$1" &> /dev/null
 }
 
+# ============================================================================
+# Battery Detection (for installer safety checks)
+# ============================================================================
+
+has_battery() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        command_exists pmset && pmset -g batt 2>/dev/null | grep -q "Battery Power"
+        return $?
+    fi
+
+    if [[ -d /sys/class/power_supply ]]; then
+        ls /sys/class/power_supply/BAT* &>/dev/null
+        return $?
+    fi
+
+    return 1
+}
+
+get_battery_percent() {
+    local percent=""
+
+    if [[ "$OSTYPE" == "darwin"* ]] && command_exists pmset; then
+        percent=$(pmset -g batt 2>/dev/null | awk -F';' 'NR==2 {gsub(/[^0-9]/,"",$1); print $1}')
+    elif [[ -d /sys/class/power_supply ]]; then
+        local capacity_file
+        capacity_file=$(ls /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)
+        if [[ -n "$capacity_file" ]]; then
+            percent=$(cat "$capacity_file" 2>/dev/null)
+        fi
+    fi
+
+    if [[ -n "$percent" ]] && [[ "$percent" =~ ^[0-9]+$ ]]; then
+        echo "$percent"
+        return 0
+    fi
+
+    return 1
+}
+
 # Detect if terminal supports TTY output
 ui_is_tty() {
     [[ -t 1 && -t 0 && "${TERM:-}" != "dumb" ]]

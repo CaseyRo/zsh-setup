@@ -43,7 +43,16 @@ cd ~/.zsh-setup
 ./install.sh -v              # Verbose output
 ./install.sh --ui gum        # Use gum for prompts (if installed)
 ./install.sh --theme minimal # Minimal color theme
+./install.sh --skip-casks    # Skip macOS Homebrew casks
+./install.sh --skip-mas      # Skip macOS App Store installs
+./install.sh --skip-mac-networked  # Skip macOS networked services
+./install.sh --allow-low-battery   # Allow install below 25% battery
 ```
+
+### Notes (macOS)
+
+- If sudo is unavailable, Homebrew installs to `~/homebrew` and the setup adds that path automatically. 
+- macOS app installs (casks/MAS) and networked services are opt-in during install. 
 
 ## Directory Structure
 

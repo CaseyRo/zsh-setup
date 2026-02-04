@@ -47,6 +47,7 @@ export SKIP_MAC_APPS=false
 export SKIP_MAC_NETWORKED=false
 export ENABLE_MAC_NETWORKED=false
 export ALLOW_MAC_NETWORKED_SERVICES=false
+export ALLOW_LOW_BATTERY=false
 UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
 UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
 
@@ -64,6 +65,7 @@ show_help() {
     echo "  --skip-mac-apps  Skip all macOS app installs (casks + mas)"
     echo "  --skip-mac-networked  Skip macOS networked services (e.g., Tailscale, Node-RED)"
     echo "  --enable-mac-networked  Install macOS networked services without prompting"
+    echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
@@ -106,6 +108,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --enable-mac-networked)
             export ENABLE_MAC_NETWORKED=true
+            shift
+            ;;
+        --allow-low-battery)
+            export ALLOW_LOW_BATTERY=true
             shift
             ;;
         --ui)
@@ -289,6 +295,20 @@ main() {
     if ! ui_confirm "Continue?"; then
         echo -e "  ${YELLOW}Aborted.${RESET}"
         exit 0
+    fi
+
+    if has_battery; then
+        local battery_percent=""
+        battery_percent=$(get_battery_percent || true)
+        if [[ -n "$battery_percent" ]]; then
+            if (( battery_percent < 25 )) && [[ "$ALLOW_LOW_BATTERY" != true ]]; then
+                print_warning "Battery at ${battery_percent}% (below 25%). Aborting install."
+                print_info "Re-run with --allow-low-battery to override."
+                exit 1
+            elif (( battery_percent < 50 )); then
+                print_warning "Battery at ${battery_percent}% (below 50%). Consider plugging in."
+            fi
+        fi
     fi
 
     # macOS opt-in prompts (apps + networked services)
