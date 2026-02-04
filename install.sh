@@ -41,6 +41,13 @@ fi
 
 export VERBOSE=false
 export YES_TO_ALL=false
+export SKIP_BREW_CASKS=false
+export SKIP_MAS_APPS=false
+export SKIP_MAC_APPS=false
+export SKIP_MAC_NETWORKED=false
+export ENABLE_MAC_NETWORKED=false
+export ALLOW_MAC_NETWORKED_SERVICES=false
+export ALLOW_LOW_BATTERY=false
 UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
 UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
 
@@ -53,6 +60,12 @@ show_help() {
     echo "  -y, --yes        Answer yes to all prompts"
     echo "  -v, --verbose    Show detailed output from all commands"
     echo "  -h, --help       Show this help message"
+    echo "  --skip-casks     Skip Homebrew cask installs on macOS"
+    echo "  --skip-mas       Skip Mac App Store installs on macOS"
+    echo "  --skip-mac-apps  Skip all macOS app installs (casks + mas)"
+    echo "  --skip-mac-networked  Skip macOS networked services (e.g., Tailscale, Node-RED)"
+    echo "  --enable-mac-networked  Install macOS networked services without prompting"
+    echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
@@ -75,6 +88,30 @@ while [[ $# -gt 0 ]]; do
             ;;
         -v|--verbose)
             export VERBOSE=true
+            shift
+            ;;
+        --skip-casks)
+            export SKIP_BREW_CASKS=true
+            shift
+            ;;
+        --skip-mas)
+            export SKIP_MAS_APPS=true
+            shift
+            ;;
+        --skip-mac-apps)
+            export SKIP_MAC_APPS=true
+            shift
+            ;;
+        --skip-mac-networked)
+            export SKIP_MAC_NETWORKED=true
+            shift
+            ;;
+        --enable-mac-networked)
+            export ENABLE_MAC_NETWORKED=true
+            shift
+            ;;
+        --allow-low-battery)
+            export ALLOW_LOW_BATTERY=true
             shift
             ;;
         --ui)
@@ -234,7 +271,8 @@ main() {
         echo -e "  ${SYMBOL_BULLET} Lazygit (Git TUI)"
         echo -e "  ${SYMBOL_BULLET} Rust & Cargo"
         if [[ "$IS_MACOS" == true ]]; then
-            echo -e "  ${SYMBOL_BULLET} Mac App Store apps (via mas)"
+            echo -e "  ${SYMBOL_BULLET} Optional: Homebrew casks (macOS apps)"
+            echo -e "  ${SYMBOL_BULLET} Optional: Mac App Store apps (via mas)"
         else
             echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
         fi
@@ -257,6 +295,51 @@ main() {
     if ! ui_confirm "Continue?"; then
         echo -e "  ${YELLOW}Aborted.${RESET}"
         exit 0
+    fi
+
+    if has_battery; then
+        local battery_percent=""
+        battery_percent=$(get_battery_percent || true)
+        if [[ -n "$battery_percent" ]]; then
+            if (( battery_percent < 25 )) && [[ "$ALLOW_LOW_BATTERY" != true ]]; then
+                print_warning "Battery at ${battery_percent}% (below 25%). Aborting install."
+                print_info "Re-run with --allow-low-battery to override."
+                exit 1
+            elif (( battery_percent < 50 )); then
+                print_warning "Battery at ${battery_percent}% (below 50%). Consider plugging in."
+            fi
+        fi
+    fi
+
+    # macOS opt-in prompts (apps + networked services)
+    if [[ "$IS_MACOS" == true ]]; then
+        if [[ "$SKIP_MAC_APPS" == true ]]; then
+            SKIP_BREW_CASKS=true
+            SKIP_MAS_APPS=true
+        else
+            if [[ "$SKIP_BREW_CASKS" != true ]]; then
+                if ! ui_confirm "Install Homebrew casks (macOS GUI apps)?"; then
+                    SKIP_BREW_CASKS=true
+                fi
+            fi
+            if [[ "$SKIP_MAS_APPS" != true ]]; then
+                if ! ui_confirm "Install Mac App Store apps?"; then
+                    SKIP_MAS_APPS=true
+                fi
+            fi
+        fi
+
+        if [[ "$SKIP_MAC_NETWORKED" == true ]]; then
+            ALLOW_MAC_NETWORKED_SERVICES=false
+        elif [[ "$ENABLE_MAC_NETWORKED" == true ]]; then
+            ALLOW_MAC_NETWORKED_SERVICES=true
+        else
+            if ui_confirm "Install macOS networked services (Tailscale, Node-RED)?"; then
+                ALLOW_MAC_NETWORKED_SERVICES=true
+            else
+                ALLOW_MAC_NETWORKED_SERVICES=false
+            fi
+        fi
     fi
 
     # Detect OS
@@ -329,7 +412,13 @@ main() {
 
     install_zsh_plugins
 
-    install_tailscale
+    if [[ "$IS_MACOS" == true ]] && [[ "${ALLOW_MAC_NETWORKED_SERVICES}" != true ]]; then
+        print_section "Tailscale"
+        print_skip "Tailscale (macOS networked services disabled)"
+        track_skipped "Tailscale (macOS networked services disabled)"
+    else
+        install_tailscale
+    fi
 
     configure_tailscale
 
