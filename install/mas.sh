@@ -9,6 +9,13 @@ install_mas_apps() {
         return 0
     fi
 
+    if [[ "${SKIP_MAS_APPS:-false}" == true ]]; then
+        print_section "Mac App Store Apps"
+        print_skip "Mac App Store apps (skipped by user)"
+        track_skipped "Mac App Store apps (skipped by user)"
+        return 0
+    fi
+
     if [[ ${#MAS_APPS[@]} -eq 0 ]]; then
         return 0
     fi

@@ -89,6 +89,13 @@ install_brew_casks() {
         return 0
     fi
 
+    if [[ "${SKIP_BREW_CASKS:-false}" == true ]]; then
+        print_section "Brew Casks (macOS Apps)"
+        print_skip "Brew casks (skipped by user)"
+        track_skipped "Brew casks (skipped by user)"
+        return 0
+    fi
+
     if [[ ${#BREW_CASKS[@]} -eq 0 ]]; then
         return 0
     fi
