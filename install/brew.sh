@@ -16,16 +16,37 @@ install_homebrew() {
             print_warning "Homebrew update failed, continuing anyway"
         fi
     else
-        print_step "Installing Homebrew"
-        if [[ "$VERBOSE" == true ]]; then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        else
-            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &>/dev/null
+        local has_sudo=false
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            if sudo -n true 2>/dev/null; then
+                has_sudo=true
+            fi
         fi
 
-        # Add brew to PATH for this session (macOS ARM)
-        if [[ "$OSTYPE" == "darwin"* ]] && [[ -f /opt/homebrew/bin/brew ]]; then
-            eval "$(/opt/homebrew/bin/brew shellenv)"
+        if [[ "$OSTYPE" == "darwin"* ]] && [[ "$has_sudo" == false ]]; then
+            local brew_prefix="$HOME/homebrew"
+            print_step "Installing Homebrew (user-space)"
+            mkdir -p "$brew_prefix"
+            if [[ "$VERBOSE" == true ]]; then
+                curl -fsSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C "$brew_prefix"
+            else
+                curl -fsSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C "$brew_prefix" &>/dev/null
+            fi
+            export PATH="$brew_prefix/bin:$PATH"
+            print_info "User-space Homebrew installed at $brew_prefix"
+            print_info "Add to PATH: export PATH=\"$brew_prefix/bin:\$PATH\""
+        else
+            print_step "Installing Homebrew"
+            if [[ "$VERBOSE" == true ]]; then
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            else
+                NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &>/dev/null
+            fi
+
+            # Add brew to PATH for this session (macOS ARM)
+            if [[ "$OSTYPE" == "darwin"* ]] && [[ -f /opt/homebrew/bin/brew ]]; then
+                eval "$(/opt/homebrew/bin/brew shellenv)"
+            fi
         fi
 
         if command_exists brew; then
@@ -86,6 +107,13 @@ install_brew_packages() {
 install_brew_casks() {
     # Only run on macOS
     if [[ "$OSTYPE" != "darwin"* ]]; then
+        return 0
+    fi
+
+    if [[ "${SKIP_BREW_CASKS:-false}" == true ]]; then
+        print_section "Brew Casks (macOS Apps)"
+        print_skip "Brew casks (skipped by user)"
+        track_skipped "Brew casks (skipped by user)"
         return 0
     fi
 
