@@ -15,6 +15,7 @@
 #   COPYPARTY_PORT      - HTTP/WebDAV port (default: 3923)
 #   COPYPARTY_USER      - Username (default: current user)
 #   COPYPARTY_FOLDER    - Folder to share (default: $HOME)
+#   COPYPARTY_VERBOSE   - Enable verbose logging (true/false)
 # ============================================================================
 
 set -e
@@ -34,8 +35,13 @@ GRAY='\033[0;90m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
+log_verbose() {
+    [[ "$VERBOSE" == "true" ]] && echo -e "${GRAY}[debug]${NC} $*" >&2
+}
+
 # Check if copyparty is installed
 check_copyparty() {
+    log_verbose "Checking for copyparty binary"
     if ! command -v copyparty &>/dev/null; then
         echo -e "${RED}[error]${NC} Copyparty not installed."
         echo "        Install with: pip install copyparty"
@@ -76,6 +82,7 @@ get_password() {
     fi
 
     if [[ "$need_new_password" == "true" ]]; then
+        log_verbose "Generating new copyparty password"
         PASSWORD=$(openssl rand -base64 16 | tr -dc 'a-zA-Z0-9' | head -c 16)
         local now
         now=$(date +%s)
@@ -111,6 +118,7 @@ install_service() {
     local port="${COPYPARTY_PORT:-3923}"
     local copyparty_bin
     copyparty_bin=$(command -v copyparty)
+    log_verbose "Installing PM2 service with user=$user_name folder=$folder port=$port"
 
     # Stop existing service if running
     pm2 delete "$SERVICE_NAME" 2>/dev/null || true
@@ -165,6 +173,7 @@ show_status() {
         exit 1
     fi
 
+    log_verbose "Checking PM2 service status for ${SERVICE_NAME}"
     pm2 describe "$SERVICE_NAME" 2>/dev/null || \
         echo -e "${YELLOW}[info]${NC} Service is not installed. Run with --install to set up."
 }
@@ -183,18 +192,25 @@ run_server() {
     # Get Tailscale IP for network access (preferred), fallback to local IP
     local local_ip=""
     # Try Tailscale first (check both PATH and macOS app location)
-    local_ip=$(tailscale ip -4 2>/dev/null)
-    [[ -z "$local_ip" ]] && local_ip=$(/Applications/Tailscale.app/Contents/MacOS/Tailscale ip -4 2>/dev/null)
+    if command -v tailscale &>/dev/null; then
+        log_verbose "Checking Tailscale IP via PATH"
+        local_ip=$(tailscale ip -4 2>/dev/null || true)
+    fi
+    if [[ -z "$local_ip" && -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]]; then
+        log_verbose "Checking Tailscale IP via macOS app bundle"
+        local_ip=$(/Applications/Tailscale.app/Contents/MacOS/Tailscale ip -4 2>/dev/null || true)
+    fi
 
     # Fallback to local network IP if Tailscale not available
     if [[ -z "$local_ip" ]]; then
+        log_verbose "Falling back to local network IP detection"
         if [[ "$(uname)" == "Darwin" ]]; then
             local_ip=$(ipconfig getifaddr en0 2>/dev/null)
             [[ -z "$local_ip" ]] && local_ip=$(ipconfig getifaddr en1 2>/dev/null)
-            [[ -z "$local_ip" ]] && local_ip=$(route get default 2>/dev/null | awk '/interface:/ {iface=$2} END {if(iface) system("ipconfig getifaddr " iface)}')
+            [[ -z "$local_ip" ]] && local_ip=$(route get default 2>/dev/null | awk '/interface:/ {iface=$2} END {if(iface) system("ipconfig getifaddr " iface)}' || true)
         else
-            local_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
-            [[ -z "$local_ip" ]] && local_ip=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
+            local_ip=$(hostname -I 2>/dev/null | awk '{print $1}' || true)
+            [[ -z "$local_ip" ]] && local_ip=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}' || true)
         fi
     fi
     [[ -z "$local_ip" ]] && local_ip="<your-ip>"
@@ -240,6 +256,7 @@ run_server() {
     copyparty_bin=$(command -v copyparty)
 
     # Run copyparty
+    log_verbose "Starting copyparty on port $port with folder $folder"
     "$copyparty_bin" \
         -q \
         -a "$user_name:$password" \
@@ -249,6 +266,7 @@ run_server() {
 
 # Parse arguments
 RESET_PASSWORD="false"
+VERBOSE="${COPYPARTY_VERBOSE:-false}"
 
 case "${1:-}" in
     --install|-i)
@@ -264,6 +282,10 @@ case "${1:-}" in
         RESET_PASSWORD="true"
         run_server
         ;;
+    --verbose|-v)
+        VERBOSE="true"
+        run_server
+        ;;
     --help|-h)
         echo "Copyparty Home Server"
         echo ""
@@ -275,12 +297,14 @@ case "${1:-}" in
         echo "  --uninstall, -u   Remove PM2 service"
         echo "  --status, -s      Check service status"
         echo "  --reset-password, -r  Force generate new password"
+        echo "  --verbose, -v     Enable verbose logging"
         echo "  --help, -h        Show this help"
         echo ""
         echo "Environment variables:"
         echo "  COPYPARTY_PORT    HTTP/WebDAV port (default: 3923)"
         echo "  COPYPARTY_USER    Username (default: current user)"
         echo "  COPYPARTY_FOLDER  Folder to share (default: \$HOME)"
+        echo "  COPYPARTY_VERBOSE Enable verbose logging (true/false)"
         ;;
     "")
         run_server
