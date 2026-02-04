@@ -100,15 +100,40 @@ install_node() {
 install_npm_global_packages() {
     # Build package list - add desktop packages for macOS/Ubuntu
     local packages=("${NPM_GLOBAL_PACKAGES[@]}")
+    local skipped_networked=()
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [[ "${ALLOW_MAC_NETWORKED_SERVICES:-false}" == true ]]; then
+            packages+=("${NPM_GLOBAL_PACKAGES_NETWORKED[@]}")
+        else
+            skipped_networked=("${NPM_GLOBAL_PACKAGES_NETWORKED[@]}")
+        fi
+    else
+        packages+=("${NPM_GLOBAL_PACKAGES_NETWORKED[@]}")
+    fi
+
     if [[ "$OSTYPE" == "darwin"* ]] || is_ubuntu; then
         packages+=("${NPM_GLOBAL_PACKAGES_DESKTOP[@]}")
     fi
 
     if [[ ${#packages[@]} -eq 0 ]]; then
+        if [[ ${#skipped_networked[@]} -gt 0 ]]; then
+            print_section "Global npm Packages"
+            for package in "${skipped_networked[@]}"; do
+                print_skip "$package (macOS networked services disabled)"
+                track_skipped "$package (macOS networked services disabled)"
+            done
+        fi
         return 0
     fi
 
     print_section "Global npm Packages"
+    if [[ ${#skipped_networked[@]} -gt 0 ]]; then
+        for package in "${skipped_networked[@]}"; do
+            print_skip "$package (macOS networked services disabled)"
+            track_skipped "$package (macOS networked services disabled)"
+        done
+    fi
 
     if ! command_exists npm; then
         print_error "npm not available, skipping global packages"

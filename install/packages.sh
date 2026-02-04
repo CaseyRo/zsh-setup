@@ -83,8 +83,12 @@ APT_PACKAGES_UBUNTU=(
 # ============================================================================
 NPM_GLOBAL_PACKAGES=(
     "pm2"
-    "node-red"
     "@fission-ai/openspec"  # spec-driven development for AI assistants
+)
+
+# Networked npm packages (macOS requires explicit opt-in)
+NPM_GLOBAL_PACKAGES_NETWORKED=(
+    "node-red"
 )
 
 # npm packages only for macOS and Ubuntu (not ARM/Raspberry Pi)
