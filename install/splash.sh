@@ -29,11 +29,16 @@ show_splash() {
     clear
     echo -e "${dim}"
     if command -v figlet &>/dev/null; then
-        figlet -f slant "ZSH-setup"
-        sleep 0.1
-        clear
-        echo -e "${green}"
-        figlet -f slant "ZSH-setup"
+        # Try slant font first, fall back to default if unavailable
+        if figlet -f slant "ZSH-setup" 2>/dev/null; then
+            sleep 0.1
+            clear
+            echo -e "${green}"
+            figlet -f slant "ZSH-setup" 2>/dev/null || figlet "ZSH-setup" 2>/dev/null || echo -e "${bold_green}>>> ZSH-SETUP <<<${reset}"
+        else
+            # slant font not available, use default or fallback
+            figlet "ZSH-setup" 2>/dev/null || echo -e "${bold_green}>>> ZSH-SETUP <<<${reset}"
+        fi
     else
         echo -e "${bold_green}>>> ZSH-SETUP <<<${reset}"
     fi
