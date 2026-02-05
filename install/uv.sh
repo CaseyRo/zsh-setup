@@ -37,6 +37,23 @@ install_uv() {
     local had_uv_in_path=false
     if command_exists uv; then
         had_uv_in_path=true
+        # Verify uv is actually executable
+        local uv_path
+        uv_path=$(command -v uv)
+        if [[ -n "$uv_path" ]] && ! "$uv_path" --version &>/dev/null; then
+            print_warning "uv exists but cannot execute"
+            local uv_owner
+            uv_owner=$(stat -c '%U' "$uv_path" 2>/dev/null || stat -f '%Su' "$uv_path" 2>/dev/null)
+            if [[ "$uv_owner" == "root" ]]; then
+                print_error "uv is owned by root. Fix with: sudo chown \$USER:\$USER $uv_path"
+                return 1
+            fi
+            # Try to fix permissions
+            if ! chmod +x "$uv_path" 2>/dev/null; then
+                print_error "Cannot fix uv permissions. Check ownership of $uv_path"
+                return 1
+            fi
+        fi
         print_skip "uv"
         track_skipped "uv"
         return 0

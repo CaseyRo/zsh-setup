@@ -13,7 +13,21 @@ install_rust() {
         # Fix permissions if cargo binaries aren't executable
         if [[ -d "$HOME/.cargo/bin" ]] && [[ ! -x "$HOME/.cargo/bin/cargo" ]]; then
             print_step "Fixing cargo binary permissions"
-            chmod +x "$HOME/.cargo/bin"/* 2>/dev/null || true
+            if ! chmod +x "$HOME/.cargo/bin"/* 2>/dev/null; then
+                print_warning "Cannot fix cargo permissions - files may be owned by root"
+                print_info "Run: sudo chown -R \$USER:\$USER ~/.cargo"
+            fi
+        fi
+
+        # Check if cargo is actually executable
+        if ! "$HOME/.cargo/bin/cargo" --version &>/dev/null; then
+            print_warning "cargo binary exists but cannot execute"
+            local cargo_owner
+            cargo_owner=$(stat -c '%U' "$HOME/.cargo/bin/cargo" 2>/dev/null || stat -f '%Su' "$HOME/.cargo/bin/cargo" 2>/dev/null)
+            if [[ "$cargo_owner" == "root" ]]; then
+                print_error "~/.cargo is owned by root. Fix with: sudo chown -R \$USER:\$USER ~/.cargo"
+                return 1
+            fi
         fi
 
         print_step "Updating Rust"
