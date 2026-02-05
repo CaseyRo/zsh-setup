@@ -6,6 +6,11 @@
 install_oh_my_zsh() {
     print_section "Oh My Zsh"
 
+    # Check ownership first
+    if ! check_dir_ownership "$HOME/.oh-my-zsh" "Oh My Zsh"; then
+        return 1
+    fi
+
     if [[ -d "$HOME/.oh-my-zsh" ]]; then
         print_skip "Oh My Zsh"
         track_skipped "Oh My Zsh"

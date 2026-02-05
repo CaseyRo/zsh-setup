@@ -8,6 +8,11 @@ install_nvm() {
 
     export NVM_DIR="$HOME/.nvm"
 
+    # Check ownership first
+    if ! check_dir_ownership "$NVM_DIR" "NVM"; then
+        return 1
+    fi
+
     if [[ -d "$NVM_DIR" ]] && [[ -s "$NVM_DIR/nvm.sh" ]]; then
         print_skip "NVM"
         track_skipped "NVM"
@@ -98,6 +103,13 @@ install_node() {
 }
 
 install_npm_global_packages() {
+    # Check npm cache directory ownership
+    if [[ -d "$HOME/.npm" ]]; then
+        if ! check_dir_ownership "$HOME/.npm" "npm cache"; then
+            return 1
+        fi
+    fi
+
     # Build package list - add desktop packages for macOS/Ubuntu
     local packages=("${NPM_GLOBAL_PACKAGES[@]}")
     local skipped_networked=()

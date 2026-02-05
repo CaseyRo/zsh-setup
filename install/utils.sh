@@ -646,6 +646,59 @@ set_default_shell_zsh() {
 }
 
 # ============================================================================
+# Ownership/Permission Checks
+# ============================================================================
+
+# Check if a directory is owned by root and print fix instructions
+# Usage: check_dir_ownership <dir> <name>
+# Returns: 0 if OK, 1 if owned by root
+check_dir_ownership() {
+    local dir="$1"
+    local name="$2"
+
+    [[ -d "$dir" ]] || return 0
+
+    local owner
+    # Linux uses -c '%U', macOS uses -f '%Su'
+    owner=$(stat -c '%U' "$dir" 2>/dev/null || stat -f '%Su' "$dir" 2>/dev/null)
+
+    if [[ "$owner" == "root" ]]; then
+        print_error "$name directory is owned by root"
+        print_info "Fix with: sudo chown -R \$USER:\$USER $dir"
+        return 1
+    fi
+    return 0
+}
+
+# Check if a file is executable and try to fix it
+# Usage: check_binary_executable <path> <name>
+# Returns: 0 if OK or fixed, 1 if cannot fix
+check_binary_executable() {
+    local path="$1"
+    local name="$2"
+
+    [[ -f "$path" ]] || return 0
+
+    if [[ -x "$path" ]]; then
+        return 0
+    fi
+
+    print_step "Fixing $name permissions"
+    if chmod +x "$path" 2>/dev/null; then
+        return 0
+    fi
+
+    local owner
+    owner=$(stat -c '%U' "$path" 2>/dev/null || stat -f '%Su' "$path" 2>/dev/null)
+    if [[ "$owner" == "root" ]]; then
+        print_error "$name is owned by root. Fix with: sudo chown \$USER:\$USER $path"
+    else
+        print_error "Cannot fix $name permissions"
+    fi
+    return 1
+}
+
+# ============================================================================
 # Platform Detection
 # ============================================================================
 
