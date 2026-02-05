@@ -48,6 +48,7 @@ export SKIP_MAC_NETWORKED=false
 export ENABLE_MAC_NETWORKED=false
 export ALLOW_MAC_NETWORKED_SERVICES=false
 export ALLOW_LOW_BATTERY=false
+export SKIP_SPLASH=false
 UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
 UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
 
@@ -66,6 +67,7 @@ show_help() {
     echo "  --skip-mac-networked  Skip macOS networked services (e.g., Tailscale, Node-RED)"
     echo "  --enable-mac-networked  Install macOS networked services without prompting"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
+    echo "  --skip-splash        Skip the intro splash screen"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
@@ -112,6 +114,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --allow-low-battery)
             export ALLOW_LOW_BATTERY=true
+            shift
+            ;;
+        --skip-splash)
+            export SKIP_SPLASH=true
             shift
             ;;
         --ui)
@@ -202,7 +208,7 @@ cleanup_legacy_zsh_manager() {
 
 main() {
     # Show Matrix splash screen (if cmatrix/figlet available)
-    show_splash
+    [[ "$SKIP_SPLASH" != true ]] && show_splash
 
     ui_init "$UI_MODE" "$UI_THEME"
     ui_clear
