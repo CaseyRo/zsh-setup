@@ -135,9 +135,20 @@ install_cargo_packages_minimal() {
         return 0
     fi
 
-    # Fix permissions if cargo binaries aren't executable
-    if [[ -d "$HOME/.cargo/bin" ]] && [[ ! -x "$HOME/.cargo/bin/cargo" ]]; then
-        chmod +x "$HOME/.cargo/bin"/* 2>/dev/null || true
+    # Check cargo ownership and permissions before proceeding
+    if ! check_dir_ownership "$HOME/.cargo" "Cargo"; then
+        print_error "Cannot install cargo packages - fix ownership first"
+        for package in "${CARGO_PACKAGES_ARM[@]}"; do
+            track_failed "$package"
+        done
+        return 1
+    fi
+    if ! check_binary_executable "$HOME/.cargo/bin/cargo" "cargo"; then
+        print_error "Cannot install cargo packages - fix permissions first"
+        for package in "${CARGO_PACKAGES_ARM[@]}"; do
+            track_failed "$package"
+        done
+        return 1
     fi
 
     print_section "Cargo Packages (ARM-optimized)"
