@@ -21,6 +21,7 @@ BREW_PACKAGES=(
     "btop"       # modern system monitor (successor to bashtop)
     "figlet"     # ASCII art text banners
     "cmatrix"    # Matrix rain effect for splash screen
+    "toilet"     # ASCII art text generator
 )
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)
@@ -63,6 +64,7 @@ APT_PACKAGES=(
     "nfs-common" # NFS client for network mounts
     "figlet"     # ASCII art text banners
     "cmatrix"    # Matrix rain effect for splash screen
+    "toilet"     # ASCII art text generator
 )
 
 # Cargo packages for ARM - only what's NOT available via apt
