@@ -24,5 +24,5 @@ fi
 
 # Display hostname with toilet (ASCII art) — right after fastfetch
 if command -v toilet &> /dev/null; then
-    toilet -f standard -F gay "$(hostname)" 2>/dev/null || true
+    toilet -F gay "$(hostname)" 2>/dev/null || true
 fi
