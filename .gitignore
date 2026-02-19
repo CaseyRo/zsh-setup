@@ -79,5 +79,6 @@ $RECYCLE.BIN/
 *.zwc
 .git-confirmer-prompted
 
-# Total Recall working memory (personal, not for version control)
+# Total Recall (personal memory — never commit to public repos)
 CLAUDE.local.md
+memory/
