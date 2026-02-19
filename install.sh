@@ -385,6 +385,8 @@ main() {
 
         install_lazygit
 
+        install_fastfetch_apt
+
     else
         # macOS - use Homebrew
         install_homebrew

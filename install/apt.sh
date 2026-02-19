@@ -129,6 +129,53 @@ install_docker_apt() {
     fi
 }
 
+install_fastfetch_apt() {
+    print_section "Fastfetch"
+
+    if command_exists fastfetch; then
+        print_skip "Fastfetch"
+        track_skipped "Fastfetch"
+        return 0
+    fi
+
+    print_package "fastfetch"
+
+    local arch
+    case "$(uname -m)" in
+        x86_64)  arch="amd64" ;;
+        aarch64) arch="aarch64" ;;
+        armv7l)  arch="armv7l" ;;
+        *)
+            print_error "Unsupported architecture for Fastfetch: $(uname -m)"
+            track_failed "Fastfetch"
+            return 1
+            ;;
+    esac
+
+    local version
+    version=$(curl -fsSL "https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [[ -z "$version" ]]; then
+        print_error "Failed to fetch latest Fastfetch version"
+        track_failed "Fastfetch"
+        return 1
+    fi
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local url="https://github.com/fastfetch-cli/fastfetch/releases/download/${version}/fastfetch-linux-${arch}.deb"
+
+    if run_with_spinner "Downloading Fastfetch ${version}" curl -fsSL "$url" -o "${tmp_dir}/fastfetch.deb" && \
+       sudo dpkg -i "${tmp_dir}/fastfetch.deb" &>/dev/null; then
+        print_success "Fastfetch ${version} installed"
+        track_installed "Fastfetch"
+    else
+        print_error "Failed to install Fastfetch"
+        track_failed "Fastfetch"
+    fi
+
+    rm -rf "$tmp_dir"
+}
+
 # Minimal cargo packages for APT systems (only what's not in apt)
 install_cargo_packages_minimal() {
     if [[ ${#CARGO_PACKAGES_APT[@]} -eq 0 ]]; then

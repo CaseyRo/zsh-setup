@@ -57,7 +57,6 @@ APT_PACKAGES=(
     "bat"
     "fd-find"
     "ripgrep"
-    "fastfetch"  # may fall back to neofetch
     "btop"       # modern system monitor (successor to bashtop)
     "micro"      # simple terminal text editor
     "unzip"      # required for Nerd Fonts installation

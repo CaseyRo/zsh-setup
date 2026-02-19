@@ -78,3 +78,6 @@ $RECYCLE.BIN/
 .last-update-check
 *.zwc
 .git-confirmer-prompted
+
+# Total Recall working memory (personal, not for version control)
+CLAUDE.local.md
