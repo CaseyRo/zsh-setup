@@ -728,9 +728,9 @@ is_ubuntu() {
     fi
 }
 
-# Should we use apt instead of brew? (ARM Linux where brew is slow)
+# Should we use apt instead of brew? (Debian/Ubuntu Linux)
 should_use_apt() {
-    is_arm && is_debian_based && [[ "$OSTYPE" == "linux-gnu"* ]]
+    is_debian_based && [[ "$OSTYPE" == "linux-gnu"* ]]
 }
 
 # Spinner for long-running operations

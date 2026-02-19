@@ -43,9 +43,9 @@ CARGO_PACKAGES=(
 )
 
 # ============================================================================
-# APT Packages (for ARM Linux / Raspberry Pi)
+# APT Packages (for Debian/Ubuntu Linux)
 # ============================================================================
-# Pre-built packages are much faster than compiling via cargo on ARM
+# Pre-built packages are much faster than compiling via cargo
 
 APT_PACKAGES=(
     "build-essential"  # gcc, make, linker - required for cargo compilation
@@ -67,8 +67,8 @@ APT_PACKAGES=(
     "toilet"     # ASCII art text generator
 )
 
-# Cargo packages for ARM - only what's NOT available via apt
-CARGO_PACKAGES_ARM=(
+# Cargo packages for APT systems - only what's NOT available via apt
+CARGO_PACKAGES_APT=(
     "zoxide"     # smarter cd (not in apt)
     "eza"        # modern ls (not in apt)
     "topgrade"   # system updater (not in apt)

@@ -14,6 +14,7 @@ INSTALL_DIR="$SCRIPT_DIR"
 source "$INSTALL_DIR/utils.sh"
 source "$INSTALL_DIR/packages.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
+source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 
 # Track if we installed anything
@@ -77,15 +78,8 @@ upgrade_lazygit() {
         return 0
     fi
 
-    if ! command_exists brew; then
-        return 0
-    fi
-
     INSTALLED_SOMETHING=true
-    echo -e "${SYMBOL_PACKAGE} Installing new package: ${BOLD}lazygit${RESET}"
-    brew install "lazygit" &>/dev/null && \
-        echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} Lazygit installed" || \
-        echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install Lazygit"
+    install_lazygit
 }
 
 upgrade_apt_packages() {
@@ -117,7 +111,7 @@ upgrade_cargo_packages() {
 
     local packages
     if should_use_apt; then
-        packages=("${CARGO_PACKAGES_ARM[@]}")
+        packages=("${CARGO_PACKAGES_APT[@]}")
     else
         packages=("${CARGO_PACKAGES[@]}")
     fi
@@ -221,11 +215,15 @@ run_upgrade() {
     # Determine platform
     if should_use_apt; then
         upgrade_apt_packages
+        upgrade_lazygit
     else
         upgrade_brew_taps
         upgrade_brew_packages
         upgrade_lazygit
     fi
+
+    # Drop cached sudo credentials before user-space operations
+    sudo -k 2>/dev/null || true
 
     upgrade_cargo_packages
     upgrade_npm_packages

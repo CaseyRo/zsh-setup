@@ -237,8 +237,10 @@ main() {
         USE_APT=true
         if is_raspberry_pi; then
             PLATFORM_NAME="Raspberry Pi"
-        else
+        elif is_arm; then
             PLATFORM_NAME="ARM Linux"
+        else
+            PLATFORM_NAME="Ubuntu Linux"
         fi
     fi
     if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f /etc/os-release ]]; then
@@ -358,8 +360,8 @@ main() {
         source /etc/os-release
         print_info "Distribution: $PRETTY_NAME"
     fi
-    if is_arm; then
-        print_info "Architecture: ARM ($(uname -m))"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        print_info "Architecture: $(uname -m)"
     fi
     if [[ "$USE_APT" == true ]]; then
         print_info "Install method: APT + minimal Cargo"
@@ -372,7 +374,7 @@ main() {
     # =========================================================================
 
     if [[ "$USE_APT" == true ]]; then
-        # ARM Linux (Raspberry Pi) - use APT
+        # Debian/Ubuntu Linux - use APT
         setup_apt_repos
 
         install_apt_packages
@@ -380,6 +382,8 @@ main() {
         install_apt_packages_ubuntu
 
         install_docker_apt
+
+        install_lazygit
 
     else
         # macOS - use Homebrew
@@ -394,6 +398,14 @@ main() {
         install_brew_casks
         install_mas_apps
     fi
+
+    # =========================================================================
+    # Drop cached sudo credentials before user-space installers
+    # =========================================================================
+    # APT/Homebrew operations above may have cached sudo credentials.
+    # User-space installers (Rust, NVM, uv, Oh-My-Zsh) write to $HOME and
+    # must NOT inherit elevated privileges, or they'll create root-owned files.
+    sudo -k 2>/dev/null || true
 
     # =========================================================================
     # Common installation (all platforms)

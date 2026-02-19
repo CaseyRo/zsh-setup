@@ -2,7 +2,7 @@
 # ============================================================================
 # APT Installation (Debian/Ubuntu/Raspbian)
 # ============================================================================
-# Used on ARM Linux (Raspberry Pi) where Homebrew is slow
+# Used on Debian/Ubuntu Linux where APT is the native package manager
 
 setup_apt_repos() {
     print_section "APT Repositories"
@@ -129,37 +129,37 @@ install_docker_apt() {
     fi
 }
 
-# Minimal cargo packages for ARM (only what's not in apt)
+# Minimal cargo packages for APT systems (only what's not in apt)
 install_cargo_packages_minimal() {
-    if [[ ${#CARGO_PACKAGES_ARM[@]} -eq 0 ]]; then
+    if [[ ${#CARGO_PACKAGES_APT[@]} -eq 0 ]]; then
         return 0
     fi
 
     # Check cargo ownership and permissions before proceeding
     if ! check_dir_ownership "$HOME/.cargo" "Cargo"; then
         print_error "Cannot install cargo packages - fix ownership first"
-        for package in "${CARGO_PACKAGES_ARM[@]}"; do
+        for package in "${CARGO_PACKAGES_APT[@]}"; do
             track_failed "$package"
         done
         return 1
     fi
     if ! check_binary_executable "$HOME/.cargo/bin/cargo" "cargo"; then
         print_error "Cannot install cargo packages - fix permissions first"
-        for package in "${CARGO_PACKAGES_ARM[@]}"; do
+        for package in "${CARGO_PACKAGES_APT[@]}"; do
             track_failed "$package"
         done
         return 1
     fi
 
-    print_section "Cargo Packages (ARM-optimized)"
+    print_section "Cargo Packages (APT supplement)"
     print_info "Installing only packages not available via apt"
-    print_info "Compiling from source - this may take several minutes per package on ARM"
+    print_info "Compiling from source - this may take several minutes per package"
     echo ""
 
-    local total=${#CARGO_PACKAGES_ARM[@]}
+    local total=${#CARGO_PACKAGES_APT[@]}
     local current=0
 
-    for package in "${CARGO_PACKAGES_ARM[@]}"; do
+    for package in "${CARGO_PACKAGES_APT[@]}"; do
         current=$((current + 1))
         if cargo install --list | grep -q "^$package "; then
             print_skip "$package"
