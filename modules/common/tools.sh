@@ -2,15 +2,17 @@
 # Common Tools & Utilities
 # ============================================================================
 
-# Znap (zsh plugin manager)
-[[ -r ~/dotfiles/znap/znap.zsh ]] ||
-    git clone --depth 1 -- \
-        https://github.com/marlonrichert/zsh-snap.git ~/dotfiles/znap
-source ~/dotfiles/znap/znap.zsh
+# fzf (fuzzy finder) — CTRL-T: file picker, CTRL-R: history, ALT-C: cd
+if command -v fzf &> /dev/null; then
+    source <(fzf --zsh)
+fi
 
 # Zoxide (smart directory jumper)
+# --cmd cd: replaces cd with zoxide-aware version that uses builtin cd for
+# exact paths and zoxide ranking for fuzzy matches. Also creates 'cdi' for
+# interactive selection via fzf.
 if command -v zoxide &> /dev/null; then
-    eval "$(zoxide init zsh)"
+    eval "$(zoxide init zsh --cmd cd)"
 fi
 
 # Envman

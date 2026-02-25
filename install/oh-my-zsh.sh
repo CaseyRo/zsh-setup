@@ -56,6 +56,21 @@ install_zsh_plugins() {
         fi
     fi
 
+    # zsh-autocomplete
+    if [[ -d "$ZSH_CUSTOM/plugins/zsh-autocomplete" ]]; then
+        print_skip "zsh-autocomplete"
+        track_skipped "zsh-autocomplete"
+    else
+        print_package "zsh-autocomplete"
+        if run_cmd git clone --depth 1 https://github.com/marlonrichert/zsh-autocomplete.git "$ZSH_CUSTOM/plugins/zsh-autocomplete"; then
+            print_success "zsh-autocomplete installed"
+            track_installed "zsh-autocomplete"
+        else
+            print_error "Failed to install zsh-autocomplete"
+            track_failed "zsh-autocomplete"
+        fi
+    fi
+
     # zsh-syntax-highlighting
     if [[ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
         print_skip "zsh-syntax-highlighting"

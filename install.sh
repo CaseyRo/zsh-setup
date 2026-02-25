@@ -207,14 +207,11 @@ cleanup_legacy_zsh_manager() {
 }
 
 main() {
-    # Show Matrix splash screen (if cmatrix/figlet available)
-    # Wrap in error handling to prevent hangs from blocking installation
     if [[ "$SKIP_SPLASH" != true ]]; then
         show_splash || true
     fi
 
     ui_init "$UI_MODE" "$UI_THEME"
-    ui_clear
     log_init
 
     print_header "ZSH-Setup: New Machine Setup"

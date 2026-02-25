@@ -1,19 +1,8 @@
 # ============================================================================
 # Startup Commands
 # ============================================================================
-# Commands to run when a new shell session starts
-
-# Ensure toilet is available (install if missing, before we display anything)
-if ! command -v toilet &> /dev/null; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        command -v brew &> /dev/null && brew install toilet &> /dev/null 2>&1
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        if command -v apt-get &> /dev/null && sudo -n true &> /dev/null 2>&1; then
-            sudo apt-get update -qq &> /dev/null 2>&1
-            sudo apt-get install -y -qq toilet &> /dev/null 2>&1
-        fi
-    fi
-fi
+# Commands to run when a new shell session starts.
+# Never install packages here — that belongs in install.sh.
 
 # Display system info (fastfetch is much faster than hyfetch/neofetch)
 if command -v fastfetch &> /dev/null; then

@@ -1,8 +1,6 @@
 # OPENSPEC:START
-# OpenSpec shell completions configuration
+# OpenSpec shell completions — fpath only; compinit runs once via Oh-My-Zsh
 fpath=("/Users/caseyromkes/.oh-my-zsh/custom/completions" $fpath)
-autoload -Uz compinit
-compinit
 # OPENSPEC:END
 
 # ============================================================================

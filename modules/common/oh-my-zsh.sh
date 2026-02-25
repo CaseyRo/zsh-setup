@@ -2,11 +2,9 @@
 # Oh My Zsh Configuration
 # ============================================================================
 
-# Determine oh-my-zsh installation path based on OS
-if [[ "$MACHINE_OS" == "Darwin" ]]; then
-    export ZSH="/users/$USER/.oh-my-zsh"
-else
-    export ZSH="/home/$USER/.oh-my-zsh"
+# Oh-My-Zsh path — $HOME works on all platforms
+export ZSH="$HOME/.oh-my-zsh"
+if [[ "$MACHINE_OS" != "Darwin" ]]; then
     ZSH_DISABLE_COMPFIX=true
 fi
 

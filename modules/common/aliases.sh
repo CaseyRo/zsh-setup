@@ -5,14 +5,18 @@
 
 # Command replacements
 # alias ls="eza -l"
-alias cd="z"
+# cd is handled by zoxide init --cmd cd in tools.sh (creates cd + cdi)
 
 # bat: on Debian/Ubuntu it's installed as 'batcat' due to naming conflict
 if command -v bat >/dev/null 2>&1; then
     alias cat="bat"
+    export MANPAGER="bat -plman"
+    export BAT_THEME="${BAT_THEME:-TwoDark}"
 elif command -v batcat >/dev/null 2>&1; then
     alias cat="batcat"
     alias bat="batcat"
+    export MANPAGER="batcat -plman"
+    export BAT_THEME="${BAT_THEME:-TwoDark}"
 fi
 
 # fd: on Debian/Ubuntu it's installed as 'fdfind' due to naming conflict
