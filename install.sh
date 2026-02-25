@@ -174,6 +174,7 @@ source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/mas.sh"
+source "$INSTALL_DIR/macos-automations.sh"
 source "$INSTALL_DIR/splash.sh"
 
 # ============================================================================
@@ -496,6 +497,8 @@ main() {
     if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
         install_git_confirmer_optional
     fi
+
+    install_macos_automations
 
     # Set zsh as default shell
     set_default_shell_zsh

@@ -16,6 +16,7 @@ source "$INSTALL_DIR/packages.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
+source "$INSTALL_DIR/macos-automations.sh"
 
 # Track if we installed anything
 INSTALLED_SOMETHING=false
@@ -230,6 +231,7 @@ run_upgrade() {
     upgrade_tailscale
     upgrade_nerd_fonts
     upgrade_git_confirmer
+    upgrade_macos_automations
 
     if [[ "$INSTALLED_SOMETHING" == true ]]; then
         echo -e "${GREEN}${SYMBOL_SUCCESS}${RESET} Upgrade complete!"
