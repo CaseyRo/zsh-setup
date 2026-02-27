@@ -106,3 +106,13 @@ for base_folder in "${BASE_FOLDERS[@]}"; do
 done
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit
+
+zstyle ':completion:*' menu select
+
+# Zoxide — must init after compinit (zoxide requirement)
+# --cmd cd: replaces cd with zoxide-aware cd; 'cdi' for interactive fzf picker
+if command -v zoxide &> /dev/null; then
+    eval "$(zoxide init zsh --cmd cd)"
+fi
