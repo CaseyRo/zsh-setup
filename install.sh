@@ -47,6 +47,8 @@ export SKIP_MAC_APPS=false
 export SKIP_MAC_NETWORKED=false
 export ENABLE_MAC_NETWORKED=false
 export ALLOW_MAC_NETWORKED_SERVICES=false
+export IS_MAC_DEV_MACHINE=false
+export MAC_DEV_MACHINE_EXPLICIT=false
 export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
 UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
@@ -66,6 +68,8 @@ show_help() {
     echo "  --skip-mac-apps  Skip all macOS app installs (casks + mas)"
     echo "  --skip-mac-networked  Skip macOS networked services (e.g., Tailscale, Node-RED)"
     echo "  --enable-mac-networked  Install macOS networked services without prompting"
+    echo "  --mac-dev-machine  Enable macOS dev machine profile installs"
+    echo "  --no-mac-dev-machine  Disable macOS dev machine profile installs"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --skip-splash        Skip the intro splash screen"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
@@ -110,6 +114,16 @@ while [[ $# -gt 0 ]]; do
             ;;
         --enable-mac-networked)
             export ENABLE_MAC_NETWORKED=true
+            shift
+            ;;
+        --mac-dev-machine)
+            export IS_MAC_DEV_MACHINE=true
+            export MAC_DEV_MACHINE_EXPLICIT=true
+            shift
+            ;;
+        --no-mac-dev-machine)
+            export IS_MAC_DEV_MACHINE=false
+            export MAC_DEV_MACHINE_EXPLICIT=true
             shift
             ;;
         --allow-low-battery)
@@ -175,6 +189,8 @@ source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/mas.sh"
 source "$INSTALL_DIR/macos-automations.sh"
+source "$INSTALL_DIR/php-dev.sh"
+source "$INSTALL_DIR/cursor.sh"
 source "$INSTALL_DIR/splash.sh"
 
 # ============================================================================
@@ -322,6 +338,21 @@ main() {
 
     # macOS opt-in prompts (apps + networked services)
     if [[ "$IS_MACOS" == true ]]; then
+        if [[ "$MAC_DEV_MACHINE_EXPLICIT" != true ]]; then
+            if [[ "$YES_TO_ALL" == true ]]; then
+                IS_MAC_DEV_MACHINE=false
+                print_info "macOS dev machine profile: disabled by default in --yes mode"
+            elif ui_confirm "Is this a dev machine?"; then
+                IS_MAC_DEV_MACHINE=true
+            else
+                IS_MAC_DEV_MACHINE=false
+            fi
+        fi
+
+        if [[ "$IS_MAC_DEV_MACHINE" == true ]]; then
+            print_info "macOS dev machine profile enabled"
+        fi
+
         if [[ "$SKIP_MAC_APPS" == true ]]; then
             SKIP_BREW_CASKS=true
             SKIP_MAS_APPS=true
@@ -392,10 +423,12 @@ main() {
         install_brew_taps
 
         install_brew_packages
+        install_brew_packages_mac_dev
 
         install_lazygit
 
         install_brew_casks
+        install_brew_casks_mac_dev
         install_mas_apps
     fi
 
@@ -428,6 +461,10 @@ main() {
     install_node
 
     install_npm_global_packages
+
+    install_php_dev_tools
+
+    install_cursor_profile
 
     install_oh_my_zsh
 

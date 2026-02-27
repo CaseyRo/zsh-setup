@@ -1,0 +1,14 @@
+# Cursor extension IDs to install on macOS dev machines
+wesbos.theme-cobalt2
+ahmadawais.shades-of-purple
+ms-python.debugpy
+ms-python.python
+anysphere.cursorpyright
+astro-build.astro-vscode
+jock.svg
+ms-azuretools.vscode-docker
+1password.op-vscode
+mechatroner.rainbow-csv
+esbenp.prettier-vscode
+ms-azuretools.vscode-containers
+anthropic.claude-code

@@ -24,10 +24,24 @@ BREW_PACKAGES=(
     "toilet"     # ASCII art text generator
 )
 
+# Homebrew packages for macOS dev machines only
+BREW_PACKAGES_MAC_DEV=(
+    "php"        # PHP runtime
+    "composer"   # PHP package manager
+    "wp-cli"     # WordPress CLI
+)
+
 # Homebrew casks (macOS GUI apps, skipped on Linux)
 BREW_CASKS=(
     "raycast"    # spotlight replacement & productivity launcher
     "setapp"     # app subscription service
+)
+
+# Homebrew casks for macOS dev machines only
+BREW_CASKS_MAC_DEV=(
+    "orbstack"   # Docker replacement for macOS
+    "utm"        # VM manager
+    "cursor"     # IDE
 )
 
 # Cargo packages (installed via cargo install)

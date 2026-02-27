@@ -1,0 +1,31 @@
+{
+    "window.commandCenter": true,
+    "workbench.sideBar.location": "right",
+    "workbench.colorTheme": "Cobalt2",
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "'FiraMono Nerd Font Mono',Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontVariations": false,
+    "terminal.integrated.fontFamily": "FiraCode Nerd Font Mono",
+    "git.openRepositoryInParentFolders": "never",
+    "cursor.general.globalCursorIgnoreList": [
+        "**/.env",
+        "**/credentials.json",
+        "**/credentials.*.json",
+        "**/secret.json",
+        "**/secrets.json",
+        "**/*.key",
+        "**/*.pem",
+        "**/*.pfx",
+        "**/*.p12",
+        "**/*.crt",
+        "**/*.cer",
+        "**/id_rsa",
+        "**/id_dsa",
+        "**/.ssh/id_*",
+        "**/.cursor/mcp.json"
+    ],
+    "claudeCode.preferredLocation": "panel"
+}

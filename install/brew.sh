@@ -104,6 +104,35 @@ install_brew_packages() {
     done
 }
 
+install_brew_packages_mac_dev() {
+    # macOS dev machines only
+    if [[ "$OSTYPE" != "darwin"* ]] || [[ "${IS_MAC_DEV_MACHINE:-false}" != true ]]; then
+        return 0
+    fi
+
+    if [[ ${#BREW_PACKAGES_MAC_DEV[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    print_section "Brew Packages (macOS Dev Machine)"
+
+    for package in "${BREW_PACKAGES_MAC_DEV[@]}"; do
+        if brew list "$package" &>/dev/null; then
+            print_skip "$package"
+            track_skipped "$package"
+        else
+            print_package "$package"
+            if run_with_spinner "Installing $package" brew install "$package"; then
+                print_success "$package installed"
+                track_installed "$package"
+            else
+                print_error "Failed to install $package"
+                track_failed "$package"
+            fi
+        fi
+    done
+}
+
 install_brew_casks() {
     # Only run on macOS
     if [[ "$OSTYPE" != "darwin"* ]]; then
@@ -124,6 +153,42 @@ install_brew_casks() {
     print_section "Brew Casks (macOS Apps)"
 
     for cask in "${BREW_CASKS[@]}"; do
+        if brew list --cask "$cask" &>/dev/null; then
+            print_skip "$cask"
+            track_skipped "$cask"
+        else
+            print_package "$cask"
+            if run_with_spinner "Installing $cask" brew install --cask "$cask"; then
+                print_success "$cask installed"
+                track_installed "$cask"
+            else
+                print_error "Failed to install $cask"
+                track_failed "$cask"
+            fi
+        fi
+    done
+}
+
+install_brew_casks_mac_dev() {
+    # macOS dev machines only
+    if [[ "$OSTYPE" != "darwin"* ]] || [[ "${IS_MAC_DEV_MACHINE:-false}" != true ]]; then
+        return 0
+    fi
+
+    if [[ "${SKIP_BREW_CASKS:-false}" == true ]]; then
+        print_section "Brew Casks (macOS Dev Machine)"
+        print_skip "Brew dev casks (skipped by user)"
+        track_skipped "Brew dev casks (skipped by user)"
+        return 0
+    fi
+
+    if [[ ${#BREW_CASKS_MAC_DEV[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    print_section "Brew Casks (macOS Dev Machine)"
+
+    for cask in "${BREW_CASKS_MAC_DEV[@]}"; do
         if brew list --cask "$cask" &>/dev/null; then
             print_skip "$cask"
             track_skipped "$cask"
