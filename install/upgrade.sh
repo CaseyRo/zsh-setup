@@ -213,6 +213,8 @@ upgrade_nerd_fonts() {
 # ============================================================================
 
 run_upgrade() {
+    upgrade_log_rotate
+
     # Determine platform
     if should_use_apt; then
         upgrade_apt_packages

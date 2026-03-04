@@ -2,6 +2,11 @@
 # Oh My Zsh Configuration
 # ============================================================================
 
+# Skip if using Starship prompt
+if [[ -f "$ZSH_SETUP_FOLDER/.prompt-choice" ]] && [[ "$(cat "$ZSH_SETUP_FOLDER/.prompt-choice" 2>/dev/null)" == "starship" ]]; then
+    return 0
+fi
+
 # Oh-My-Zsh path — $HOME works on all platforms
 export ZSH="$HOME/.oh-my-zsh"
 if [[ "$MACHINE_OS" != "Darwin" ]]; then
@@ -12,7 +17,7 @@ fi
 ZSH_THEME=agnoster
 
 # Plugins
-plugins=(zsh-autosuggestions docker docker-compose zsh-autocomplete)
+plugins=(zsh-autosuggestions zsh-syntax-highlighting docker docker-compose zsh-autocomplete)
 
 # Auto-update configuration
 zstyle ':omz:update' mode auto

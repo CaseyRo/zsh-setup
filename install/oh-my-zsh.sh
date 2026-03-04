@@ -4,6 +4,13 @@
 # ============================================================================
 
 install_oh_my_zsh() {
+    if [[ "$USE_STARSHIP" == true ]]; then
+        print_section "Oh My Zsh"
+        print_skip "Oh My Zsh (using Starship prompt instead)"
+        track_skipped "Oh My Zsh (Starship mode)"
+        return 0
+    fi
+
     print_section "Oh My Zsh"
 
     # Check ownership first
@@ -39,7 +46,12 @@ install_oh_my_zsh() {
 install_zsh_plugins() {
     print_section "Zsh Plugins"
 
-    local ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    local ZSH_CUSTOM
+    if [[ "$USE_STARSHIP" == true ]]; then
+        ZSH_CUSTOM="$HOME/.local/share/zsh-plugins"
+    else
+        ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+    fi
 
     # zsh-autosuggestions
     if [[ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then

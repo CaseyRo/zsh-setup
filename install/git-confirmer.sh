@@ -165,16 +165,26 @@ upgrade_git_confirmer() {
     if [[ "$behind" -gt 0 ]]; then
         INSTALLED_SOMETHING=true
         echo -e "${SYMBOL_PACKAGE} Updating git_confirmer"
+        local old_sha new_sha
+        old_sha=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
         if git -C "$GIT_CONFIRMER_INSTALL_DIR" pull --ff-only &>/dev/null; then
+            new_sha=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
             if [[ -f "$GIT_CONFIRMER_INSTALL_DIR/install.sh" ]]; then
-                bash "$GIT_CONFIRMER_INSTALL_DIR/install.sh" &>/dev/null && \
-                    echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} git_confirmer updated" || \
+                if bash "$GIT_CONFIRMER_INSTALL_DIR/install.sh" &>/dev/null; then
+                    echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} git_confirmer updated"
+                    upgrade_log "git_confirmer" "$old_sha" "$new_sha" "pulled"
+                else
                     echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to run git_confirmer installer"
+                    upgrade_log "git_confirmer" "$old_sha" "$new_sha" "install-failed"
+                fi
             else
                 echo -e "  ${RED}${SYMBOL_FAIL}${RESET} git_confirmer install.sh missing"
+                upgrade_log "git_confirmer" "$old_sha" "$new_sha" "install-failed"
             fi
         else
+            new_sha=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
             echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to update git_confirmer"
+            upgrade_log "git_confirmer" "$old_sha" "$new_sha" "pull-failed"
         fi
     fi
 }

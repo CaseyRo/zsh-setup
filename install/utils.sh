@@ -811,6 +811,41 @@ progress_show() {
     progress_draw "Initializing..."
 }
 
+# ============================================================================
+# Upgrade Audit Logging
+# ============================================================================
+
+UPGRADE_LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-setup/upgrades.log"
+
+# Log an upgrade event: timestamp repo old_sha -> new_sha [status]
+# Usage: upgrade_log <repo_name> <old_sha> <new_sha> <status>
+upgrade_log() {
+    local repo="$1" old_sha="$2" new_sha="$3" status="$4"
+    local ts
+    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    local line="$ts $repo ${old_sha:0:7} -> ${new_sha:0:7} [$status]"
+
+    mkdir -p "$(dirname "$UPGRADE_LOG_FILE")"
+    echo "$line" >> "$UPGRADE_LOG_FILE"
+
+    # Print to stdout when interactive
+    if [[ -t 1 ]]; then
+        echo "  [audit] $line"
+    fi
+}
+
+# Keep only the last 500 lines of the upgrade log
+upgrade_log_rotate() {
+    [[ -f "$UPGRADE_LOG_FILE" ]] || return 0
+    local line_count
+    line_count=$(wc -l < "$UPGRADE_LOG_FILE")
+    if (( line_count > 500 )); then
+        local tmp
+        tmp=$(mktemp "${UPGRADE_LOG_FILE}.XXXXXX" 2>/dev/null) || return 1
+        tail -n 500 "$UPGRADE_LOG_FILE" > "$tmp" && mv "$tmp" "$UPGRADE_LOG_FILE" || rm -f "$tmp"
+    fi
+}
+
 # Print final summary
 print_summary() {
     local elapsed

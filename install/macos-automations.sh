@@ -93,14 +93,21 @@ upgrade_macos_automations() {
     if [[ "$behind" -gt 0 ]]; then
         INSTALLED_SOMETHING=true
         echo -e "${SYMBOL_PACKAGE} Updating macos-automations"
+        local old_sha new_sha
+        old_sha=$(git -C "$MACOS_AUTOMATIONS_INSTALL_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
         if git -C "$MACOS_AUTOMATIONS_INSTALL_DIR" pull --ff-only &>/dev/null; then
+            new_sha=$(git -C "$MACOS_AUTOMATIONS_INSTALL_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
             if bash "$MACOS_AUTOMATIONS_INSTALL_DIR/install.sh" &>/dev/null; then
                 echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} macos-automations updated"
+                upgrade_log "macos-automations" "$old_sha" "$new_sha" "pulled"
             else
                 echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to run macos-automations installer"
+                upgrade_log "macos-automations" "$old_sha" "$new_sha" "install-failed"
             fi
         else
+            new_sha=$(git -C "$MACOS_AUTOMATIONS_INSTALL_DIR" rev-parse HEAD 2>/dev/null || echo "unknown")
             echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to update macos-automations"
+            upgrade_log "macos-automations" "$old_sha" "$new_sha" "pull-failed"
         fi
     fi
 }

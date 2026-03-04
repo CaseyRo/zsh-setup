@@ -49,6 +49,8 @@ export ENABLE_MAC_NETWORKED=false
 export ALLOW_MAC_NETWORKED_SERVICES=false
 export IS_MAC_DEV_MACHINE=false
 export MAC_DEV_MACHINE_EXPLICIT=false
+export USE_STARSHIP=false
+export PROMPT_CHOICE_EXPLICIT=false
 export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
 UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
@@ -70,6 +72,8 @@ show_help() {
     echo "  --enable-mac-networked  Install macOS networked services without prompting"
     echo "  --mac-dev-machine  Enable macOS dev machine profile installs"
     echo "  --no-mac-dev-machine  Disable macOS dev machine profile installs"
+    echo "  --use-starship       Use Starship prompt instead of Oh-My-Zsh+Agnoster"
+    echo "  --use-ohmyzsh        Use Oh-My-Zsh+Agnoster prompt (default)"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --skip-splash        Skip the intro splash screen"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
@@ -124,6 +128,16 @@ while [[ $# -gt 0 ]]; do
         --no-mac-dev-machine)
             export IS_MAC_DEV_MACHINE=false
             export MAC_DEV_MACHINE_EXPLICIT=true
+            shift
+            ;;
+        --use-starship)
+            export USE_STARSHIP=true
+            export PROMPT_CHOICE_EXPLICIT=true
+            shift
+            ;;
+        --use-ohmyzsh)
+            export USE_STARSHIP=false
+            export PROMPT_CHOICE_EXPLICIT=true
             shift
             ;;
         --allow-low-battery)
@@ -181,6 +195,7 @@ source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
 source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
+source "$INSTALL_DIR/starship.sh"
 source "$INSTALL_DIR/tailscale.sh"
 source "$INSTALL_DIR/network-mounts.sh"
 source "$INSTALL_DIR/copyparty.sh"
@@ -230,6 +245,17 @@ main() {
 
     ui_init "$UI_MODE" "$UI_THEME"
     log_init
+
+    # Read persisted prompt choice (unless overridden by CLI flag)
+    if [[ "$PROMPT_CHOICE_EXPLICIT" != true ]] && [[ -f "$SCRIPT_DIR/.prompt-choice" ]]; then
+        local saved_choice
+        saved_choice=$(cat "$SCRIPT_DIR/.prompt-choice" 2>/dev/null)
+        if [[ "$saved_choice" == "starship" ]]; then
+            USE_STARSHIP=true
+        elif [[ "$saved_choice" == "ohmyzsh" ]]; then
+            USE_STARSHIP=false
+        fi
+    fi
 
     print_header "ZSH-Setup: New Machine Setup"
     if [[ "$UI_WARN_GUM_MISSING" == true ]]; then
@@ -304,7 +330,11 @@ main() {
     fi
     echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
     echo -e "  ${SYMBOL_BULLET} uv + Python stable"
-    echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
+    if [[ "$USE_STARSHIP" == true ]]; then
+        echo -e "  ${SYMBOL_BULLET} Starship prompt + zsh plugins"
+    else
+        echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
+    fi
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
     echo -e "  ${SYMBOL_BULLET} Nerd Fonts (terminal glyphs for prompts)"
@@ -352,7 +382,37 @@ main() {
         if [[ "$IS_MAC_DEV_MACHINE" == true ]]; then
             print_info "macOS dev machine profile enabled"
         fi
+    fi
 
+    # Prompt choice: Starship vs Oh-My-Zsh+Agnoster
+    if [[ "$PROMPT_CHOICE_EXPLICIT" != true ]]; then
+        if [[ "$YES_TO_ALL" == true ]]; then
+            # Default to ohmyzsh in --yes mode (unless persisted choice exists)
+            if [[ ! -f "$SCRIPT_DIR/.prompt-choice" ]]; then
+                USE_STARSHIP=false
+            fi
+            if [[ "$USE_STARSHIP" == true ]]; then
+                print_info "Prompt: Starship (persisted choice)"
+            else
+                print_info "Prompt: Oh-My-Zsh+Agnoster (default in --yes mode)"
+            fi
+        elif ui_confirm "Use Starship prompt instead of Oh-My-Zsh+Agnoster?"; then
+            USE_STARSHIP=true
+        else
+            USE_STARSHIP=false
+        fi
+    fi
+
+    # Persist prompt choice
+    if [[ "$USE_STARSHIP" == true ]]; then
+        echo "starship" > "$SCRIPT_DIR/.prompt-choice" 2>/dev/null || true
+        print_info "Prompt choice: Starship"
+    else
+        echo "ohmyzsh" > "$SCRIPT_DIR/.prompt-choice" 2>/dev/null || true
+        print_info "Prompt choice: Oh-My-Zsh+Agnoster"
+    fi
+
+    if [[ "$IS_MACOS" == true ]]; then
         if [[ "$SKIP_MAC_APPS" == true ]]; then
             SKIP_BREW_CASKS=true
             SKIP_MAS_APPS=true
@@ -465,6 +525,8 @@ main() {
     install_php_dev_tools
 
     install_cursor_profile
+
+    install_starship
 
     install_oh_my_zsh
 
