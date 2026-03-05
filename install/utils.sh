@@ -846,6 +846,39 @@ upgrade_log_rotate() {
     fi
 }
 
+# Terminal confetti burst — just for fun
+terminal_confetti() {
+    local cols
+    cols=$(tput cols 2>/dev/null || echo 60)
+    local particles=("🎉" "🎊" "✨" "🌟" "⭐" "💫" "🥳" "🍻" "🔥" "💥" "🪅" "🎆")
+    local colors=("\033[31m" "\033[32m" "\033[33m" "\033[34m" "\033[35m" "\033[36m" "\033[91m" "\033[92m" "\033[93m" "\033[94m" "\033[95m" "\033[96m")
+
+    # Hide cursor during animation
+    printf "\033[?25l"
+
+    # Print 4 rows of random confetti
+    for _ in 1 2 3 4; do
+        local line=""
+        local pos=0
+        while (( pos < cols - 2 )); do
+            local gap=$(( RANDOM % 4 + 1 ))
+            pos=$(( pos + gap ))
+            if (( pos >= cols - 2 )); then break; fi
+            local p=${particles[RANDOM % ${#particles[@]}]}
+            local c=${colors[RANDOM % ${#colors[@]}]}
+            # Move to column and print
+            printf "%*s%b%s\033[0m" "$gap" "" "$c" "$p"
+        done
+        echo ""
+    done
+
+    # Brief pause to enjoy the confetti
+    sleep 0.6
+
+    # Show cursor again
+    printf "\033[?25h"
+}
+
 # Print final summary
 print_summary() {
     local elapsed
@@ -854,6 +887,8 @@ print_summary() {
     local skipped_count=${#SKIPPED_ITEMS[@]}
     local failed_count=${#FAILED_ITEMS[@]}
 
+    echo ""
+    terminal_confetti
     echo ""
     echo -e "${BOLD}${GREEN}╔════════════════════════════════════════════════════════════╗${RESET}"
     echo -e "${BOLD}${GREEN}║${RESET}  ${SYMBOL_SPARKLE} ${BOLD}${WHITE}Setup Complete!${RESET} ${SYMBOL_SPARKLE}"
