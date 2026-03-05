@@ -4,7 +4,9 @@
 # Shared aliases for all systems
 
 # Command replacements
-# alias ls="eza -l"
+alias ls="eza --icons"
+alias ll="eza -la --icons --git"
+alias lt="eza --tree --level=2 --icons"
 # cd is handled by zoxide init --cmd cd in tools.sh (creates cd + cdi)
 
 # bat: on Debian/Ubuntu it's installed as 'batcat' due to naming conflict
@@ -24,7 +26,7 @@ if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     alias fd="fdfind"
 fi
 
-alias top="htop"
+alias top="btop"
 alias docker-compose="docker compose"
 alias lzg="lazygit"
 

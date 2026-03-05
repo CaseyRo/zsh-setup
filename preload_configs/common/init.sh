@@ -9,7 +9,7 @@ export MACHINE_OS=$(uname)
 export MACHINE_USER=$(whoami)
 
 # History configuration
-HISTFILE=$HOME/dotfiles/.zsh_history
+HISTFILE=$HOME/.zsh_history
 HISTSIZE=50000
 SAVEHIST=50000
 

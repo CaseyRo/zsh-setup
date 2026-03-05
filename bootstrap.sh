@@ -11,6 +11,9 @@
 
 set -e
 
+# Capture arguments to pass through to install.sh
+INSTALL_ARGS="$*"
+
 REPO_URL="https://github.com/CaseyRo/zsh-setup.git"
 INSTALL_DIR="${ZSH_SETUP_DIR:-${ZSH_MANAGER_DIR:-$HOME/.zsh-setup}}"
 
@@ -40,7 +43,16 @@ fi
 if [ -d "$INSTALL_DIR" ]; then
     echo "  → Updating existing installation..."
     cd "$INSTALL_DIR"
-    git pull --quiet
+    # Stash local changes so pull isn't blocked
+    if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+        echo "  → Stashing local changes..."
+        git stash push --quiet -m "bootstrap auto-stash $(date +%Y-%m-%d)"
+    fi
+    if ! git pull --ff-only --quiet; then
+        echo "  ⚠ Pull failed (diverged history?). Trying reset to upstream..."
+        git fetch --quiet
+        git reset --hard origin/main --quiet
+    fi
 else
     echo "  → Cloning zsh-setup to $INSTALL_DIR..."
     git clone --quiet "$REPO_URL" "$INSTALL_DIR"
@@ -50,4 +62,4 @@ fi
 echo "  → Running setup..."
 echo ""
 cd "$INSTALL_DIR"
-exec bash ./install.sh
+exec bash ./install.sh $INSTALL_ARGS

@@ -6,7 +6,9 @@
 # ============================================================================
 
 # Homebrew taps (additional repositories)
-BREW_TAPS=()
+BREW_TAPS=(
+    "mutagen-io/mutagen"  # file sync for remote/container dev
+)
 
 # Homebrew packages (installed via brew install)
 # Only packages not available via cargo or that work better via brew
@@ -22,6 +24,12 @@ BREW_PACKAGES=(
     "figlet"     # ASCII art text banners
     "cmatrix"    # Matrix rain effect for splash screen
     "toilet"     # ASCII art text generator
+    "jq"         # JSON processor
+    "yq"         # YAML processor (like jq for YAML)
+    "wget"       # file downloader
+    "tree"       # directory tree viewer
+    "tlrc"       # tldr pages client (Rust, fast)
+    "yt-dlp"     # YouTube downloader
 )
 
 # Homebrew packages for macOS dev machines only
@@ -29,6 +37,8 @@ BREW_PACKAGES_MAC_DEV=(
     "php"        # PHP runtime
     "composer"   # PHP package manager
     "wp-cli"     # WordPress CLI
+    "mutagen-io/mutagen/mutagen"         # file sync for remote/container dev
+    "mutagen-io/mutagen/mutagen-compose" # docker compose integration
 )
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)
@@ -54,6 +64,13 @@ CARGO_PACKAGES=(
     "fd-find"    # fast find (fd)
     "topgrade"   # system updater
     "cargo-cache" # manage cargo cache disk usage
+    "git-delta"  # better git diffs (syntax highlighting, side-by-side)
+    "du-dust"    # better disk usage viewer (dust)
+    "hyperfine"  # command benchmarking tool
+    "procs"      # modern ps replacement
+    "sd"         # intuitive sed alternative
+    "tokei"      # code line counter by language
+    "bandwhich"  # bandwidth usage by process
 )
 
 # ============================================================================
@@ -78,6 +95,10 @@ APT_PACKAGES=(
     "figlet"     # ASCII art text banners
     "cmatrix"    # Matrix rain effect for splash screen
     "toilet"     # ASCII art text generator
+    "jq"         # JSON processor
+    "wget"       # file downloader
+    "tree"       # directory tree viewer
+    "htop"       # interactive process viewer
 )
 
 # Cargo packages for APT systems - only what's NOT available via apt
@@ -109,6 +130,7 @@ NPM_GLOBAL_PACKAGES_NETWORKED=(
 # npm packages only for macOS and Ubuntu (not ARM/Raspberry Pi)
 NPM_GLOBAL_PACKAGES_DESKTOP=(
     "nori-ai-cli"  # Nori AI CLI assistant
+    "vercel"       # Vercel CLI (deploy, dev, env management)
 )
 
 # ============================================================================
