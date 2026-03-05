@@ -27,16 +27,19 @@ install_php_dev_tools() {
     local wpcs_pkg="wp-coding-standards/wpcs"
     local need_require=false
 
-    if ! composer global show "$phpcs_pkg" &>/dev/null; then
+    if ! composer global show --no-interaction "$phpcs_pkg" &>/dev/null; then
         need_require=true
     fi
-    if ! composer global show "$wpcs_pkg" &>/dev/null; then
+    if ! composer global show --no-interaction "$wpcs_pkg" &>/dev/null; then
         need_require=true
     fi
 
     if [[ "$need_require" == true ]]; then
+        # Allow the PHPCS Composer installer plugin to avoid interactive prompts
+        composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true 2>/dev/null
+
         if run_with_spinner "Installing PHPCS + WPCS (Composer global)" \
-            composer global require "$phpcs_pkg" "$wpcs_pkg"; then
+            composer global require --no-interaction "$phpcs_pkg" "$wpcs_pkg"; then
             print_success "PHPCS + WPCS installed"
             track_installed "PHPCS + WPCS"
         else
