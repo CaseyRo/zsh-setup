@@ -108,11 +108,11 @@ done
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Zoxide — must init after compinit (zoxide requirement)
+# iTerm2 Claude status integration
+[[ "$TERM_PROGRAM" == "iTerm.app" ]] && source ~/.iterm2-claude-status.zsh
+
+# Zoxide — must init at the very end of .zshrc (zoxide requirement)
 # --cmd cd: replaces cd with zoxide-aware cd; 'cdi' for interactive fzf picker
 if command -v zoxide &> /dev/null; then
     eval "$(zoxide init zsh --cmd cd)"
 fi
-
-# iTerm2 Claude status integration
-[[ "$TERM_PROGRAM" == "iTerm.app" ]] && source ~/.iterm2-claude-status.zsh

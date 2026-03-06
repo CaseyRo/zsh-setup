@@ -175,9 +175,8 @@ format = "[ $time]($style)"
 
 [cmd_duration]
 min_time = 2_000
-symbol = " "
 style = "bold yellow"
-format = "[$symbol$duration]($style) "
+format = "[ $duration]($style) "
 
 [jobs]
 symbol = " "

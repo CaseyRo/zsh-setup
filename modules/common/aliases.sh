@@ -5,6 +5,7 @@
 
 # Command replacements
 alias ls="eza --icons"
+alias z="eza --icons"
 alias ll="eza -la --icons --git"
 alias lt="eza --tree --level=2 --icons"
 # cd is handled by zoxide init --cmd cd in tools.sh (creates cd + cdi)
