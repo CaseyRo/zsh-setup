@@ -7,6 +7,8 @@
 
 # Homebrew taps (additional repositories)
 BREW_TAPS=(
+    "gromgit/brewtils"    # taproom and other brew utilities
+    "marcus/tap"          # sidecar TUI for dev workflows
     "mutagen-io/mutagen"  # file sync for remote/container dev
 )
 
@@ -34,11 +36,16 @@ BREW_PACKAGES=(
 
 # Homebrew packages for macOS dev machines only
 BREW_PACKAGES_MAC_DEV=(
+    "go"         # Go programming language (needed for go install tools)
+    "gromgit/brewtils/taproom" # interactive TUI for Homebrew
+    "mactop"     # Apple Silicon system monitor (top for Mac)
     "php"        # PHP runtime
     "composer"   # PHP package manager
     "wp-cli"     # WordPress CLI
+    "marcus/tap/sidecar"                 # TUI for git, AI agents, tasks, file browsing
     "mutagen-io/mutagen/mutagen"         # file sync for remote/container dev
     "mutagen-io/mutagen/mutagen-compose" # docker compose integration
+    "zellij"     # terminal multiplexer / workspace
 )
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)
@@ -49,6 +56,8 @@ BREW_CASKS=(
 
 # Homebrew casks for macOS dev machines only
 BREW_CASKS_MAC_DEV=(
+    "claude"     # Claude desktop app
+    "claude-code" # Claude Code CLI
     "orbstack"   # Docker replacement for macOS
     "utm"        # VM manager
     "cursor"     # IDE
@@ -71,6 +80,7 @@ CARGO_PACKAGES=(
     "sd"         # intuitive sed alternative
     "tokei"      # code line counter by language
     "bandwhich"  # bandwidth usage by process
+    "llmfit"     # LLM toolkit CLI
 )
 
 # ============================================================================
@@ -107,11 +117,20 @@ CARGO_PACKAGES_APT=(
     "eza"        # modern ls (not in apt)
     "topgrade"   # system updater (not in apt)
     "cargo-cache" # manage cargo cache disk usage (not in apt)
+    "zellij"     # terminal multiplexer / workspace (not in apt)
+    "llmfit"     # LLM toolkit CLI
 )
 
 # APT packages only for Ubuntu (not Raspberry Pi)
 APT_PACKAGES_UBUNTU=(
     "cockpit"    # web-based server management UI
+)
+
+# ============================================================================
+# Go packages (installed via go install, macOS dev machines only)
+# ============================================================================
+GO_PACKAGES=(
+    "github.com/osteele/mutagui@latest"  # TUI for managing Mutagen sync sessions
 )
 
 # ============================================================================
