@@ -27,6 +27,14 @@ if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     alias fd="fdfind"
 fi
 
+# Claude Code shortcut
+alias cc="claude"
+
+# parsync: parallel rsync drop-in replacement
+if command -v parsync >/dev/null 2>&1; then
+    alias rsync="parsync"
+fi
+
 alias top="btop"
 alias docker-compose="docker compose"
 alias lzg="lazygit"

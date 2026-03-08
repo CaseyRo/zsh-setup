@@ -81,6 +81,7 @@ CARGO_PACKAGES=(
     "tokei"      # code line counter by language
     "bandwhich"  # bandwidth usage by process
     "llmfit"     # LLM toolkit CLI
+    "parsync"    # parallel rsync replacement (drop-in, faster)
 )
 
 # ============================================================================
@@ -119,6 +120,7 @@ CARGO_PACKAGES_APT=(
     "cargo-cache" # manage cargo cache disk usage (not in apt)
     "zellij"     # terminal multiplexer / workspace (not in apt)
     "llmfit"     # LLM toolkit CLI
+    "parsync"    # parallel rsync replacement (drop-in, faster)
 )
 
 # APT packages only for Ubuntu (not Raspberry Pi)
