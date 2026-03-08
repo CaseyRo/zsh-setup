@@ -151,14 +151,12 @@ empty_symbol = " "
 [[battery.display]]
 threshold = 20
 style = "bold red"
+discharging_symbol = " "
 
 [[battery.display]]
 threshold = 50
 style = "bold yellow"
-
-[[battery.display]]
-threshold = 100
-style = "bold green"
+discharging_symbol = " "
 
 [memory_usage]
 disabled = false
