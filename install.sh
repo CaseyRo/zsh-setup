@@ -204,6 +204,7 @@ source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/mas.sh"
 source "$INSTALL_DIR/macos-automations.sh"
+source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
 source "$INSTALL_DIR/splash.sh"
@@ -523,6 +524,8 @@ main() {
     install_npm_global_packages
 
     install_php_dev_tools
+
+    install_go_packages
 
     install_cursor_profile
 
