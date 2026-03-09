@@ -217,6 +217,7 @@ source "$INSTALL_DIR/macos-automations.sh"
 source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
+source "$INSTALL_DIR/dev-repos.sh"
 source "$INSTALL_DIR/splash.sh"
 
 # ============================================================================
@@ -567,6 +568,11 @@ main() {
     fi
 
     install_npm_global_packages
+
+    # Dev repos: clone on dev machines and Docker containers
+    if [[ "$IS_MAC_DEV_MACHINE" == true ]] || [[ "$IS_DOCKER" == true ]]; then
+        install_dev_repos
+    fi
 
     install_php_dev_tools
 

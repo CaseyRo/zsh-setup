@@ -56,11 +56,17 @@ BREW_CASKS=(
 
 # Homebrew casks for macOS dev machines only
 BREW_CASKS_MAC_DEV=(
-    "claude"     # Claude desktop app
-    "claude-code" # Claude Code CLI
     "orbstack"   # Docker replacement for macOS
     "utm"        # VM manager
     "cursor"     # IDE
+)
+
+# ============================================================================
+# Dev Repos (cloned to ~/dev on dev machines and Docker containers)
+# ============================================================================
+DEV_REPOS=(
+    "CaseyRo/casey-claude-setup"  # Claude Code config, skills, and settings
+    "fission-ai/openspec.dev"     # OpenSpec spec-driven development
 )
 
 # Cargo packages (installed via cargo install)
