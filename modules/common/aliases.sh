@@ -27,8 +27,9 @@ if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     alias fd="fdfind"
 fi
 
-# Claude Code shortcut
+# Claude Code shortcuts
 alias cc="claude"
+alias claude-yolo="claude --dangerously-skip-permissions"
 
 # parsync: parallel rsync drop-in replacement
 if command -v parsync >/dev/null 2>&1; then
