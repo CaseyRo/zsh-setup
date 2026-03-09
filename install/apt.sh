@@ -19,8 +19,11 @@ setup_apt_repos() {
         track_skipped "GitHub CLI repository"
     fi
 
-    # Docker repo (for non-macOS)
-    if [[ ! -f /etc/apt/sources.list.d/docker.list ]]; then
+    # Docker repo (skip inside containers — no Docker-in-Docker)
+    if is_docker; then
+        print_skip "Docker repository (inside container)"
+        track_skipped "Docker repository (container)"
+    elif [[ ! -f /etc/apt/sources.list.d/docker.list ]]; then
         print_step "Adding Docker repository"
         sudo install -m 0755 -d /etc/apt/keyrings
         curl -fsSL https://download.docker.com/linux/$(. /etc/os-release && echo "$ID")/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
@@ -61,6 +64,33 @@ install_apt_packages() {
             fi
         fi
     done
+
+    # Generate UTF-8 locale if locales was just installed (needed in containers)
+    if dpkg -s locales &>/dev/null && ! locale -a 2>/dev/null | grep -qi 'en_US.utf'; then
+        print_step "Generating en_US.UTF-8 locale"
+        sed -i 's/# en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen 2>/dev/null || true
+        locale-gen en_US.UTF-8 &>/dev/null || true
+        print_success "Locale generated"
+    fi
+
+    # Install host-only packages (skip in Docker)
+    if ! is_docker; then
+        for package in "${APT_PACKAGES_HOST_ONLY[@]}"; do
+            if dpkg -s "$package" &>/dev/null; then
+                print_skip "$package"
+                track_skipped "$package"
+            else
+                print_package "$package"
+                if run_with_spinner "Installing $package" sudo apt-get install -y -qq "$package"; then
+                    print_success "$package installed"
+                    track_installed "$package"
+                else
+                    print_error "Failed to install $package"
+                    track_failed "$package"
+                fi
+            fi
+        done
+    fi
 }
 
 install_apt_packages_ubuntu() {
@@ -178,21 +208,27 @@ install_fastfetch_apt() {
 
 # Minimal cargo packages for APT systems (only what's not in apt)
 install_cargo_packages_minimal() {
-    if [[ ${#CARGO_PACKAGES_APT[@]} -eq 0 ]]; then
+    # Merge host-only packages when not in Docker
+    local all_packages=("${CARGO_PACKAGES_APT[@]}")
+    if ! is_docker && [[ ${#CARGO_PACKAGES_APT_HOST[@]} -gt 0 ]]; then
+        all_packages+=("${CARGO_PACKAGES_APT_HOST[@]}")
+    fi
+
+    if [[ ${#all_packages[@]} -eq 0 ]]; then
         return 0
     fi
 
     # Check cargo ownership and permissions before proceeding
     if ! check_dir_ownership "$HOME/.cargo" "Cargo"; then
         print_error "Cannot install cargo packages - fix ownership first"
-        for package in "${CARGO_PACKAGES_APT[@]}"; do
+        for package in "${all_packages[@]}"; do
             track_failed "$package"
         done
         return 1
     fi
     if ! check_binary_executable "$HOME/.cargo/bin/cargo" "cargo"; then
         print_error "Cannot install cargo packages - fix permissions first"
-        for package in "${CARGO_PACKAGES_APT[@]}"; do
+        for package in "${all_packages[@]}"; do
             track_failed "$package"
         done
         return 1
@@ -203,10 +239,10 @@ install_cargo_packages_minimal() {
     print_info "Compiling from source - this may take several minutes per package"
     echo ""
 
-    local total=${#CARGO_PACKAGES_APT[@]}
+    local total=${#all_packages[@]}
     local current=0
 
-    for package in "${CARGO_PACKAGES_APT[@]}"; do
+    for package in "${all_packages[@]}"; do
         current=$((current + 1))
         if cargo install --list | grep -q "^$package "; then
             print_skip "$package"

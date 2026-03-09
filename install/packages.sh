@@ -94,6 +94,8 @@ APT_PACKAGES=(
     "zsh"
     "git"
     "gh"         # GitHub CLI (needs repo setup)
+    "curl"       # HTTP client (not always present in slim images)
+    "ca-certificates" # HTTPS certificate authorities
     "fzf"
     "byobu"
     "bat"
@@ -102,7 +104,6 @@ APT_PACKAGES=(
     "btop"       # modern system monitor (successor to bashtop)
     "micro"      # simple terminal text editor
     "unzip"      # required for Nerd Fonts installation
-    "nfs-common" # NFS client for network mounts
     "figlet"     # ASCII art text banners
     "cmatrix"    # Matrix rain effect for splash screen
     "toilet"     # ASCII art text generator
@@ -110,17 +111,28 @@ APT_PACKAGES=(
     "wget"       # file downloader
     "tree"       # directory tree viewer
     "htop"       # interactive process viewer
+    "procps"     # ps, top, etc. (missing in slim Docker images)
+    "locales"    # locale generation (UTF-8 support in containers)
+)
+
+# APT packages only for non-Docker (host machines)
+APT_PACKAGES_HOST_ONLY=(
+    "nfs-common" # NFS client for network mounts
 )
 
 # Cargo packages for APT systems - only what's NOT available via apt
 CARGO_PACKAGES_APT=(
     "zoxide"     # smarter cd (not in apt)
     "eza"        # modern ls (not in apt)
-    "topgrade"   # system updater (not in apt)
     "cargo-cache" # manage cargo cache disk usage (not in apt)
+    "parsync"    # parallel rsync replacement (drop-in, faster)
+)
+
+# Additional cargo packages for APT host machines (not Docker)
+CARGO_PACKAGES_APT_HOST=(
+    "topgrade"   # system updater (not in apt)
     "zellij"     # terminal multiplexer / workspace (not in apt)
     "llmfit"     # LLM toolkit CLI
-    "parsync"    # parallel rsync replacement (drop-in, faster)
 )
 
 # APT packages only for Ubuntu (not Raspberry Pi)
@@ -139,18 +151,17 @@ GO_PACKAGES=(
 # Global npm packages (installed via npm install -g)
 # ============================================================================
 NPM_GLOBAL_PACKAGES=(
-    "pm2"
     "@fission-ai/openspec"  # spec-driven development for AI assistants
 )
 
-# Networked npm packages (macOS requires explicit opt-in)
-NPM_GLOBAL_PACKAGES_NETWORKED=(
-    "node-red"
+# npm packages for host machines only (not Docker containers)
+NPM_GLOBAL_PACKAGES_HOST=(
+    "pm2"        # process manager
+    "node-red"   # flow-based programming
 )
 
-# npm packages only for macOS and Ubuntu (not ARM/Raspberry Pi)
+# npm packages only for macOS and Ubuntu/Debian (not ARM/Raspberry Pi)
 NPM_GLOBAL_PACKAGES_DESKTOP=(
-    "nori-ai-cli"  # Nori AI CLI assistant
     "vercel"       # Vercel CLI (deploy, dev, env management)
 )
 

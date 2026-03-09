@@ -11,6 +11,9 @@ has_display() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS always has a display context
         return 0
+    elif is_docker; then
+        # Docker containers don't have displays — fonts come from host terminal
+        return 1
     elif [[ -n "$DISPLAY" ]] || [[ -n "$WAYLAND_DISPLAY" ]]; then
         # Linux with X11 or Wayland
         return 0

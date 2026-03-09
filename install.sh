@@ -26,13 +26,23 @@ set -e
 # ============================================================================
 
 if [[ $EUID -eq 0 ]]; then
-    echo "ERROR: Do not run this script as root or with sudo."
-    echo ""
-    echo "The installer will prompt for sudo when needed (e.g., apt install)."
-    echo "Running the entire script as root creates permission issues for user files."
-    echo ""
-    echo "Usage: ./install.sh"
-    exit 1
+    # Allow running as root inside Docker containers
+    if [[ -f /.dockerenv ]] || grep -qw docker /proc/1/cgroup 2>/dev/null || \
+       grep -qw docker /proc/self/mountinfo 2>/dev/null; then
+        # In Docker: define sudo as a passthrough (already root)
+        sudo() { "$@"; }
+        export -f sudo
+        # Auto-enable non-interactive mode in Docker
+        export YES_TO_ALL=true
+    else
+        echo "ERROR: Do not run this script as root or with sudo."
+        echo ""
+        echo "The installer will prompt for sudo when needed (e.g., apt install)."
+        echo "Running the entire script as root creates permission issues for user files."
+        echo ""
+        echo "Usage: ./install.sh"
+        exit 1
+    fi
 fi
 
 # ============================================================================
@@ -271,6 +281,11 @@ main() {
     local IS_UBUNTU=false
     local PLATFORM_NAME="Linux"
 
+    local IS_DOCKER=false
+    if is_docker; then
+        IS_DOCKER=true
+    fi
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         IS_MACOS=true
         PLATFORM_NAME="macOS"
@@ -280,8 +295,12 @@ main() {
             PLATFORM_NAME="Raspberry Pi"
         elif is_arm; then
             PLATFORM_NAME="ARM Linux"
-        else
+        elif is_ubuntu; then
             PLATFORM_NAME="Ubuntu Linux"
+        elif is_debian; then
+            PLATFORM_NAME="Debian Linux"
+        else
+            PLATFORM_NAME="Linux"
         fi
     fi
     if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -f /etc/os-release ]]; then
@@ -289,6 +308,9 @@ main() {
         if [[ "$ID" == "ubuntu" || "$ID_LIKE" == *"ubuntu"* ]]; then
             IS_UBUNTU=true
         fi
+    fi
+    if [[ "$IS_DOCKER" == true ]]; then
+        PLATFORM_NAME="$PLATFORM_NAME (Docker)"
     fi
     ui_set_context "$PLATFORM_NAME"
     log_line "Platform: $PLATFORM_NAME"
@@ -471,9 +493,19 @@ main() {
 
         install_apt_packages_ubuntu
 
-        install_docker_apt
+        if [[ "$IS_DOCKER" != true ]]; then
+            install_docker_apt
+        else
+            print_section "Docker"
+            print_skip "Docker (already inside a container)"
+            track_skipped "Docker (container)"
+        fi
 
         install_lazygit
+
+        if [[ "$IS_DOCKER" != true ]]; then
+            install_lazydocker
+        fi
 
         install_fastfetch_apt
 
@@ -487,6 +519,8 @@ main() {
         install_brew_packages_mac_dev
 
         install_lazygit
+
+        install_lazydocker
 
         install_brew_casks
         install_brew_casks_mac_dev
@@ -517,9 +551,20 @@ main() {
 
     install_python_uv
 
-    install_nvm
+    # Skip NVM if Node.js is already provided (e.g., Docker base image)
+    if [[ "$IS_DOCKER" == true ]] && command_exists node; then
+        print_section "NVM (Node Version Manager)"
+        print_skip "NVM (Node.js $(node --version) provided by base image)"
+        track_skipped "NVM (base image)"
 
-    install_node
+        print_section "Node.js"
+        print_skip "Node.js $(node --version) (from base image)"
+        track_skipped "Node.js (base image)"
+    else
+        install_nvm
+
+        install_node
+    fi
 
     install_npm_global_packages
 
@@ -535,7 +580,11 @@ main() {
 
     install_zsh_plugins
 
-    if [[ "$IS_MACOS" == true ]] && [[ "${ALLOW_MAC_NETWORKED_SERVICES}" != true ]]; then
+    if [[ "$IS_DOCKER" == true ]]; then
+        print_section "Tailscale"
+        print_skip "Tailscale (Docker container)"
+        track_skipped "Tailscale (Docker)"
+    elif [[ "$IS_MACOS" == true ]] && [[ "${ALLOW_MAC_NETWORKED_SERVICES}" != true ]]; then
         print_section "Tailscale"
         print_skip "Tailscale (macOS networked services disabled)"
         track_skipped "Tailscale (macOS networked services disabled)"
@@ -543,11 +592,15 @@ main() {
         install_tailscale
     fi
 
-    configure_tailscale
-
-    configure_nfs_mount
-
-    install_copyparty
+    if [[ "$IS_DOCKER" != true ]]; then
+        configure_tailscale
+        configure_nfs_mount
+        install_copyparty
+    else
+        print_section "Network Mounts"
+        print_skip "NFS mounts (Docker container)"
+        track_skipped "NFS mounts (Docker)"
+    fi
 
     install_nerd_fonts
 

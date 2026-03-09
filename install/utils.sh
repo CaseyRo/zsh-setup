@@ -624,6 +624,20 @@ set_default_shell_zsh() {
 
     print_step "Setting zsh as default shell"
 
+    # In Docker, chsh may not be available — just update /etc/passwd directly
+    if is_docker; then
+        if sed -i "s|$current_shell\$|$zsh_path|" /etc/passwd 2>/dev/null; then
+            print_success "Default shell changed to zsh"
+            track_installed "default shell (zsh)"
+            export SHELL_CHANGED=true
+        else
+            print_warning "Could not change default shell in container"
+            print_info "Start container with: docker run -it ... zsh"
+            track_skipped "default shell (Docker)"
+        fi
+        return 0
+    fi
+
     # Ensure zsh is in /etc/shells (required for chsh)
     if ! grep -q "^${zsh_path}$" /etc/shells 2>/dev/null; then
         print_step "Adding zsh to /etc/shells"
@@ -662,7 +676,7 @@ check_dir_ownership() {
     # Linux uses -c '%U', macOS uses -f '%Su'
     owner=$(stat -c '%U' "$dir" 2>/dev/null || stat -f '%Su' "$dir" 2>/dev/null)
 
-    if [[ "$owner" == "root" ]]; then
+    if [[ "$owner" == "root" ]] && [[ $EUID -ne 0 ]]; then
         print_error "$name directory is owned by root"
         print_info "Fix with: sudo chown -R \$USER:\$USER $dir"
         return 1
@@ -713,6 +727,12 @@ is_raspberry_pi() {
     [[ -f /proc/device-tree/model ]] && grep -qi "raspberry" /proc/device-tree/model 2>/dev/null
 }
 
+# Detect if running inside a Docker container
+is_docker() {
+    [[ -f /.dockerenv ]] || grep -qw docker /proc/1/cgroup 2>/dev/null || \
+        grep -qw docker /proc/self/mountinfo 2>/dev/null
+}
+
 # Detect if running on Debian-based system (Ubuntu, Raspbian, etc.)
 is_debian_based() {
     [[ -f /etc/debian_version ]] || command_exists apt-get
@@ -723,6 +743,16 @@ is_ubuntu() {
     if [[ -f /etc/os-release ]]; then
         source /etc/os-release
         [[ "$ID" == "ubuntu" || "$ID_LIKE" == *"ubuntu"* ]]
+    else
+        return 1
+    fi
+}
+
+# Detect if running on plain Debian (not Ubuntu, not Raspberry Pi)
+is_debian() {
+    if [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        [[ "$ID" == "debian" ]]
     else
         return 1
     fi

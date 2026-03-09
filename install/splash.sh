@@ -8,9 +8,23 @@ show_splash() {
 
     local dim=$'\033[2m'
     local bold=$'\033[1m'
+    local cyan=$'\033[0;36m'
+    local blue=$'\033[0;34m'
     local reset=$'\033[0m'
 
     echo ""
+
+    # Docker whale easter egg
+    if [[ -f /.dockerenv ]] || grep -qw docker /proc/1/cgroup 2>/dev/null; then
+        echo "${cyan}        .                ${reset}"
+        echo "${cyan}       \":\"               ${reset}"
+        echo "${cyan}     ___:____     |\"\\/\"|  ${reset}"
+        echo "${cyan}   ,'        \`.    \\  /   ${reset}"
+        echo "${cyan}   |  O        \\___/  |  ${reset}"
+        echo "${cyan} ~^~^~^~^~^~^~^~^~^~^~^~${reset}"
+        echo "${blue}  ~  ~ ~ ~  ~ ~  ~ ~ ~  ${reset}"
+        echo ""
+    fi
 
     # Rainbow figlet: toilet -F gay > figlet > plain text
     if command -v toilet &>/dev/null; then
@@ -31,6 +45,9 @@ show_splash() {
         platform="Raspberry Pi"
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         platform="Linux"
+        if [[ -f /.dockerenv ]] || grep -qw docker /proc/1/cgroup 2>/dev/null; then
+            platform="Linux (Docker)"
+        fi
     fi
 
     echo "${dim}${platform} ${arch} · $(date '+%Y-%m-%d %H:%M')${reset}"
