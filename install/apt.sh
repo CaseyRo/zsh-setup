@@ -48,7 +48,15 @@ setup_apt_repos() {
 install_apt_packages() {
     print_section "APT Packages"
 
+    # In light mode, skip heavy/cosmetic packages
+    local _apt_light_skip="build-essential byobu figlet cmatrix toilet"
+
     for package in "${APT_PACKAGES[@]}"; do
+        if [[ "$LIGHT_MODE" == true ]] && [[ " $_apt_light_skip " == *" $package "* ]]; then
+            print_skip "$package (light mode)"
+            track_skipped "$package (light mode)"
+            continue
+        fi
         # Use dpkg -s to check if package is actually installed (not just known)
         if dpkg -s "$package" &>/dev/null; then
             print_skip "$package"

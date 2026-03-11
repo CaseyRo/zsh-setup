@@ -140,6 +140,7 @@ export USE_STARSHIP=false
 export PROMPT_CHOICE_EXPLICIT=false
 export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
+export LIGHT_MODE=false
 UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
 UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
 
@@ -163,6 +164,8 @@ show_help() {
     echo "  --use-ohmyzsh        Use Oh-My-Zsh+Agnoster prompt (default)"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --skip-splash        Skip the intro splash screen"
+    echo "  --light              Minimal server/VPS install (no Rust, prebuilt bins)"
+    echo "  --server, --vps      Aliases for --light"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
@@ -235,6 +238,11 @@ while [[ $# -gt 0 ]]; do
             export SKIP_SPLASH=true
             shift
             ;;
+        --light|--server|--vps)
+            export LIGHT_MODE=true
+            export SKIP_SPLASH=true
+            shift
+            ;;
         --ui)
             UI_MODE="$2"
             shift 2
@@ -295,6 +303,7 @@ source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
 source "$INSTALL_DIR/dev-repos.sh"
+source "$INSTALL_DIR/prebuilt-bins.sh"
 source "$INSTALL_DIR/splash.sh"
 
 # ============================================================================
@@ -412,9 +421,19 @@ main() {
     log_kv "InstallMethod" "$([[ "$USE_APT" == true ]] && echo apt || echo brew)"
     log_kv "UI_MODE" "$UI_MODE"
     log_kv "UI_THEME" "$UI_THEME"
+    log_kv "LIGHT_MODE" "$LIGHT_MODE"
 
+    if [[ "$LIGHT_MODE" == true ]]; then
+        echo -e "  ${BOLD}Light mode${RESET} ${DIM}(minimal server/VPS install)${RESET}"
+        echo ""
+    fi
     echo -e "  ${DIM}This script will install:${RESET}"
-    if [[ "$USE_APT" == true ]]; then
+    if [[ "$LIGHT_MODE" == true ]]; then
+        echo -e "  ${SYMBOL_BULLET} APT packages (git, gh, bat, ripgrep, fd, jq, btop, etc.)"
+        echo -e "  ${SYMBOL_BULLET} zoxide & eza (prebuilt binaries)"
+        echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
+        echo -e "  ${SYMBOL_BULLET} Lazygit & Lazydocker (Git/Docker TUI)"
+    elif [[ "$USE_APT" == true ]]; then
         echo -e "  ${SYMBOL_BULLET} APT packages (git, gh, bat, ripgrep, fd, etc.)"
         echo -e "  ${SYMBOL_BULLET} Rust & Cargo (minimal - eza, zoxide, topgrade)"
         echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
@@ -429,7 +448,11 @@ main() {
             echo -e "  ${SYMBOL_BULLET} Docker & Docker Compose"
         fi
     fi
-    echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
+    if [[ "$LIGHT_MODE" == true ]]; then
+        echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2)"
+    else
+        echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
+    fi
     echo -e "  ${SYMBOL_BULLET} uv + Python stable"
     if [[ "$USE_STARSHIP" == true ]]; then
         echo -e "  ${SYMBOL_BULLET} Starship prompt + zsh plugins"
@@ -437,10 +460,12 @@ main() {
         echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
     fi
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
-    echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
-    echo -e "  ${SYMBOL_BULLET} Nerd Fonts (terminal glyphs for prompts)"
+    if [[ "$LIGHT_MODE" != true ]]; then
+        echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
+        echo -e "  ${SYMBOL_BULLET} Nerd Fonts (terminal glyphs for prompts)"
+    fi
     echo -e "  ${SYMBOL_BULLET} ZSH-Setup configuration"
-    if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
+    if [[ "$LIGHT_MODE" != true ]] && { [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; }; then
         echo -e "  ${SYMBOL_BULLET} Optional: git_confirmer (prompt at end)"
     fi
     echo ""
@@ -553,7 +578,9 @@ main() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         print_info "Architecture: $(uname -m)"
     fi
-    if [[ "$USE_APT" == true ]]; then
+    if [[ "$LIGHT_MODE" == true ]]; then
+        print_info "Install method: APT + prebuilt binaries (light mode)"
+    elif [[ "$USE_APT" == true ]]; then
         print_info "Install method: APT + minimal Cargo"
     else
         print_info "Install method: Homebrew + Cargo"
@@ -569,7 +596,9 @@ main() {
 
         install_apt_packages
 
-        install_apt_packages_ubuntu
+        if [[ "$LIGHT_MODE" != true ]]; then
+            install_apt_packages_ubuntu
+        fi
 
         if [[ "$IS_DOCKER" != true ]]; then
             install_docker_apt
@@ -617,12 +646,21 @@ main() {
     # Common installation (all platforms)
     # =========================================================================
 
-    install_rust
+    if [[ "$LIGHT_MODE" == true ]]; then
+        # Light mode: skip Rust/Cargo entirely, use prebuilt binaries
+        print_section "Rust"
+        print_skip "Rust/Cargo (light mode - using prebuilt binaries)"
+        track_skipped "Rust (light mode)"
 
-    if [[ "$USE_APT" == true ]]; then
-        install_cargo_packages_minimal
+        install_prebuilt_bins
     else
-        install_cargo_packages
+        install_rust
+
+        if [[ "$USE_APT" == true ]]; then
+            install_cargo_packages_minimal
+        else
+            install_cargo_packages
+        fi
     fi
 
     install_uv
@@ -647,15 +685,17 @@ main() {
     install_npm_global_packages
 
     # Dev repos: clone on dev machines and Docker containers
-    if [[ "$IS_MAC_DEV_MACHINE" == true ]] || [[ "$IS_DOCKER" == true ]]; then
-        install_dev_repos
+    if [[ "$LIGHT_MODE" != true ]]; then
+        if [[ "$IS_MAC_DEV_MACHINE" == true ]] || [[ "$IS_DOCKER" == true ]]; then
+            install_dev_repos
+        fi
+
+        install_php_dev_tools
+
+        install_go_packages
+
+        install_cursor_profile
     fi
-
-    install_php_dev_tools
-
-    install_go_packages
-
-    install_cursor_profile
 
     install_starship
 
@@ -677,15 +717,19 @@ main() {
 
     if [[ "$IS_DOCKER" != true ]]; then
         configure_tailscale
-        configure_nfs_mount
-        install_copyparty
+        if [[ "$LIGHT_MODE" != true ]]; then
+            configure_nfs_mount
+            install_copyparty
+        fi
     else
         print_section "Network Mounts"
         print_skip "NFS mounts (Docker container)"
         track_skipped "NFS mounts (Docker)"
     fi
 
-    install_nerd_fonts
+    if [[ "$LIGHT_MODE" != true ]]; then
+        install_nerd_fonts
+    fi
 
     # Setup zsh-setup symlink
     print_section "ZSH-Setup Configuration"
@@ -732,7 +776,7 @@ main() {
         track_installed "topgrade config"
     fi
 
-    if [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; then
+    if [[ "$LIGHT_MODE" != true ]] && { [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; }; then
         install_git_confirmer_optional
     fi
 

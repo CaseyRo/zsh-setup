@@ -129,7 +129,22 @@ install_npm_global_packages() {
         fi
     fi
 
-    if [[ "$OSTYPE" == "darwin"* ]] || is_ubuntu || is_debian; then
+    # In light mode, filter out heavy/unnecessary npm packages
+    if [[ "$LIGHT_MODE" == true ]]; then
+        local _npm_light_skip="node-red"
+        local filtered=()
+        for package in "${packages[@]}"; do
+            if [[ " $_npm_light_skip " == *" $package "* ]]; then
+                print_skip "$package (light mode)"
+                track_skipped "$package (light mode)"
+            else
+                filtered+=("$package")
+            fi
+        done
+        packages=("${filtered[@]}")
+    fi
+
+    if [[ "$LIGHT_MODE" != true ]] && { [[ "$OSTYPE" == "darwin"* ]] || is_ubuntu || is_debian; }; then
         packages+=("${NPM_GLOBAL_PACKAGES_DESKTOP[@]}")
     fi
 
