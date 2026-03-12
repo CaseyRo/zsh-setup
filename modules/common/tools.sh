@@ -4,7 +4,11 @@
 
 # fzf (fuzzy finder) — CTRL-T: file picker, CTRL-R: history, ALT-C: cd
 if command -v fzf &> /dev/null; then
-    source <(fzf --zsh)
+    if fzf --zsh &>/dev/null; then
+        source <(fzf --zsh)
+    elif [[ -f "${HOME}/.fzf.zsh" ]]; then
+        source "${HOME}/.fzf.zsh"
+    fi
 fi
 
 
