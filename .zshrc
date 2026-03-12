@@ -37,6 +37,13 @@ ZSH_Manager_MODULES_FOLDER="$ZSH_SETUP_MODULES_FOLDER"
 
 local BASE_FOLDERS=("$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER" "$ZSH_SETUP_MODULES_FOLDER")
 
+# 1b. TERMINAL COMPATIBILITY
+# Ghostty sets TERM=xterm-ghostty, but most remote hosts and multiplexers
+# (byobu, tmux, screen) lack that terminfo entry. Fall back gracefully.
+if [[ "$TERM" == "xterm-ghostty" ]] && ! infocmp xterm-ghostty &>/dev/null; then
+    export TERM=xterm-256color
+fi
+
 # 2. OS DETECTION
 local OS_FOLDER=""
 local OS_SUBFOLDER=""
