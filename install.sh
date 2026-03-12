@@ -158,8 +158,9 @@ show_help() {
     echo "  --skip-mac-apps  Skip all macOS app installs (casks + mas)"
     echo "  --skip-mac-networked  Skip macOS networked services (e.g., Tailscale, Node-RED)"
     echo "  --enable-mac-networked  Install macOS networked services without prompting"
-    echo "  --mac-dev-machine  Enable macOS dev machine profile installs"
-    echo "  --no-mac-dev-machine  Disable macOS dev machine profile installs"
+    echo "  --dev                Enable dev machine profile installs"
+    echo "  --mac-dev-machine    Alias for --dev"
+    echo "  --no-mac-dev-machine  Disable dev machine profile installs"
     echo "  --use-starship       Use Starship prompt instead of Oh-My-Zsh+Agnoster"
     echo "  --use-ohmyzsh        Use Oh-My-Zsh+Agnoster prompt (default)"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
@@ -211,6 +212,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --mac-dev-machine)
+            # Legacy alias for --dev
             export IS_MAC_DEV_MACHINE=true
             export MAC_DEV_MACHINE_EXPLICIT=true
             shift
@@ -236,6 +238,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-splash)
             export SKIP_SPLASH=true
+            shift
+            ;;
+        --dev)
+            export IS_MAC_DEV_MACHINE=true
+            export MAC_DEV_MACHINE_EXPLICIT=true
             shift
             ;;
         --light|--server|--vps)
@@ -269,6 +276,14 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Conflict checks
+if [[ "$LIGHT_MODE" == true ]] && [[ "$IS_MAC_DEV_MACHINE" == true ]]; then
+    echo "ERROR: --dev and --light/--server/--vps cannot be used together."
+    echo "  --dev is for full dev machine setups."
+    echo "  --light is for minimal server/VPS installs."
+    exit 1
+fi
 
 # Cleanup on exit/interrupt
 cleanup_on_exit() {
