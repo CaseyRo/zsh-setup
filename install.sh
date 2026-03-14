@@ -370,7 +370,11 @@ main() {
         fi
     fi
 
-    print_header "ZSH-Setup: New Machine Setup"
+    local zsh_setup_version="unknown"
+    if [[ -f "$SCRIPT_DIR/VERSION" ]]; then
+        zsh_setup_version=$(cat "$SCRIPT_DIR/VERSION")
+    fi
+    print_header "ZSH-Setup v${zsh_setup_version}"
     if [[ "$UI_WARN_GUM_MISSING" == true ]]; then
         print_warning "gum requested but not found; falling back to classic UI."
     fi

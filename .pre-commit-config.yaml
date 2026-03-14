@@ -12,3 +12,13 @@ repos:
     hooks:
       - id: markdownlint
         args: [--fix]
+
+  - repo: local
+    hooks:
+      - id: bump-version
+        name: bump-version
+        entry: bash scripts/bump-version.sh
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [pre-commit]
