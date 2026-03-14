@@ -10,6 +10,7 @@ BREW_TAPS=(
     "gromgit/brewtils"    # taproom and other brew utilities
     "marcus/tap"          # sidecar TUI for dev workflows
     "mutagen-io/mutagen"  # file sync for remote/container dev
+    "moghtech/komodo"     # Komodo container/stack management
 )
 
 # Homebrew packages (installed via brew install)
@@ -46,6 +47,7 @@ BREW_PACKAGES_MAC_DEV=(
     "mutagen-io/mutagen/mutagen"         # file sync for remote/container dev
     "mutagen-io/mutagen/mutagen-compose" # docker compose integration
     "zellij"     # terminal multiplexer / workspace
+    "moghtech/komodo/km"         # Komodo CLI for container/stack management
 )
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)

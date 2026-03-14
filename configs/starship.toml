@@ -39,6 +39,7 @@ $character"""
 
 # --- Right Prompt (time, memory, cpu) ---
 right_format = """
+$localip\
 $memory_usage\
 $time"""
 
@@ -157,6 +158,12 @@ discharging_symbol = " "
 threshold = 50
 style = "bold yellow"
 discharging_symbol = " "
+
+[localip]
+disabled = false
+ssh_only = false
+style = "dimmed fg:overlay1"
+format = "[󰩟 $localipv4]($style) "
 
 [memory_usage]
 disabled = false
