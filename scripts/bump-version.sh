@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
-# Auto-bump patch version on every commit
+# Auto-set version based on commit count
 # Called by pre-commit hook
+# Format: 2.0.<total-commit-count>
 
 VERSION_FILE="$(git rev-parse --show-toplevel)/VERSION"
 
-if [[ ! -f "$VERSION_FILE" ]]; then
-    echo "0.1.0" > "$VERSION_FILE"
-fi
+# Current commit count + 1 (this commit hasn't been created yet)
+COMMIT_COUNT=$(($(git rev-list --count HEAD) + 1))
 
-VERSION=$(cat "$VERSION_FILE")
-IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-PATCH=$((PATCH + 1))
-echo "${MAJOR}.${MINOR}.${PATCH}" > "$VERSION_FILE"
+echo "2.0.${COMMIT_COUNT}" > "$VERSION_FILE"
 
 git add "$VERSION_FILE"
