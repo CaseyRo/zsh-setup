@@ -65,7 +65,8 @@ show_always = false
 [hostname]
 ssh_only = true
 ssh_symbol = " "
-style = "bold green"
+style = "bold bg:__HOST_COLOR__ fg:base"
+format = "[$ssh_symbol$hostname ]($style)"
 
 # ==========================================================================
 # Git
