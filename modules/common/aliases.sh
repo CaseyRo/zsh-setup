@@ -33,6 +33,9 @@ alias cy="claude --dangerously-skip-permissions"
 alias ccr="claude --resume"
 alias cyr="claude --dangerously-skip-permissions --resume"
 
+# cmux workspace setup
+alias cms="bash ~/dev/cmux-setup/cmux-setup.sh"
+
 # parsync: parallel rsync drop-in replacement
 if command -v parsync >/dev/null 2>&1; then
     alias rsync="parsync"
