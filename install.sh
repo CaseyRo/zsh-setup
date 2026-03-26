@@ -136,8 +136,7 @@ export ENABLE_MAC_NETWORKED=false
 export ALLOW_MAC_NETWORKED_SERVICES=false
 export IS_MAC_DEV_MACHINE=false
 export MAC_DEV_MACHINE_EXPLICIT=false
-export USE_STARSHIP=false
-export PROMPT_CHOICE_EXPLICIT=false
+export USE_STARSHIP=true
 export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
 export LIGHT_MODE=false
@@ -161,8 +160,6 @@ show_help() {
     echo "  --dev                Enable dev machine profile installs"
     echo "  --mac-dev-machine    Alias for --dev"
     echo "  --no-mac-dev-machine  Disable dev machine profile installs"
-    echo "  --use-starship       Use Starship prompt instead of Oh-My-Zsh+Agnoster"
-    echo "  --use-ohmyzsh        Use Oh-My-Zsh+Agnoster prompt (default)"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --skip-splash        Skip the intro splash screen"
     echo "  --light              Minimal server/VPS install (no Rust, prebuilt bins)"
@@ -220,16 +217,6 @@ while [[ $# -gt 0 ]]; do
         --no-mac-dev-machine)
             export IS_MAC_DEV_MACHINE=false
             export MAC_DEV_MACHINE_EXPLICIT=true
-            shift
-            ;;
-        --use-starship)
-            export USE_STARSHIP=true
-            export PROMPT_CHOICE_EXPLICIT=true
-            shift
-            ;;
-        --use-ohmyzsh)
-            export USE_STARSHIP=false
-            export PROMPT_CHOICE_EXPLICIT=true
             shift
             ;;
         --allow-low-battery)
@@ -371,16 +358,6 @@ main() {
     fi
 
     if [[ -f "$STATE_FILE" ]]; then
-        # Read prompt choice
-        if [[ "$PROMPT_CHOICE_EXPLICIT" != true ]]; then
-            local saved_prompt
-            saved_prompt=$(grep '^PROMPT_CHOICE=' "$STATE_FILE" 2>/dev/null | cut -d= -f2)
-            if [[ "$saved_prompt" == "starship" ]]; then
-                USE_STARSHIP=true
-            elif [[ "$saved_prompt" == "ohmyzsh" ]]; then
-                USE_STARSHIP=false
-            fi
-        fi
         # Read dev machine choice
         if [[ "$MAC_DEV_MACHINE_EXPLICIT" != true ]]; then
             local saved_dev
@@ -506,11 +483,7 @@ main() {
         echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
     fi
     echo -e "  ${SYMBOL_BULLET} uv + Python stable"
-    if [[ "$USE_STARSHIP" == true ]]; then
-        echo -e "  ${SYMBOL_BULLET} Starship prompt + zsh plugins"
-    else
-        echo -e "  ${SYMBOL_BULLET} Oh My Zsh + plugins"
-    fi
+    echo -e "  ${SYMBOL_BULLET} Starship prompt + zsh plugins"
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     if [[ "$LIGHT_MODE" != true ]]; then
         echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
@@ -562,41 +535,14 @@ main() {
         fi
     fi
 
-    # Prompt choice: Starship vs Oh-My-Zsh+Agnoster
-    if [[ "$PROMPT_CHOICE_EXPLICIT" != true ]]; then
-        if [[ "$YES_TO_ALL" == true ]]; then
-            # Default to ohmyzsh in --yes mode (unless persisted choice exists)
-            if [[ ! -f "$SCRIPT_DIR/.prompt-choice" ]]; then
-                USE_STARSHIP=false
-            fi
-            if [[ "$USE_STARSHIP" == true ]]; then
-                print_info "Prompt: Starship (persisted choice)"
-            else
-                print_info "Prompt: Oh-My-Zsh+Agnoster (default in --yes mode)"
-            fi
-        elif ui_confirm "Use Starship prompt instead of Oh-My-Zsh+Agnoster?"; then
-            USE_STARSHIP=true
-        else
-            USE_STARSHIP=false
-        fi
-    fi
+    print_info "Prompt: Starship"
 
     # Persist all user decisions to .install-state
     {
-        if [[ "$USE_STARSHIP" == true ]]; then
-            echo "PROMPT_CHOICE=starship"
-        else
-            echo "PROMPT_CHOICE=ohmyzsh"
-        fi
+        echo "PROMPT_CHOICE=starship"
         echo "IS_DEV_MACHINE=$IS_MAC_DEV_MACHINE"
         echo "MAC_NETWORKED=$ALLOW_MAC_NETWORKED_SERVICES"
     } > "$SCRIPT_DIR/.install-state" 2>/dev/null || true
-
-    if [[ "$USE_STARSHIP" == true ]]; then
-        print_info "Prompt choice: Starship"
-    else
-        print_info "Prompt choice: Oh-My-Zsh+Agnoster"
-    fi
 
     if [[ "$IS_MACOS" == true ]]; then
         if [[ "$SKIP_MAC_APPS" == true ]]; then
@@ -698,7 +644,7 @@ main() {
     # Drop cached sudo credentials before user-space installers
     # =========================================================================
     # APT/Homebrew operations above may have cached sudo credentials.
-    # User-space installers (Rust, NVM, uv, Oh-My-Zsh) write to $HOME and
+    # User-space installers (Rust, NVM, uv, Starship) write to $HOME and
     # must NOT inherit elevated privileges, or they'll create root-owned files.
     sudo -k 2>/dev/null || true
 

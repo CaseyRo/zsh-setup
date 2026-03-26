@@ -24,5 +24,5 @@ setopt HIST_SAVE_NO_DUPS         # Don't write duplicates to file
 setopt HIST_VERIFY               # Show expanded history before executing
 setopt EXTENDED_HISTORY          # Record timestamp and duration
 
-# Completion system — compinit runs once via Oh-My-Zsh after all fpath entries are set
+# Completion system — compinit runs after all fpath entries are set
 zstyle :compinstall filename '$HOME/.zshrc'

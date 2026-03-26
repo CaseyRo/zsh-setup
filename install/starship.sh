@@ -4,10 +4,6 @@
 # ============================================================================
 
 install_starship() {
-    if [[ "$USE_STARSHIP" != true ]]; then
-        return 0
-    fi
-
     print_section "Starship Prompt"
 
     if command_exists starship; then

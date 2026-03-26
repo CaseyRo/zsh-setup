@@ -233,8 +233,10 @@ else
     check_warn "Default shell is $current_shell (expected zsh)"
 fi
 
-if [[ -d "$HOME/.oh-my-zsh" ]]; then
-    check_pass "Oh My Zsh installed"
+if command -v starship &>/dev/null; then
+    check_pass "Starship prompt installed"
+else
+    check_fail "Starship prompt not found"
 fi
 
 echo ""

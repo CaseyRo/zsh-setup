@@ -1,57 +1,17 @@
 #!/bin/bash
 # ============================================================================
-# Oh My Zsh Installation
+# Zsh Plugin Installation (Starship-only, no Oh My Zsh)
 # ============================================================================
 
 install_oh_my_zsh() {
-    if [[ "$USE_STARSHIP" == true ]]; then
-        print_section "Oh My Zsh"
-        print_skip "Oh My Zsh (using Starship prompt instead)"
-        track_skipped "Oh My Zsh (Starship mode)"
-        return 0
-    fi
-
-    print_section "Oh My Zsh"
-
-    # Check ownership first
-    if ! check_dir_ownership "$HOME/.oh-my-zsh" "Oh My Zsh"; then
-        return 1
-    fi
-
-    if [[ -d "$HOME/.oh-my-zsh" ]]; then
-        print_skip "Oh My Zsh"
-        track_skipped "Oh My Zsh"
-    else
-        print_step "Installing Oh My Zsh"
-
-        # Install without running zsh at the end (RUNZSH=no)
-        # Don't replace .zshrc (KEEP_ZSHRC=yes) since we'll use our own
-        if [[ "$VERBOSE" == true ]]; then
-            RUNZSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-        else
-            RUNZSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended &>/dev/null
-        fi
-
-        if [[ -d "$HOME/.oh-my-zsh" ]]; then
-            print_success "Oh My Zsh installed"
-            track_installed "Oh My Zsh"
-        else
-            print_error "Oh My Zsh installation failed"
-            track_failed "Oh My Zsh"
-            return 1
-        fi
-    fi
+    # Oh My Zsh is no longer used — Starship is the only prompt
+    return 0
 }
 
 install_zsh_plugins() {
     print_section "Zsh Plugins"
 
-    local ZSH_CUSTOM
-    if [[ "$USE_STARSHIP" == true ]]; then
-        ZSH_CUSTOM="$HOME/.local/share/zsh-plugins"
-    else
-        ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-    fi
+    local ZSH_CUSTOM="$HOME/.local/share/zsh-plugins"
 
     # zsh-autosuggestions
     if [[ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]]; then
@@ -97,13 +57,4 @@ install_zsh_plugins() {
             track_failed "zsh-syntax-highlighting"
         fi
     fi
-
-    # fast-syntax-highlighting (alternative, more performant)
-    # if [[ -d "$ZSH_CUSTOM/plugins/fast-syntax-highlighting" ]]; then
-    #     print_skip "fast-syntax-highlighting"
-    # else
-    #     print_package "fast-syntax-highlighting"
-    #     git clone https://github.com/zdharma-continuum/fast-syntax-highlighting "$ZSH_CUSTOM/plugins/fast-syntax-highlighting" &>/dev/null
-    #     print_success "fast-syntax-highlighting installed"
-    # fi
 }

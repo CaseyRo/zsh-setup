@@ -2,11 +2,6 @@
 # Starship Prompt Configuration
 # ============================================================================
 
-# Only activate if prompt choice is starship
-if [[ ! -f "$ZSH_SETUP_FOLDER/.prompt-choice" ]] || [[ "$(cat "$ZSH_SETUP_FOLDER/.prompt-choice" 2>/dev/null)" != "starship" ]]; then
-    return 0
-fi
-
 # --------------------------------------------------------------------------
 # Hostname → deterministic color (golden-ratio hash scatter)
 # Picks a vibrant bg color unique per hostname, so every server looks different.
@@ -60,7 +55,7 @@ if command -v starship &> /dev/null; then
     eval "$(starship init zsh)"
 fi
 
-# Source plugins directly (no Oh-My-Zsh framework)
+# Source plugins directly
 local _plugin_dir="$HOME/.local/share/zsh-plugins/plugins"
 
 if [[ -f "$_plugin_dir/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
