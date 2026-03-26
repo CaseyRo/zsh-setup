@@ -125,5 +125,6 @@ export PATH="$HOME/go/bin:$PATH"
 # Zoxide — must init at the very end of .zshrc (zoxide requirement)
 # --cmd cd: replaces cd with zoxide-aware cd; 'cdi' for interactive fzf picker
 if command -v zoxide &> /dev/null; then
+    export _ZO_DOCTOR=0
     eval "$(zoxide init zsh --cmd cd)"
 fi
