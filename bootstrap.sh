@@ -152,6 +152,14 @@ else
     git clone --quiet "$REPO_URL" "$INSTALL_DIR"
 fi
 
+# Validate install.sh syntax before running
+echo "  → Validating install scripts..."
+if ! bash -n "$INSTALL_DIR/install.sh" 2>/dev/null; then
+    echo "  ERROR: install.sh has syntax errors. Aborting."
+    echo "  Try re-cloning: rm -rf $INSTALL_DIR && re-run bootstrap."
+    exit 1
+fi
+
 # Run the setup script
 echo "  → Running setup..."
 echo ""

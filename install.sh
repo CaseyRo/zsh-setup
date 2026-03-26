@@ -313,7 +313,6 @@ source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/mas.sh"
-source "$INSTALL_DIR/macos-automations.sh"
 source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
@@ -359,14 +358,48 @@ main() {
     ui_init "$UI_MODE" "$UI_THEME"
     log_init
 
-    # Read persisted prompt choice (unless overridden by CLI flag)
-    if [[ "$PROMPT_CHOICE_EXPLICIT" != true ]] && [[ -f "$SCRIPT_DIR/.prompt-choice" ]]; then
-        local saved_choice
-        saved_choice=$(cat "$SCRIPT_DIR/.prompt-choice" 2>/dev/null)
-        if [[ "$saved_choice" == "starship" ]]; then
-            USE_STARSHIP=true
-        elif [[ "$saved_choice" == "ohmyzsh" ]]; then
-            USE_STARSHIP=false
+    # Read persisted install state (unless overridden by CLI flags)
+    local STATE_FILE="$SCRIPT_DIR/.install-state"
+
+    # Migrate legacy .prompt-choice → .install-state
+    if [[ -f "$SCRIPT_DIR/.prompt-choice" ]] && [[ ! -f "$STATE_FILE" ]]; then
+        local legacy_choice
+        legacy_choice=$(cat "$SCRIPT_DIR/.prompt-choice" 2>/dev/null)
+        echo "PROMPT_CHOICE=$legacy_choice" > "$STATE_FILE"
+        rm -f "$SCRIPT_DIR/.prompt-choice"
+        print_info "Migrated .prompt-choice → .install-state"
+    fi
+
+    if [[ -f "$STATE_FILE" ]]; then
+        # Read prompt choice
+        if [[ "$PROMPT_CHOICE_EXPLICIT" != true ]]; then
+            local saved_prompt
+            saved_prompt=$(grep '^PROMPT_CHOICE=' "$STATE_FILE" 2>/dev/null | cut -d= -f2)
+            if [[ "$saved_prompt" == "starship" ]]; then
+                USE_STARSHIP=true
+            elif [[ "$saved_prompt" == "ohmyzsh" ]]; then
+                USE_STARSHIP=false
+            fi
+        fi
+        # Read dev machine choice
+        if [[ "$MAC_DEV_MACHINE_EXPLICIT" != true ]]; then
+            local saved_dev
+            saved_dev=$(grep '^IS_DEV_MACHINE=' "$STATE_FILE" 2>/dev/null | cut -d= -f2)
+            if [[ "$saved_dev" == "true" ]]; then
+                IS_MAC_DEV_MACHINE=true
+            elif [[ "$saved_dev" == "false" ]]; then
+                IS_MAC_DEV_MACHINE=false
+            fi
+        fi
+        # Read networked services choice
+        if [[ "$SKIP_MAC_NETWORKED" != true ]] && [[ "$ENABLE_MAC_NETWORKED" != true ]]; then
+            local saved_networked
+            saved_networked=$(grep '^MAC_NETWORKED=' "$STATE_FILE" 2>/dev/null | cut -d= -f2)
+            if [[ "$saved_networked" == "true" ]]; then
+                ALLOW_MAC_NETWORKED_SERVICES=true
+            elif [[ "$saved_networked" == "false" ]]; then
+                ALLOW_MAC_NETWORKED_SERVICES=false
+            fi
         fi
     fi
 
@@ -548,12 +581,20 @@ main() {
         fi
     fi
 
-    # Persist prompt choice
+    # Persist all user decisions to .install-state
+    {
+        if [[ "$USE_STARSHIP" == true ]]; then
+            echo "PROMPT_CHOICE=starship"
+        else
+            echo "PROMPT_CHOICE=ohmyzsh"
+        fi
+        echo "IS_DEV_MACHINE=$IS_MAC_DEV_MACHINE"
+        echo "MAC_NETWORKED=$ALLOW_MAC_NETWORKED_SERVICES"
+    } > "$SCRIPT_DIR/.install-state" 2>/dev/null || true
+
     if [[ "$USE_STARSHIP" == true ]]; then
-        echo "starship" > "$SCRIPT_DIR/.prompt-choice" 2>/dev/null || true
         print_info "Prompt choice: Starship"
     else
-        echo "ohmyzsh" > "$SCRIPT_DIR/.prompt-choice" 2>/dev/null || true
         print_info "Prompt choice: Oh-My-Zsh+Agnoster"
     fi
 
@@ -798,8 +839,6 @@ main() {
     if [[ "$LIGHT_MODE" != true ]] && { [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; }; then
         install_git_confirmer_optional
     fi
-
-    install_macos_automations
 
     # Set zsh as default shell
     set_default_shell_zsh

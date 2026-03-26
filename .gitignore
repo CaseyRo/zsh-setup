@@ -80,6 +80,7 @@ $RECYCLE.BIN/
 *.zwc
 .git-confirmer-prompted
 .prompt-choice
+.install-state
 
 # Total Recall (personal memory — never commit to public repos)
 CLAUDE.local.md
