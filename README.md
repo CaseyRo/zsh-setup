@@ -14,7 +14,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 
 | Category | Tools |
 |----------|-------|
-| Shell | ZSH, Starship prompt, zsh-autosuggestions, zsh-syntax-highlighting |
+| Shell | ZSH, Starship prompt |
 | CLI tools | bat, eza, ripgrep, fd, fzf, zoxide, btop, fastfetch |
 | Dev tools | git, gh (GitHub CLI), lazygit |
 | Languages | Rust/Cargo, NVM + Node.js, uv + Python |
