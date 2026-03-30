@@ -2,6 +2,12 @@
 # Completion Scripts
 # ============================================================================
 
+# Initialize zsh completion engine (skip if zsh-autocomplete already did it)
+if ! whence compdef &>/dev/null; then
+    autoload -Uz compinit
+    compinit
+fi
+
 # PM2 completion
 COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
 COMP_WORDBREAKS=${COMP_WORDBREAKS/@/}

@@ -57,11 +57,11 @@ if command -v git_confirmer >/dev/null 2>&1; then
     alias gc="git_confirmer"
     alias gcs="git_confirmer --ship"
 else
-    gc() {
+    function gc {
         echo "git_confirmer not found. Run \"$ZSH_SETUP_FOLDER/install.sh\" and opt in to enable gc."
         return 127
     }
-    gcs() {
+    function gcs {
         echo "git_confirmer not found. Run \"$ZSH_SETUP_FOLDER/install.sh\" and opt in to enable gcs."
         return 127
     }
