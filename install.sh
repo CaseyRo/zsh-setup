@@ -305,6 +305,7 @@ source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
 source "$INSTALL_DIR/dev-repos.sh"
 source "$INSTALL_DIR/prebuilt-bins.sh"
+source "$INSTALL_DIR/atuin.sh"
 source "$INSTALL_DIR/splash.sh"
 
 # ============================================================================
@@ -736,6 +737,13 @@ main() {
     if [[ "$LIGHT_MODE" != true ]]; then
         install_nerd_fonts
     fi
+
+    # Atuin: shell history sync & search
+    # macOS gets atuin via BREW_PACKAGES; Linux needs the curl installer
+    if [[ "$USE_APT" == true ]]; then
+        install_atuin
+    fi
+    deploy_atuin_config
 
     # Setup zsh-setup symlink
     print_section "ZSH-Setup Configuration"

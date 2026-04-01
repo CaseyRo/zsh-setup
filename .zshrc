@@ -122,9 +122,17 @@ alias css='clipssh'
 # Go binaries (go install puts binaries here)
 export PATH="$HOME/go/bin:$PATH"
 
+# Atuin — shell history sync & search (overrides Ctrl+R from fzf)
+# Must init after modules (fzf in tools.sh) so atuin's bindings take precedence
+if command -v atuin &> /dev/null; then
+    eval "$(atuin init zsh)"
+fi
+
 # Zoxide — must init at the very end of .zshrc (zoxide requirement)
 # --cmd cd: replaces cd with zoxide-aware cd; 'cdi' for interactive fzf picker
 if command -v zoxide &> /dev/null; then
     export _ZO_DOCTOR=0
     eval "$(zoxide init zsh --cmd cd)"
 fi
+
+. "$HOME/.atuin/bin/env"

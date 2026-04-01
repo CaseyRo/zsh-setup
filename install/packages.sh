@@ -33,6 +33,7 @@ BREW_PACKAGES=(
     "tree"       # directory tree viewer
     "tlrc"       # tldr pages client (Rust, fast)
     "yt-dlp"     # YouTube downloader
+    "atuin"      # shell history sync & search
 )
 
 # Homebrew packages for macOS dev machines only

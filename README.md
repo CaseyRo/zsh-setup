@@ -15,7 +15,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | Category | Tools |
 |----------|-------|
 | Shell | ZSH, Starship prompt |
-| CLI tools | bat, eza, ripgrep, fd, fzf, zoxide, btop, fastfetch |
+| CLI tools | bat, eza, ripgrep, fd, fzf, zoxide, btop, fastfetch, atuin |
 | Dev tools | git, gh (GitHub CLI), lazygit |
 | Languages | Rust/Cargo, NVM + Node.js, uv + Python |
 | Services | Docker, Tailscale, Copyparty |
@@ -121,6 +121,23 @@ export MY_API_KEY="secret"
 ### Customizing packages
 
 Edit `install/packages.sh` to add/remove packages from the installation.
+
+## Atuin (Shell History Sync)
+
+[Atuin](https://docs.atuin.sh/) replaces your shell history with a searchable, encrypted, and synced database. Ctrl+R opens Atuin's fuzzy search instead of the default zsh history.
+
+History syncs to a self-hosted Atuin server on the Tailscale mesh — no data leaves the private network.
+
+### First-time setup
+
+After running `install.sh`, log in to sync history across machines:
+
+```bash
+atuin login -u casey
+# Enter the encryption key from 1Password when prompted
+atuin import auto    # Import existing shell history
+atuin sync           # First sync
+```
 
 ## License
 
