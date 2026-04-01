@@ -1,0 +1,24 @@
+## Atuin Configuration
+## Managed by CaseyRo/zsh-setup
+
+# Self-hosted sync server (Tailscale mesh)
+sync_address = "http://100.114.39.108:8888"
+
+# Sync interval
+sync_frequency = "10m"
+
+# Search mode — daemon-fuzzy requires daemon enabled
+search_mode = "daemon-fuzzy"
+
+[daemon]
+enabled = true
+autostart = true
+
+# Filter noisy commands from history
+history_filter = [
+    "^ls$",
+    "^cd ",
+    "^pwd$",
+    "^exit$",
+    "^clear$",
+]
