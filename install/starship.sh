@@ -62,7 +62,7 @@ install_starship() {
 
         print_step "Creating starship config symlink"
         ln -s "$STARSHIP_SOURCE" "$STARSHIP_TARGET"
-        print_success "~/.config/starship.toml → $STARSHIP_SOURCE"
+        print_success "\$HOME/.config/starship.toml → $STARSHIP_SOURCE"
         track_installed "starship config"
     fi
 }

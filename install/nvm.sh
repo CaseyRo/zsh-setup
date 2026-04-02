@@ -56,7 +56,8 @@ install_node() {
 
     # Check if any node version is installed
     if nvm list 2>/dev/null | grep -q "v[0-9]"; then
-        local current_version=$(nvm current 2>/dev/null)
+        local current_version
+        current_version=$(nvm current 2>/dev/null)
         if [[ -z "$current_version" || "$current_version" == "none" || "$current_version" == "system" ]]; then
             # No version active, try to activate and set default
             nvm use node &>/dev/null || true

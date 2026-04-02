@@ -1,7 +1,9 @@
+#!/usr/bin/env zsh
+# shellcheck disable=SC1090,SC2034
 # OPENSPEC:START
 # OpenSpec shell completions — fpath only; compinit runs separately
-fpath=("$HOME/.local/share/zsh-plugins/completions" $fpath)
-fpath+=~/.zfunc
+fpath=("$HOME/.local/share/zsh-plugins/completions" "${fpath[@]}")
+fpath+=(~/.zfunc)
 # OPENSPEC:END
 
 # ============================================================================
@@ -26,7 +28,7 @@ fpath+=~/.zfunc
 # ============================================================================
 
 # 1. CONFIGURATION PATHS
-ZSH_SETUP_FOLDER=$(dirname $(realpath $HOME/.zshrc))
+ZSH_SETUP_FOLDER=$(dirname "$(realpath "$HOME/.zshrc")")
 ZSH_SETUP_PRELOAD_CONFIGS_FOLDER=${ZSH_SETUP_FOLDER}/preload_configs
 ZSH_SETUP_MODULES_FOLDER=${ZSH_SETUP_FOLDER}/modules
 
@@ -35,7 +37,7 @@ ZSH_Manager_FOLDER="$ZSH_SETUP_FOLDER"
 ZSH_Manager_PRELOAD_CONFIGS_FOLDER="$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER"
 ZSH_Manager_MODULES_FOLDER="$ZSH_SETUP_MODULES_FOLDER"
 
-local BASE_FOLDERS=("$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER" "$ZSH_SETUP_MODULES_FOLDER")
+BASE_FOLDERS=("$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER" "$ZSH_SETUP_MODULES_FOLDER")
 
 # 1b. TERMINAL COMPATIBILITY
 # Ghostty sets TERM=xterm-ghostty, but most remote hosts and multiplexers
@@ -45,8 +47,8 @@ if [[ "$TERM" == "xterm-ghostty" ]] && ! infocmp xterm-ghostty &>/dev/null; then
 fi
 
 # 2. OS DETECTION
-local OS_FOLDER=""
-local OS_SUBFOLDER=""
+OS_FOLDER=""
+OS_SUBFOLDER=""
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS_FOLDER="macos"
@@ -66,7 +68,7 @@ elif [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" ==
 fi
 
 # Build list of folders to load from (in order)
-local OS_SCRIPT_FOLDERS=("common")
+OS_SCRIPT_FOLDERS=("common")
 if [[ -n "$OS_FOLDER" ]]; then
     OS_SCRIPT_FOLDERS+=("$OS_FOLDER")
     if [[ -n "$OS_SUBFOLDER" ]]; then

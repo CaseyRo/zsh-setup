@@ -761,7 +761,7 @@ main() {
 
         print_step "Creating symlink"
         ln -s "$SCRIPT_DIR/.zshrc" "$ZSHRC_TARGET"
-        print_success "~/.zshrc → $SCRIPT_DIR/.zshrc"
+        print_success "\$HOME/.zshrc → $SCRIPT_DIR/.zshrc"
         track_installed "zshrc symlink"
     fi
 
@@ -786,7 +786,7 @@ main() {
 
         print_step "Creating topgrade config symlink"
         ln -s "$TOPGRADE_SOURCE" "$TOPGRADE_TARGET"
-        print_success "~/.config/topgrade.toml → $TOPGRADE_SOURCE"
+        print_success "\$HOME/.config/topgrade.toml → $TOPGRADE_SOURCE"
         track_installed "topgrade config"
     fi
 

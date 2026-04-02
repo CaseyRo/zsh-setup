@@ -186,7 +186,8 @@ upgrade_nerd_fonts() {
         for font in "${NERD_FONTS[@]}"; do
             if ! is_nerd_font_installed "$font"; then
                 INSTALLED_SOMETHING=true
-                local cask_name=$(get_brew_cask_name "$font")
+                local cask_name
+                cask_name=$(get_brew_cask_name "$font")
                 echo -e "${SYMBOL_PACKAGE} Installing new font: ${BOLD}$font Nerd Font${RESET}"
                 brew install --cask "$cask_name" &>/dev/null && \
                     echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} $font Nerd Font installed" || \

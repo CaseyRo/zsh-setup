@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1083,SC2034
 # ============================================================================
 # ZSH-Setup: git_confirmer (optional)
 # ============================================================================
@@ -34,8 +35,8 @@ git_confirmer_update_if_needed() {
     fi
 
     local behind=0
-    if git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse --abbrev-ref --symbolic-full-name @{upstream} &>/dev/null; then
-        behind=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0)
+    if git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' &>/dev/null; then
+        behind=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)
     else
         behind=1
     fi
@@ -156,8 +157,8 @@ upgrade_git_confirmer() {
     git -C "$GIT_CONFIRMER_INSTALL_DIR" fetch --quiet &>/dev/null || return 0
 
     local behind=0
-    if git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse --abbrev-ref --symbolic-full-name @{upstream} &>/dev/null; then
-        behind=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0)
+    if git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' &>/dev/null; then
+        behind=$(git -C "$GIT_CONFIRMER_INSTALL_DIR" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)
     else
         behind=1
     fi

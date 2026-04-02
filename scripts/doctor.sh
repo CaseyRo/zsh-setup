@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1083
 # ============================================================================
 # ZSH-Setup Doctor — Health check for your zsh-setup installation
 # ============================================================================
@@ -66,14 +67,14 @@ echo "${CYAN}Symlinks${RESET}"
 if [[ -L "$HOME/.zshrc" ]]; then
     target="$(readlink "$HOME/.zshrc")"
     if [[ -f "$target" ]]; then
-        check_pass "~/.zshrc → $target"
+        check_pass "\$HOME/.zshrc → $target"
     else
-        check_fail "~/.zshrc symlink is broken → $target"
+        check_fail "\$HOME/.zshrc symlink is broken → $target"
     fi
 elif [[ -f "$HOME/.zshrc" ]]; then
-    check_warn "~/.zshrc exists but is not a symlink (managed manually?)"
+    check_warn "\$HOME/.zshrc exists but is not a symlink (managed manually?)"
 else
-    check_fail "~/.zshrc is missing"
+    check_fail "\$HOME/.zshrc is missing"
 fi
 
 # Starship config
@@ -200,7 +201,7 @@ if [[ -d "$SETUP_DIR/.git" ]]; then
         if [[ "$local_sha" == "$remote_sha" ]]; then
             check_pass "Up to date with remote"
         else
-            behind=$(git -C "$SETUP_DIR" rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0)
+            behind=$(git -C "$SETUP_DIR" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)
             if [[ "$behind" -gt 0 ]]; then
                 check_warn "$behind commits behind remote"
             else

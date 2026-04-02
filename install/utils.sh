@@ -1,4 +1,5 @@
 # shellcheck shell=bash
+# shellcheck disable=SC2034
 # ============================================================================
 # CLI Styling Utilities
 # ============================================================================
@@ -718,7 +719,8 @@ check_binary_executable() {
 
 # Detect if running on ARM architecture (Raspberry Pi, Apple Silicon, etc.)
 is_arm() {
-    local arch=$(uname -m)
+    local arch
+    arch=$(uname -m)
     [[ "$arch" == "arm64" || "$arch" == "aarch64" || "$arch" == "armv"* ]]
 }
 

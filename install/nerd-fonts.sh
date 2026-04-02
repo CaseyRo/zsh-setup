@@ -56,7 +56,8 @@ install_nerd_font_linux() {
     local font_name="$1"
     local font_url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_name}.zip"
     local font_dir="$HOME/.local/share/fonts/NerdFonts"
-    local temp_dir=$(mktemp -d)
+    local temp_dir
+    temp_dir=$(mktemp -d)
 
     mkdir -p "$font_dir"
 
@@ -107,7 +108,8 @@ get_brew_cask_name() {
         RobotoMono)     echo "font-roboto-mono-nerd-font" ;;
         *)
             # Fallback: convert CamelCase to kebab-case
-            local cask_name=$(echo "$font" | sed 's/\([A-Z]\)/-\1/g' | sed 's/^-//' | tr '[:upper:]' '[:lower:]')
+            local cask_name
+            cask_name=$(echo "$font" | sed 's/\([A-Z]\)/-\1/g' | sed 's/^-//' | tr '[:upper:]' '[:lower:]')
             echo "font-${cask_name}-nerd-font"
             ;;
     esac
@@ -129,7 +131,8 @@ install_nerd_fonts() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS: Install via Homebrew cask
         for font in "${NERD_FONTS[@]}"; do
-            local cask_name=$(get_brew_cask_name "$font")
+            local cask_name
+            cask_name=$(get_brew_cask_name "$font")
             if is_nerd_font_installed "$font"; then
                 print_skip "$font Nerd Font"
                 track_skipped "$font Nerd Font"
