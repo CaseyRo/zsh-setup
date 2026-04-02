@@ -123,7 +123,8 @@ alias css='clipssh'
 export PATH="$HOME/go/bin:$PATH"
 
 # Atuin — shell history sync & search (overrides Ctrl+R from fzf)
-# Must init after modules (fzf in tools.sh) so atuin's bindings take precedence
+# Source env first (adds ~/.atuin/bin to PATH), then init
+[[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
 if command -v atuin &> /dev/null; then
     eval "$(atuin init zsh)"
 fi
@@ -134,5 +135,3 @@ if command -v zoxide &> /dev/null; then
     export _ZO_DOCTOR=0
     eval "$(zoxide init zsh --cmd cd)"
 fi
-
-. "$HOME/.atuin/bin/env"
