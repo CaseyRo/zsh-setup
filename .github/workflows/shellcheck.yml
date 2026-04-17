@@ -29,9 +29,18 @@ jobs:
           echo "All files passed syntax check"
           echo "::endgroup::"
 
-      - name: ShellCheck
+      - name: ShellCheck (installer scripts)
         uses: ludeeus/action-shellcheck@master
         with:
           severity: warning
           scandir: .
           ignore_paths: modules preload_configs .zshrc
+
+      - name: ShellCheck (runtime modules, bash mode)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          echo "::group::Runtime modules + preload_configs"
+          mapfile -t targets < <(find modules preload_configs -type f -name '*.sh' ! -name '#*')
+          shellcheck --shell=bash --severity=warning "${targets[@]}"
+          echo "::endgroup::"
+        shell: bash

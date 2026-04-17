@@ -3,9 +3,14 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
+        name: shellcheck (installers)
         args: [--severity=error]
         files: ^(install\.sh|install/.*\.sh|bootstrap\.sh|scripts/.*\.sh)$
-        exclude: ^(modules/|preload_configs/|\.zshrc)
+      - id: shellcheck
+        name: shellcheck (runtime modules, bash mode)
+        args: [--shell=bash, --severity=warning]
+        files: ^(modules/.*\.sh|preload_configs/.*\.sh)$
+        exclude: ^(modules|preload_configs)/.*#.*
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.47.0

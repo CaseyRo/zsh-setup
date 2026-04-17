@@ -32,11 +32,6 @@ ZSH_SETUP_FOLDER=$(dirname "$(realpath "$HOME/.zshrc")")
 ZSH_SETUP_PRELOAD_CONFIGS_FOLDER=${ZSH_SETUP_FOLDER}/preload_configs
 ZSH_SETUP_MODULES_FOLDER=${ZSH_SETUP_FOLDER}/modules
 
-# Legacy aliases for external scripts
-ZSH_Manager_FOLDER="$ZSH_SETUP_FOLDER"
-ZSH_Manager_PRELOAD_CONFIGS_FOLDER="$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER"
-ZSH_Manager_MODULES_FOLDER="$ZSH_SETUP_MODULES_FOLDER"
-
 BASE_FOLDERS=("$ZSH_SETUP_PRELOAD_CONFIGS_FOLDER" "$ZSH_SETUP_MODULES_FOLDER")
 
 # 1b. TERMINAL COMPATIBILITY
@@ -79,8 +74,6 @@ fi
 # Export for use in modules
 export ZSH_SETUP_OS_FOLDER="$OS_FOLDER"
 export ZSH_SETUP_OS_SUBFOLDER="$OS_SUBFOLDER"
-export ZSH_Manager_OS_FOLDER="$ZSH_SETUP_OS_FOLDER"
-export ZSH_Manager_OS_SUBFOLDER="$ZSH_SETUP_OS_SUBFOLDER"
 
 # 3. HELPER FUNCTION
 include () {
@@ -114,26 +107,8 @@ for base_folder in "${BASE_FOLDERS[@]}"; do
         fi
     done
 done
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
 
-# ClipSSH — clipboard screenshot to remote host
-export CLIPSSH_HOST=cc1
-alias css='clipssh'
-
-# Go binaries (go install puts binaries here)
-export PATH="$HOME/go/bin:$PATH"
-
-# Atuin — shell history sync & search (overrides Ctrl+R from fzf)
-# Source env first (adds ~/.atuin/bin to PATH), then init
-[[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
-if command -v atuin &> /dev/null; then
-    eval "$(atuin init zsh)"
-fi
-
-# Zoxide — must init at the very end of .zshrc (zoxide requirement)
-# --cmd cd: replaces cd with zoxide-aware cd; 'cdi' for interactive fzf picker
-if command -v zoxide &> /dev/null; then
-    export _ZO_DOCTOR=0
-    eval "$(zoxide init zsh --cmd cd)"
-fi
+# Locale, common exports, and tail-init (atuin, zoxide) live in:
+#   preload_configs/common/env.sh   — locale, aliases, PATH extensions
+#   modules/common/zz_atuin.sh      — atuin (loads last to win Ctrl+R)
+#   modules/common/zz_zoxide.sh     — zoxide (strictly last; overrides cd)

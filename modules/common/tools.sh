@@ -5,6 +5,7 @@
 # fzf (fuzzy finder) — CTRL-T: file picker, CTRL-R: history, ALT-C: cd
 if command -v fzf &> /dev/null; then
     if fzf --zsh &>/dev/null; then
+        # shellcheck disable=SC1090  # dynamic source from fzf
         source <(fzf --zsh)
     elif [[ -f "${HOME}/.fzf.zsh" ]]; then
         source "${HOME}/.fzf.zsh"

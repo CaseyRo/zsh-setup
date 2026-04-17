@@ -12,11 +12,13 @@ fi
 
 # Alias
 if [[ -x "$_cmux_setup_dir/cmux-setup.sh" ]]; then
+    # shellcheck disable=SC2139  # intentional: capture path at definition time
     alias cms="bash $_cmux_setup_dir/cmux-setup.sh"
 fi
 
 # Zsh completions
 if [[ -d "$_cmux_setup_dir/completions" ]]; then
+    # shellcheck disable=SC2206  # zsh fpath array append
     fpath=("$_cmux_setup_dir/completions" $fpath)
 fi
 

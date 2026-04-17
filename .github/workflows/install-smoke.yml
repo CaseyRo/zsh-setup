@@ -1,0 +1,23 @@
+name: Install Smoke Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  install-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ubuntu, debian]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.distro }} image (install runs twice for idempotence)
+        run: docker build -f test/Dockerfile.${{ matrix.distro }} -t zsh-setup-test:${{ matrix.distro }} .
+
+      - name: Run shell inside image
+        run: docker run --rm zsh-setup-test:${{ matrix.distro }}

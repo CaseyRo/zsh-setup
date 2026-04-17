@@ -9,13 +9,16 @@ dl() {
 }
 
 dlc() {
-    local DIRNAME=$(basename "$PWD")
+    local DIRNAME
+    DIRNAME=$(basename "$PWD")
     docker logs "$DIRNAME" --follow --tail 100
 }
 
 dcdcurl() {
-    local DIRNAME=$(basename "$PWD")
+    local DIRNAME
+    DIRNAME=$(basename "$PWD")
     docker compose down && docker compose pull && docker compose up -d && docker compose logs -f
+    unset DIRNAME
 }
 
 # Git shortcuts

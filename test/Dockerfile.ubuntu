@@ -1,0 +1,25 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+RUN apt-get update -qq \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates curl git sudo locales tzdata zsh \
+ && locale-gen en_US.UTF-8 \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash tester \
+ && echo 'tester ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/tester \
+ && chmod 0440 /etc/sudoers.d/tester
+
+USER tester
+WORKDIR /home/tester/zsh-setup
+COPY --chown=tester:tester . /home/tester/zsh-setup
+
+RUN ./install.sh -y --light --skip-splash
+RUN ./install.sh -y --light --skip-splash
+
+CMD ["zsh", "-i", "-c", "echo zsh-setup OK on $(uname -a); type cd"]

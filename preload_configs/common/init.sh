@@ -4,13 +4,15 @@
 # Loaded on all systems before OS-specific configs
 
 # Machine detection (available for use in other modules)
-export MACHINE_HOSTNAME=$(hostname)
-export MACHINE_OS=$(uname)
-export MACHINE_USER=$(whoami)
+MACHINE_HOSTNAME=$(hostname)
+MACHINE_OS=$(uname)
+MACHINE_USER=$(whoami)
+export MACHINE_HOSTNAME MACHINE_OS MACHINE_USER
 
 # History configuration
 HISTFILE=$HOME/.zsh_history
 HISTSIZE=50000
+# shellcheck disable=SC2034  # SAVEHIST is read by zsh internals
 SAVEHIST=50000
 
 setopt INC_APPEND_HISTORY        # Write immediately, not on shell exit

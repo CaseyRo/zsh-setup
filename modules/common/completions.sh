@@ -16,6 +16,7 @@ export COMP_WORDBREAKS
 if type complete &>/dev/null; then
     _pm2_completion () {
         local si="$IFS"
+        # shellcheck disable=SC2207  # pm2 completion emits one candidate per line
         IFS=$'\n' COMPREPLY=($(COMP_CWORD="$COMP_CWORD" \
                                COMP_LINE="$COMP_LINE" \
                                COMP_POINT="$COMP_POINT" \
@@ -29,10 +30,11 @@ elif type compctl &>/dev/null; then
         local cword line point words si
         read -Ac words
         read -cn cword
-        let cword-=1
+        (( cword-=1 ))
         read -l line
         read -ln point
         si="$IFS"
+        # shellcheck disable=SC2034,SC2207  # 'reply' is the zsh compctl return array
         IFS=$'\n' reply=($(COMP_CWORD="$cword" \
                            COMP_LINE="$line" \
                            COMP_POINT="$point" \

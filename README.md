@@ -101,6 +101,8 @@ modules/
     └── macos_shortcuts.sh
 ```
 
+Modules in each folder load in lexicographic order. The `zz_` prefix is **reserved** for tail-init modules that must run last — currently `zz_atuin.sh` (overrides fzf's Ctrl+R) and `zz_zoxide.sh` (must be strictly last to override `cd`). Don't prefix your own modules with `zz_`.
+
 ### Ignoring files
 
 Prefix with `#` to skip loading:

@@ -9,7 +9,7 @@ ZSH_SETUP_LAST_UPDATE_FILE="$ZSH_SETUP_FOLDER/.last-update-check"
 ZSH_SETUP_LOCK_FILE="$ZSH_SETUP_FOLDER/.update-lock"
 
 cleanup_legacy_zsh_manager() {
-    local legacy_dir="${ZSH_MANAGER_DIR:-$HOME/.zsh-manager}"
+    local legacy_dir="$HOME/.zsh-manager"
     local legacy_state="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-manager"
     local legacy_real=""
     local current_real=""
@@ -86,8 +86,8 @@ _zsh_setup_release_lock() {
 _zsh_setup_check_update() {
     cleanup_legacy_zsh_manager
 
-    local current_time=$(date +%s)
-    local last_check=0
+    local current_time last_check=0
+    current_time=$(date +%s)
 
     # Read last check time if file exists
     if [[ -f "$ZSH_SETUP_LAST_UPDATE_FILE" ]]; then
@@ -122,6 +122,7 @@ _zsh_setup_check_update() {
         git fetch --quiet 2>/dev/null || exit 1
 
         local behind
+        # shellcheck disable=SC1083  # @{upstream} is valid git revision syntax
         behind=$(git rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0)
         [[ "$behind" -gt 0 ]] || exit 0
 
@@ -160,6 +161,7 @@ zsh-update() {
     git fetch || { echo "Fetch failed. Check your network connection."; return 1; }
 
     local behind
+    # shellcheck disable=SC1083  # @{upstream} is valid git revision syntax
     behind=$(git rev-list --count HEAD..@{upstream} 2>/dev/null || echo 0)
     if [[ "$behind" -eq 0 ]]; then
         echo "Already up to date."

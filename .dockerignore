@@ -1,0 +1,9 @@
+.git
+.github
+.claude
+.cursor
+openspec
+test/Dockerfile.*
+.install-state
+.last-update-check
+.update-lock

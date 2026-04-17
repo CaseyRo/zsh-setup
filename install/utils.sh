@@ -50,8 +50,8 @@ SYMBOL_WARN="⚠️"
 # UI Layout / Theme
 # ============================================================================
 
-UI_MODE="${ZSH_SETUP_UI:-${ZSH_MANAGER_UI:-auto}}"
-UI_THEME="${ZSH_SETUP_THEME:-${ZSH_MANAGER_THEME:-classic}}"
+UI_MODE="${ZSH_SETUP_UI:-auto}"
+UI_THEME="${ZSH_SETUP_THEME:-classic}"
 UI_TTY=false
 UI_HAS_TUI=false
 UI_GUM=false

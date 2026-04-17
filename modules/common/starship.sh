@@ -56,7 +56,7 @@ if command -v starship &> /dev/null; then
 fi
 
 # Source plugins directly
-local _plugin_dir="$HOME/.local/share/zsh-plugins/plugins"
+_plugin_dir="$HOME/.local/share/zsh-plugins/plugins"
 
 if [[ -f "$_plugin_dir/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
     source "$_plugin_dir/zsh-autosuggestions/zsh-autosuggestions.zsh"
