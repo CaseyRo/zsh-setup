@@ -27,11 +27,12 @@ if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     alias fd="fdfind"
 fi
 
-# Claude Code shortcuts
-alias cc="claude"
-alias cy="claude --dangerously-skip-permissions"
-alias ccr="claude --resume"
-alias cyr="claude --dangerously-skip-permissions --resume"
+# Claude Code shortcuts are defined as zsh-abbr abbreviations
+# (expand-on-SPACE) in modules/common/zz_abbr.sh. See that file for the
+# cl<mode><session> naming scheme.
+
+# Beta headers (API-key auth only). Usage: clbeta <header> [<header>...]
+clbeta() { claude --betas "$@"; }
 
 alias top="btop"
 alias docker-compose="docker compose"

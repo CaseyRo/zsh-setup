@@ -66,6 +66,12 @@ if [[ -f "$_plugin_dir/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
     source "$_plugin_dir/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
+# zsh-abbr: fish-style abbreviations (expand on SPACE/ENTER)
+# Used by modules/common/zz_abbr.sh to define Claude Code shortcuts.
+if [[ -f "$_plugin_dir/zsh-abbr/zsh-abbr.plugin.zsh" ]]; then
+    source "$_plugin_dir/zsh-abbr/zsh-abbr.plugin.zsh"
+fi
+
 # syntax-highlighting must be sourced last
 if [[ -f "$_plugin_dir/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
     source "$_plugin_dir/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"

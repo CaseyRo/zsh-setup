@@ -12,6 +12,7 @@ install_zsh_plugins() {
     local plugins=(
         "zsh-users/zsh-autosuggestions"
         "marlonrichert/zsh-autocomplete"
+        "olets/zsh-abbr"
         "zsh-users/zsh-syntax-highlighting"
     )
 
