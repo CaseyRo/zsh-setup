@@ -21,9 +21,16 @@ install_zsh_plugins() {
         local dest="$plugin_dir/$name"
         if [[ -d "$dest" ]]; then
             echo "  ✓ $name already installed"
+            # Heal existing installs that were cloned before --recurse-submodules
+            # was added. zsh-abbr needs olets/zsh-job-queue or `abbr` fails to
+            # initialise and silently drops all abbreviations.
+            if [[ -f "$dest/.gitmodules" ]]; then
+                git -C "$dest" submodule update --init --recursive >/dev/null 2>&1 || true
+            fi
         else
             echo "  Installing $name..."
-            git clone --depth 1 "https://github.com/$plugin.git" "$dest"
+            git clone --depth 1 --recurse-submodules --shallow-submodules \
+                "https://github.com/$plugin.git" "$dest"
         fi
     done
 }
