@@ -33,4 +33,40 @@ install_zsh_plugins() {
                 "https://github.com/$plugin.git" "$dest"
         fi
     done
+
+    _patch_zsh_autocomplete_stderr_leak "$plugin_dir"
+}
+
+# Patch upstream bug in zsh-autocomplete that silently redirects the shell's
+# fd 2 to /dev/null on every keystroke pause.
+#
+# The buggy line in Functions/Init/.autocomplete__async is:
+#     exec {_autocomplete__async_fd}<&- 2>/dev/null
+# In zsh, `exec` followed by *any* redirect applies that redirect to the
+# shell itself, permanently. Intent was per-command error suppression on the
+# close; effect is "stderr is dead for the rest of the session." Wrapping the
+# close in a brace block scopes the 2>/dev/null to just the close.
+#
+# Idempotent: matches only the unpatched pattern, exits silently otherwise.
+_patch_zsh_autocomplete_stderr_leak() {
+    local plugin_dir="$1"
+    local target="$plugin_dir/zsh-autocomplete/Functions/Init/.autocomplete__async"
+    [[ -f "$target" ]] || return 0
+
+    if ! grep -q '^[[:space:]]*exec {_autocomplete__async_fd}<&- 2>/dev/null$' "$target" 2>/dev/null; then
+        return 0
+    fi
+
+    cp -n "$target" "$target.bak-stderr-leak" 2>/dev/null || true
+
+    local tmp
+    tmp=$(mktemp) || return 1
+    if sed -E 's|^([[:space:]]*)exec \{_autocomplete__async_fd\}<&- 2>/dev/null$|\1{ exec {_autocomplete__async_fd}<\&- } 2>/dev/null|' \
+            "$target" > "$tmp"; then
+        mv "$tmp" "$target"
+        echo "  ✓ patched zsh-autocomplete (upstream stderr→/dev/null leak on line ~213)"
+    else
+        rm -f "$tmp"
+        return 1
+    fi
 }
