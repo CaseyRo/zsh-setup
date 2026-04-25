@@ -1,16 +1,23 @@
 # shellcheck shell=bash
 # ============================================================================
-# Syncthing Installation & Hub Bootstrap
+# Syncthing Installation & Configuration
 # ============================================================================
-# Installs Syncthing, runs it as the main user, and (when ZSH_SETUP_SYNCTHING_HUB_ID
-# is set in ~/.env.sh) wires this host to a single "hub" device with the
-# introducer flag — so all other devices the hub knows about are automatically
-# shared into this host. No reinventing the wheel: Syncthing's introducer
-# feature is the canonical mechanism for this pattern.
+# Installs Syncthing, runs it as the main user, generates GUI credentials, and
+# binds the web UI on a network interface so it's reachable over LAN/Tailscale.
+# Runs with zero user input — every host ends up with a working, password-
+# protected Syncthing instance.
 #
-# Required env (in ~/.env.sh):
-#   ZSH_SETUP_SYNCTHING_HUB_ID    Device ID of the hub (e.g. ABCDEFG-...)
-# Optional:
+# Optionally wires this host into a "hub" device via Syncthing's introducer
+# feature: the hub vouches for all other devices it knows about, so they're
+# auto-shared into this host without manual peering. If no hub ID is set, this
+# host is configured as a standalone instance and its own device ID is printed
+# at the end — that ID can then be used as the hub ID on other hosts to wire
+# them into this one.
+#
+# Optional env (in ~/.env.sh):
+#   ZSH_SETUP_SYNCTHING_HUB_ID      Device ID of the hub (another machine).
+#                                   When set, this host adds the hub as an
+#                                   introducer device. When unset, standalone.
 #   ZSH_SETUP_SYNCTHING_HUB_NAME    Friendly name for the hub (default: "hub")
 #   ZSH_SETUP_SYNCTHING_DEVICE_NAME Override this host's display name
 #   ZSH_SETUP_SYNCTHING_GUI_ADDRESS GUI bind address (default: 0.0.0.0:8384)
@@ -408,21 +415,6 @@ configure_syncthing() {
     local device_name="${ZSH_SETUP_SYNCTHING_DEVICE_NAME:-$(hostname -s 2>/dev/null || hostname)}"
     local gui_address="${ZSH_SETUP_SYNCTHING_GUI_ADDRESS:-0.0.0.0:8384}"
 
-    if [[ -z "$hub_id" ]]; then
-        print_info "No ZSH_SETUP_SYNCTHING_HUB_ID set — skipping hub bootstrap"
-        print_info "Add it to ~/.env.sh, then re-run install.sh to wire this host into the circle"
-        track_skipped "Syncthing hub bootstrap (no ZSH_SETUP_SYNCTHING_HUB_ID)"
-        return 0
-    fi
-
-    # Validate the hub ID shape (Syncthing IDs are 7×7 hex-ish blocks separated by dashes)
-    if [[ ! "$hub_id" =~ ^[A-Z0-9]{7}(-[A-Z0-9]{7}){7}$ ]]; then
-        print_warning "ZSH_SETUP_SYNCTHING_HUB_ID does not look like a valid device ID"
-        print_info "Expected format: AAAAAAA-BBBBBBB-CCCCCCC-DDDDDDD-EEEEEEE-FFFFFFF-GGGGGGG-HHHHHHH"
-        track_failed "Syncthing hub bootstrap (invalid hub ID)"
-        return 1
-    fi
-
     # First start: triggers config + key generation if config dir is empty
     if ! _syncthing_is_running; then
         if ! _syncthing_first_start; then
@@ -448,26 +440,15 @@ configure_syncthing() {
         return 1
     fi
 
-    print_info "This host's device ID: $my_id"
-
     if _syncthing_set_device_name "$apikey" "$my_id" "$device_name"; then
         print_success "Set device name to '$device_name'"
     else
         print_warning "Could not set device name (continuing)"
     fi
 
-    if _syncthing_add_hub_device "$apikey" "$hub_id" "$hub_name"; then
-        print_success "Added hub '$hub_name' as introducer device"
-        track_installed "Syncthing hub link"
-    else
-        print_error "Failed to add hub device via API"
-        track_failed "Syncthing hub link"
-        return 1
-    fi
-
     # Bind the GUI to all interfaces (LAN/Tailscale reachable) and lock it
     # behind a generated user/password so Syncthing doesn't refuse non-loopback
-    # access.
+    # access. Runs unconditionally — every managed install gets auth.
     _syncthing_load_or_make_creds
     if _syncthing_apply_gui_config "$apikey" "$gui_address" \
             "$SYNCTHING_GUI_USER" "$SYNCTHING_GUI_PASSWORD"; then
@@ -477,15 +458,41 @@ configure_syncthing() {
         print_warning "Could not configure GUI bind address — leaving Syncthing default (loopback only)"
     fi
 
+    # Optional: wire this host into a hub via Syncthing's introducer pattern.
+    # Skipped cleanly when no hub ID is provided — this host then acts as a
+    # standalone instance (and can itself become the hub for future hosts).
+    local hub_wired=false
+    if [[ -n "$hub_id" ]]; then
+        if [[ ! "$hub_id" =~ ^[A-Z0-9]{7}(-[A-Z0-9]{7}){7}$ ]]; then
+            print_warning "ZSH_SETUP_SYNCTHING_HUB_ID does not look like a valid device ID"
+            print_info "Expected format: AAAAAAA-BBBBBBB-CCCCCCC-DDDDDDD-EEEEEEE-FFFFFFF-GGGGGGG-HHHHHHH"
+            track_failed "Syncthing hub bootstrap (invalid hub ID)"
+        elif _syncthing_add_hub_device "$apikey" "$hub_id" "$hub_name"; then
+            print_success "Added hub '$hub_name' as introducer device"
+            track_installed "Syncthing hub link"
+            hub_wired=true
+        else
+            print_error "Failed to add hub device via API"
+            track_failed "Syncthing hub link"
+        fi
+    fi
+
     _syncthing_write_marker
 
     echo ""
+    print_info "This host's device ID: $my_id"
     print_info "Local Web UI : http://${SYNCTHING_API_HOST}/"
     print_info "Network UI   : http://<this-host>:${gui_address##*:}/"
     print_info "GUI user     : $SYNCTHING_GUI_USER"
     print_info "GUI password : $SYNCTHING_GUI_PASSWORD"
     print_info "  (also stored at $(_syncthing_creds_file))"
     echo ""
-    print_info "Now go to the hub's Syncthing UI and accept '$device_name' under Pending Devices."
-    print_info "The hub's existing folders will be offered to this host automatically."
+    if [[ "$hub_wired" == true ]]; then
+        print_info "Now go to the hub's Syncthing UI and accept '$device_name' under Pending Devices."
+        print_info "The hub's existing folders will be offered to this host automatically."
+    else
+        print_info "Standalone install — no hub configured."
+        print_info "To wire other hosts into this one, set on those hosts:"
+        print_info "  export ZSH_SETUP_SYNCTHING_HUB_ID=$my_id"
+    fi
 }
