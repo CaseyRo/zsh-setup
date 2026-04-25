@@ -85,7 +85,7 @@ _syncthing_start_service() {
 }
 
 _syncthing_wait_ready() {
-    local max_tries=30
+    local max_tries="${1:-30}"
     local i=0
     while (( i < max_tries )); do
         if _syncthing_is_running; then
@@ -95,6 +95,58 @@ _syncthing_wait_ready() {
         ((i++))
     done
     return 1
+}
+
+# Print actionable diagnostics when the daemon fails to come up. Called only
+# from the failure path of _syncthing_first_start — keeps install output clean
+# on the happy path.
+_syncthing_diagnose() {
+    local config_dir
+    config_dir="$(_syncthing_config_dir)"
+
+    print_info "Diagnostics:"
+    print_info "  Expected API : http://${SYNCTHING_API_HOST}/"
+    print_info "  Config dir   : $config_dir"
+
+    if pgrep -u "$USER" -x syncthing >/dev/null 2>&1; then
+        print_info "  Process      : syncthing IS running ($(pgrep -u "$USER" -x syncthing | head -1))"
+        print_info "  → Daemon is alive but API isn't on $SYNCTHING_API_HOST"
+        print_info "  → Check config.xml <gui> address: $config_dir/config.xml"
+    else
+        print_info "  Process      : syncthing is NOT running"
+    fi
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command_exists brew; then
+            local svc_state
+            svc_state=$(brew services list 2>/dev/null | awk '$1=="syncthing"{print $2}')
+            print_info "  brew service : ${svc_state:-unknown}"
+            if [[ "$svc_state" == "error" ]]; then
+                print_info "  → 'brew services info syncthing' will show the launchd error"
+            fi
+        fi
+        local log="$HOME/Library/Logs/syncthing.log"
+        if [[ -f "$log" ]]; then
+            print_info "  Last log lines ($log):"
+            tail -10 "$log" | sed 's/^/      /'
+        fi
+    else
+        if command_exists systemctl; then
+            local unit_state
+            unit_state=$(systemctl --user is-active syncthing.service 2>&1)
+            print_info "  systemd unit : $unit_state"
+            if [[ -z "$XDG_RUNTIME_DIR" ]]; then
+                print_info "  → XDG_RUNTIME_DIR is unset — systemd --user likely has no session"
+                print_info "  → If this is over SSH, run 'loginctl enable-linger $USER' and reconnect"
+            fi
+            if command_exists journalctl; then
+                print_info "  Last journal lines:"
+                journalctl --user -u syncthing.service --no-pager -n 10 2>/dev/null | sed 's/^/      /'
+            fi
+        fi
+    fi
+
+    print_info "  Reproduce manually: syncthing serve --no-browser"
 }
 
 _syncthing_apikey() {
@@ -278,12 +330,14 @@ _syncthing_first_start() {
     print_step "Starting Syncthing as user '$USER'"
     if ! _syncthing_start_service; then
         print_error "Failed to start syncthing service"
+        _syncthing_diagnose
         return 1
     fi
 
-    print_step "Waiting for Syncthing API to come up"
-    if ! _syncthing_wait_ready; then
-        print_error "Syncthing API did not respond within 30s"
+    print_step "Waiting for Syncthing API to come up (60s)"
+    if ! _syncthing_wait_ready 60; then
+        print_error "Syncthing API did not respond within 60s"
+        _syncthing_diagnose
         return 1
     fi
     print_success "Syncthing is running"
