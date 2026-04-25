@@ -35,6 +35,7 @@ BREW_PACKAGES=(
     "tlrc"       # tldr pages client (Rust, fast)
     "yt-dlp"     # YouTube downloader
     "atuin"      # shell history sync & search
+    "syncthing"  # peer-to-peer continuous file sync
 )
 
 # Homebrew packages for macOS dev machines only

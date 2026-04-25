@@ -243,6 +243,41 @@ fi
 echo ""
 
 # ============================================================================
+# 7. Syncthing
+# ============================================================================
+echo "${CYAN}Syncthing${RESET}"
+
+if command -v syncthing &>/dev/null; then
+    check_pass "syncthing binary"
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        st_config="$HOME/Library/Application Support/Syncthing"
+    elif [[ -d "$HOME/.local/state/syncthing" ]]; then
+        st_config="$HOME/.local/state/syncthing"
+    else
+        st_config="${XDG_CONFIG_HOME:-$HOME/.config}/syncthing"
+    fi
+
+    if [[ -f "$st_config/.zsh-setup-managed" ]]; then
+        check_pass "managed by zsh-setup"
+    elif [[ -d "$st_config" ]]; then
+        check_warn "config exists but not managed by zsh-setup ($st_config)"
+    else
+        check_warn "no config directory yet — run install.sh to bootstrap"
+    fi
+
+    if curl -fsS --max-time 2 http://127.0.0.1:8384/rest/system/ping &>/dev/null; then
+        check_pass "API reachable on http://127.0.0.1:8384"
+    else
+        check_warn "API not reachable (service stopped?)"
+    fi
+else
+    check_warn "syncthing not installed"
+fi
+
+echo ""
+
+# ============================================================================
 # Score
 # ============================================================================
 echo "${BOLD}────────────────────────────────${RESET}"

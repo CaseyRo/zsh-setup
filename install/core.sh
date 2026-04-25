@@ -25,6 +25,7 @@ export USE_STARSHIP=true
 export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
 export LIGHT_MODE=false
+export SYNCTHING_WIPE=false
 UI_MODE="${ZSH_SETUP_UI:-auto}"
 UI_THEME="${ZSH_SETUP_THEME:-classic}"
 
@@ -49,6 +50,7 @@ show_help() {
     echo "  --skip-splash        Skip the intro splash screen"
     echo "  --light              Minimal server/VPS install (no Rust, prebuilt bins)"
     echo "  --server, --vps      Aliases for --light"
+    echo "  --syncthing-wipe     Wipe any pre-existing Syncthing state before install"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
@@ -120,6 +122,10 @@ while [[ $# -gt 0 ]]; do
             export SKIP_SPLASH=true
             shift
             ;;
+        --syncthing-wipe)
+            export SYNCTHING_WIPE=true
+            shift
+            ;;
         --ui)
             UI_MODE="$2"
             shift 2
@@ -179,6 +185,7 @@ source "$INSTALL_DIR/starship.sh"
 source "$INSTALL_DIR/tailscale.sh"
 source "$INSTALL_DIR/network-mounts.sh"
 source "$INSTALL_DIR/copyparty.sh"
+source "$INSTALL_DIR/syncthing.sh"
 source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
@@ -371,6 +378,7 @@ main() {
     echo -e "  ${SYMBOL_BULLET} Tailscale (VPN mesh network)"
     if [[ "$LIGHT_MODE" != true ]]; then
         echo -e "  ${SYMBOL_BULLET} Copyparty (portable file server)"
+        echo -e "  ${SYMBOL_BULLET} Syncthing (peer-to-peer file sync)"
         echo -e "  ${SYMBOL_BULLET} Nerd Fonts (terminal glyphs for prompts)"
     fi
     echo -e "  ${SYMBOL_BULLET} ZSH-Setup configuration"
@@ -610,6 +618,8 @@ main() {
         if [[ "$LIGHT_MODE" != true ]]; then
             configure_nfs_mount
             install_copyparty
+            install_syncthing
+            configure_syncthing
         fi
     else
         print_section "Network Mounts"
