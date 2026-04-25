@@ -46,7 +46,9 @@ _syncthing_config_dir() {
 }
 
 _syncthing_is_running() {
-    curl -fsS --max-time 2 "http://${SYNCTHING_API_HOST}/rest/system/ping" >/dev/null 2>&1
+    # /rest/noauth/health is the only liveness endpoint that doesn't require
+    # the API key — /rest/system/ping returns 401 once GUI auth is configured.
+    curl -fsS --max-time 2 "http://${SYNCTHING_API_HOST}/rest/noauth/health" >/dev/null 2>&1
 }
 
 # Read the GUI listen address from config.xml. Returns "host:port" or empty.
@@ -75,7 +77,7 @@ _syncthing_recover_api_host() {
     addr="${addr/#\[::\]:/127.0.0.1:}"
     addr="${addr/#\[::1\]:/127.0.0.1:}"
 
-    if curl -fsS --max-time 3 "http://${addr}/rest/system/ping" >/dev/null 2>&1; then
+    if curl -fsS --max-time 3 "http://${addr}/rest/noauth/health" >/dev/null 2>&1; then
         SYNCTHING_API_HOST="$addr"
         return 0
     fi
@@ -505,23 +507,46 @@ configure_syncthing() {
     print_section "Syncthing Configuration"
 
     # If the binary isn't on PATH after install_syncthing ran, brew likely
-    # dropped it at /opt/homebrew/bin but this script's PATH doesn't include
-    # that prefix (common when brew was already installed before this run, so
-    # the install_homebrew shellenv eval was skipped).
+    # dropped it at a prefix this script's PATH doesn't cover (common when
+    # brew was already installed before this run, so the install_homebrew
+    # shellenv eval was skipped). Ask brew where it actually went.
     if ! command_exists syncthing; then
-        if [[ -x /opt/homebrew/bin/syncthing ]]; then
-            print_info "syncthing binary found at /opt/homebrew/bin — adding to PATH for this run"
-            export PATH="/opt/homebrew/bin:$PATH"
-            hash -r 2>/dev/null || true
-        elif [[ -x /usr/local/bin/syncthing ]]; then
-            export PATH="/usr/local/bin:$PATH"
+        local syncthing_bin=""
+        if command_exists brew; then
+            local brew_pkg_prefix
+            brew_pkg_prefix=$(brew --prefix syncthing 2>/dev/null)
+            if [[ -n "$brew_pkg_prefix" ]] && [[ -x "$brew_pkg_prefix/bin/syncthing" ]]; then
+                syncthing_bin="$brew_pkg_prefix/bin/syncthing"
+            fi
+            if [[ -z "$syncthing_bin" ]]; then
+                local brew_main_prefix
+                brew_main_prefix=$(brew --prefix 2>/dev/null)
+                if [[ -n "$brew_main_prefix" ]] && [[ -x "$brew_main_prefix/bin/syncthing" ]]; then
+                    syncthing_bin="$brew_main_prefix/bin/syncthing"
+                fi
+            fi
+        fi
+        if [[ -z "$syncthing_bin" ]]; then
+            for candidate in /opt/homebrew/bin/syncthing /usr/local/bin/syncthing "$HOME/homebrew/bin/syncthing"; do
+                if [[ -x "$candidate" ]]; then
+                    syncthing_bin="$candidate"
+                    break
+                fi
+            done
+        fi
+
+        if [[ -n "$syncthing_bin" ]]; then
+            local bin_dir
+            bin_dir="$(dirname "$syncthing_bin")"
+            print_info "syncthing binary found at $bin_dir — adding to PATH for this run"
+            export PATH="$bin_dir:$PATH"
             hash -r 2>/dev/null || true
         fi
     fi
 
     if ! command_exists syncthing; then
         print_warning "syncthing not on PATH after install — cannot configure"
-        print_info "Try: which syncthing  /  ls /opt/homebrew/bin/syncthing"
+        print_info "Try: brew --prefix syncthing  /  brew list syncthing | grep bin/syncthing"
         track_failed "Syncthing configure (binary not on PATH)"
         return 1
     fi
