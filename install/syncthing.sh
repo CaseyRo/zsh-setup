@@ -49,6 +49,39 @@ _syncthing_is_running() {
     curl -fsS --max-time 2 "http://${SYNCTHING_API_HOST}/rest/system/ping" >/dev/null 2>&1
 }
 
+# Read the GUI listen address from config.xml. Returns "host:port" or empty.
+# Useful when the daemon is up but on a non-default port (e.g. someone changed
+# the GUI bind via the web UI before our installer touched the config).
+_syncthing_gui_address_from_config() {
+    local config_dir
+    config_dir="$(_syncthing_config_dir)"
+    local config_xml="$config_dir/config.xml"
+    [[ -f "$config_xml" ]] || return 1
+    awk '/<gui[ >]/,/<\/gui>/' "$config_xml" \
+        | sed -n 's|.*<address>\([^<]*\)</address>.*|\1|p' | head -n1
+}
+
+# Try to discover the daemon's actual API address from config.xml when our
+# default SYNCTHING_API_HOST doesn't respond. On success, mutates
+# SYNCTHING_API_HOST to whatever works (localized to loopback) and returns 0.
+_syncthing_recover_api_host() {
+    local addr
+    addr="$(_syncthing_gui_address_from_config)" || return 1
+    [[ -n "$addr" ]] || return 1
+
+    # Translate any-interface / IPv6 binds to loopback so we can reach the API
+    # locally regardless of how the daemon advertises it.
+    addr="${addr/#0.0.0.0:/127.0.0.1:}"
+    addr="${addr/#\[::\]:/127.0.0.1:}"
+    addr="${addr/#\[::1\]:/127.0.0.1:}"
+
+    if curl -fsS --max-time 3 "http://${addr}/rest/system/ping" >/dev/null 2>&1; then
+        SYNCTHING_API_HOST="$addr"
+        return 0
+    fi
+    return 1
+}
+
 _syncthing_stop_service() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         if command_exists brew; then
@@ -107,11 +140,18 @@ _syncthing_diagnose() {
     print_info "Diagnostics:"
     print_info "  Expected API : http://${SYNCTHING_API_HOST}/"
     print_info "  Config dir   : $config_dir"
+    if [[ -f "$config_dir/config.xml" ]]; then
+        local cfg_addr
+        cfg_addr="$(_syncthing_gui_address_from_config 2>/dev/null)"
+        print_info "  config.xml   : exists (GUI <address>${cfg_addr:-unknown}</address>)"
+    else
+        print_info "  config.xml   : MISSING — daemon likely uses a different home dir"
+        print_info "  → If Syncthing.app (xor-gate macOS wrapper) is running, quit it and re-run"
+    fi
 
     if pgrep -u "$USER" -x syncthing >/dev/null 2>&1; then
         print_info "  Process      : syncthing IS running ($(pgrep -u "$USER" -x syncthing | head -1))"
         print_info "  → Daemon is alive but API isn't on $SYNCTHING_API_HOST"
-        print_info "  → Check config.xml <gui> address: $config_dir/config.xml"
     else
         print_info "  Process      : syncthing is NOT running"
     fi
@@ -335,13 +375,22 @@ _syncthing_first_start() {
     fi
 
     print_step "Waiting for Syncthing API to come up (60s)"
-    if ! _syncthing_wait_ready 60; then
-        print_error "Syncthing API did not respond within 60s"
-        _syncthing_diagnose
-        return 1
+    if _syncthing_wait_ready 60; then
+        print_success "Syncthing is running"
+        return 0
     fi
-    print_success "Syncthing is running"
-    return 0
+
+    # Daemon may have come up on a non-default GUI address (existing config
+    # with a custom <gui><address> value). Try to recover before giving up.
+    if pgrep -u "$USER" -x syncthing >/dev/null 2>&1 \
+       && _syncthing_recover_api_host; then
+        print_warning "Syncthing GUI is on $SYNCTHING_API_HOST (non-default — will rebind to default during configure)"
+        return 0
+    fi
+
+    print_error "Syncthing API did not respond within 60s"
+    _syncthing_diagnose
+    return 1
 }
 
 _syncthing_set_device_name() {
@@ -452,11 +501,30 @@ configure_syncthing() {
     if _syncthing_should_skip_platform; then
         return 0
     fi
-    if ! command_exists syncthing; then
-        return 0
-    fi
 
     print_section "Syncthing Configuration"
+
+    # If the binary isn't on PATH after install_syncthing ran, brew likely
+    # dropped it at /opt/homebrew/bin but this script's PATH doesn't include
+    # that prefix (common when brew was already installed before this run, so
+    # the install_homebrew shellenv eval was skipped).
+    if ! command_exists syncthing; then
+        if [[ -x /opt/homebrew/bin/syncthing ]]; then
+            print_info "syncthing binary found at /opt/homebrew/bin — adding to PATH for this run"
+            export PATH="/opt/homebrew/bin:$PATH"
+            hash -r 2>/dev/null || true
+        elif [[ -x /usr/local/bin/syncthing ]]; then
+            export PATH="/usr/local/bin:$PATH"
+            hash -r 2>/dev/null || true
+        fi
+    fi
+
+    if ! command_exists syncthing; then
+        print_warning "syncthing not on PATH after install — cannot configure"
+        print_info "Try: which syncthing  /  ls /opt/homebrew/bin/syncthing"
+        track_failed "Syncthing configure (binary not on PATH)"
+        return 1
+    fi
 
     # Source ~/.env.sh so the user can keep the hub ID out of the repo.
     if [[ -f "$HOME/.env.sh" ]]; then
@@ -508,6 +576,11 @@ configure_syncthing() {
             "$SYNCTHING_GUI_USER" "$SYNCTHING_GUI_PASSWORD"; then
         print_success "GUI bound to $gui_address (auth as '$SYNCTHING_GUI_USER')"
         track_installed "Syncthing GUI ($gui_address)"
+        # Daemon rebinds the GUI listener (and therefore the API). Move the
+        # local API host to the loopback equivalent of the new bind and pause
+        # briefly so subsequent calls (hub-add) hit the rebound listener.
+        SYNCTHING_API_HOST="127.0.0.1:${gui_address##*:}"
+        sleep 2
     else
         print_warning "Could not configure GUI bind address — leaving Syncthing default (loopback only)"
     fi
