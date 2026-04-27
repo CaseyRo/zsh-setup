@@ -28,19 +28,19 @@ warnings=0
 
 check_pass() {
     echo "  $PASS $1"
-    ((score++))
-    ((total++))
+    score=$((score + 1))
+    total=$((total + 1))
 }
 
 check_fail() {
     echo "  $FAIL $1"
-    ((total++))
+    total=$((total + 1))
 }
 
 check_warn() {
     echo "  $WARN $1"
-    ((warnings++))
-    ((total++))
+    warnings=$((warnings + 1))
+    total=$((total + 1))
 }
 
 # Resolve zsh-setup directory
@@ -273,6 +273,37 @@ if command -v syncthing &>/dev/null; then
     fi
 else
     check_warn "syncthing not installed"
+fi
+
+echo ""
+
+# ============================================================================
+# 8. HOME Ownership
+# ============================================================================
+echo "${CYAN}HOME Ownership${RESET}"
+
+me=$(id -un 2>/dev/null || echo "")
+own_mismatched=0
+own_checked=0
+own_sample=""
+for p in "$HOME" "$HOME/.config" "$HOME/.local" "$HOME/.cache" "$HOME/.cargo" "$HOME/.ssh" "$HOME/.zsh-setup"; do
+    [[ -e "$p" ]] || continue
+    owner=$(stat -c '%U' "$p" 2>/dev/null || stat -f '%Su' "$p" 2>/dev/null)
+    own_checked=$((own_checked + 1))
+    if [[ -n "$owner" && "$owner" != "$me" ]]; then
+        own_mismatched=$((own_mismatched + 1))
+        own_sample="$owner"
+    fi
+done
+
+if [[ -z "$me" ]] || (( own_checked == 0 )); then
+    check_warn "Could not probe HOME ownership"
+elif (( own_mismatched == 0 )); then
+    check_pass "HOME owned by $me"
+elif (( own_mismatched * 2 <= own_checked )); then
+    check_warn "$own_mismatched of $own_checked HOME paths owned by other users"
+else
+    check_fail "$own_mismatched of $own_checked HOME paths owned by '$own_sample' — run: sudo chown -R $me:$me \$HOME"
 fi
 
 echo ""

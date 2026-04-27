@@ -713,6 +713,84 @@ check_binary_executable() {
     return 1
 }
 
+# Detect pervasive HOME ownership mismatch and offer a single recursive chown.
+# Triggers on rsync/restore from a host with different numeric UIDs, or LXD
+# userns shifts where guest 1000 mapped to a different host UID. Only acts
+# when a majority of probed paths are mismatched; never runs without
+# confirmation (YES_TO_ALL or --auto-fix bypasses the prompt).
+# Usage: check_home_ownership_sweep [--auto-fix]
+# Returns: 0 if OK or fixed, 1 if mismatched and not fixed.
+check_home_ownership_sweep() {
+    local auto_fix=false
+    [[ "${1:-}" == "--auto-fix" ]] && auto_fix=true
+
+    [[ -n "${HOME:-}" ]] || return 0
+    local me
+    me=$(id -un 2>/dev/null) || return 0
+    [[ -n "$me" ]] || return 0
+
+    local probes=(
+        "$HOME"
+        "$HOME/.config"
+        "$HOME/.local"
+        "$HOME/.cache"
+        "$HOME/.cargo"
+        "$HOME/.ssh"
+        "$HOME/.zsh-setup"
+    )
+    local mismatched=0 checked=0 sample_owner=""
+    local p owner
+    for p in "${probes[@]}"; do
+        [[ -e "$p" ]] || continue
+        owner=$(stat -c '%U' "$p" 2>/dev/null || stat -f '%Su' "$p" 2>/dev/null)
+        checked=$((checked + 1))
+        if [[ -n "$owner" && "$owner" != "$me" ]]; then
+            mismatched=$((mismatched + 1))
+            sample_owner="$owner"
+        fi
+    done
+
+    # Need >=4 probes and a majority mismatched before trusting the signal.
+    if (( checked < 4 )) || (( mismatched * 2 <= checked )); then
+        return 0
+    fi
+
+    print_error "$mismatched of $checked HOME paths owned by '$sample_owner', not '$me'"
+    print_info "Likely cause: rsync/restore from another host, or LXD userns shift"
+    print_info "Proposed fix: sudo chown -R $me:$me $HOME"
+
+    local do_fix=false
+    if $auto_fix || [[ "${YES_TO_ALL:-}" == "true" ]]; then
+        do_fix=true
+    elif [[ -t 0 ]]; then
+        local reply
+        printf "Run the chown now? [y/N] "
+        read -r reply
+        [[ "$reply" =~ ^[Yy]$ ]] && do_fix=true
+    fi
+
+    if ! $do_fix; then
+        return 1
+    fi
+
+    if ! sudo -n true 2>/dev/null && ! sudo -v 2>/dev/null; then
+        print_error "sudo unavailable; cannot apply fix"
+        return 1
+    fi
+
+    if ! sudo chown -R "$me:$me" "$HOME"; then
+        print_error "chown failed"
+        return 1
+    fi
+
+    if [[ -d "$HOME/.ssh" ]]; then
+        chmod 700 "$HOME/.ssh" 2>/dev/null || true
+        find "$HOME/.ssh" -maxdepth 1 -type f -exec chmod 600 {} \; 2>/dev/null || true
+    fi
+    print_success "HOME ownership reset to $me:$me"
+    return 0
+}
+
 # ============================================================================
 # Platform Detection
 # ============================================================================
