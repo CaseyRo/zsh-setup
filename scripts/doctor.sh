@@ -278,37 +278,36 @@ fi
 echo ""
 
 # ============================================================================
-# 7b. Atuin executable bit
+# 7b. Install dirs — executable bits
 # ============================================================================
-# `command -v atuin` filters by executability in zsh but not always in bash —
-# so a 664 atuin in PATH passes "Core Tools" while breaking the actual shell.
-# Probe the known install paths explicitly and assert -x.
-echo "${CYAN}Atuin${RESET}"
+# A regression observed in the wild stripped +x off ELF binaries across
+# ~/.cargo/bin, ~/.local/bin, and ~/.atuin/bin — symptoms include
+# 'permission denied: starship/atuin/eza/zoxide' on shell startup while
+# `command -v` still finds them in bash (which doesn't always filter by
+# executability). Probe known install dirs and flag any non-executable
+# ELF/Mach-O binary.
+echo "${CYAN}Install Dirs${RESET}"
 
-atuin_paths=()
-[[ -f "$HOME/.atuin/bin/atuin" ]] && atuin_paths+=("$HOME/.atuin/bin/atuin")
-if command -v brew &>/dev/null; then
-    brew_atuin="$(brew --prefix atuin 2>/dev/null)/bin/atuin"
-    [[ -f "$brew_atuin" ]] && atuin_paths+=("$brew_atuin")
-fi
-path_atuin=$(command -v atuin 2>/dev/null || true)
-if [[ -n "$path_atuin" ]]; then
-    already=false
-    for existing in "${atuin_paths[@]}"; do
-        [[ "$existing" == "$path_atuin" ]] && already=true && break
-    done
-    [[ "$already" == false ]] && atuin_paths+=("$path_atuin")
-fi
+bad_bins=()
+for d in "$HOME/.cargo/bin" "$HOME/.local/bin" "$HOME/.atuin/bin" "$HOME/go/bin"; do
+    [[ -d "$d" ]] || continue
+    while IFS= read -r -d '' f; do
+        [[ -x "$f" ]] && continue
+        magic=$(head -c4 "$f" 2>/dev/null | od -An -tx1 | tr -d ' \n' || true)
+        case "$magic" in
+            7f454c46|cffaedfe|cefaedfe|feedface|feedfacf)
+                bad_bins+=("$f")
+                ;;
+        esac
+    done < <(find "$d" -maxdepth 1 -type f -print0 2>/dev/null)
+done
 
-if (( ${#atuin_paths[@]} == 0 )); then
-    check_warn "atuin not installed"
+if (( ${#bad_bins[@]} == 0 )); then
+    check_pass "all binaries in user install dirs are +x"
 else
-    for atuin_bin in "${atuin_paths[@]}"; do
-        if [[ -x "$atuin_bin" ]]; then
-            check_pass "atuin executable: $atuin_bin"
-        else
-            check_fail "atuin not executable: $atuin_bin — fix: chmod +x $atuin_bin"
-        fi
+    check_fail "${#bad_bins[@]} binary/binaries missing +x — fix: re-run ./install.sh (auto-heals)"
+    for b in "${bad_bins[@]}"; do
+        echo "    ${DIM}•${RESET} $b"
     done
 fi
 

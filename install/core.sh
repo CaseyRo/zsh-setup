@@ -712,6 +712,12 @@ main() {
     # Set zsh as default shell
     set_default_shell_zsh
 
+    # Final safety net: a regression seen in the wild stripped +x off ELF
+    # binaries across ~/.cargo/bin, ~/.local/bin, ~/.atuin/bin (cause
+    # unclear — possibly backup/restore or filesystem oddity). Re-running
+    # install.sh now self-heals.
+    ensure_install_dirs_executable
+
     # Done!
     print_summary
 }

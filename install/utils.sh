@@ -879,6 +879,44 @@ check_cargo_ownership_sweep() {
     return 0
 }
 
+# Sweep the standard user install dirs and restore +x on any ELF binary that
+# lost it. Generalizes the atuin self-heal — the same regression pattern was
+# seen across ~/.cargo/bin, ~/.local/bin, and ~/.atuin/bin (cause unknown,
+# possibly backup/restore or filesystem quirk). Only ELF magic-bytes files
+# are touched — config files like ~/.atuin/bin/env stay untouched.
+# Usage: ensure_install_dirs_executable
+# Returns: 0 always (best-effort).
+ensure_install_dirs_executable() {
+    local dirs=(
+        "$HOME/.cargo/bin"
+        "$HOME/.local/bin"
+        "$HOME/.atuin/bin"
+        "$HOME/go/bin"
+    )
+    local fixed=0
+    local d f
+    for d in "${dirs[@]}"; do
+        [[ -d "$d" ]] || continue
+        while IFS= read -r -d '' f; do
+            [[ -x "$f" ]] && continue
+            # ELF magic = 0x7F 'E' 'L' 'F' (Linux); Mach-O = 0xCF/0xCE FA ED FE (macOS)
+            local magic
+            magic=$(head -c4 "$f" 2>/dev/null | od -An -tx1 | tr -d ' \n')
+            case "$magic" in
+                7f454c46|cffaedfe|cefaedfe|feedface|feedfacf)
+                    if chmod +x "$f" 2>/dev/null; then
+                        fixed=$((fixed + 1))
+                    fi
+                    ;;
+            esac
+        done < <(find "$d" -maxdepth 1 -type f -print0 2>/dev/null)
+    done
+    if (( fixed > 0 )); then
+        print_info "Restored +x on $fixed binary/binaries in user install dirs"
+    fi
+    return 0
+}
+
 # ============================================================================
 # Platform Detection
 # ============================================================================
