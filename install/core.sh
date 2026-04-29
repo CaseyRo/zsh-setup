@@ -52,7 +52,7 @@ show_help() {
     echo "  --light              Minimal server/VPS install (no Rust, prebuilt bins)"
     echo "  --server, --vps      Aliases for --light"
     echo "  --syncthing-wipe     Wipe any pre-existing Syncthing state before install"
-    echo "  --fix-home-ownership Auto-repair HOME ownership drift (sudo chown -R \$USER:\$USER \$HOME)"
+    echo "  --fix-home-ownership Auto-repair ownership drift in HOME and cargo/rustup install dirs"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""

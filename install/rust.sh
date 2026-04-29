@@ -6,11 +6,26 @@
 install_rust() {
     print_section "Rust"
 
+    # Sweep cargo/rustup ownership before any rustup/cargo write. A single
+    # mis-owned subtree (registry/, git/, bin/) is enough to break installs,
+    # so this triggers on any drift, not just majority.
+    local cargo_sweep_args=()
+    if [[ "${FIX_HOME_OWNERSHIP:-false}" == true ]]; then
+        cargo_sweep_args=(--auto-fix)
+    fi
+    if ! check_cargo_ownership_sweep "${cargo_sweep_args[@]}"; then
+        print_error "Cannot proceed — cargo/rustup ownership drift not repaired."
+        print_info "Re-run with --fix-home-ownership or apply the chown manually."
+        track_failed "Rust (ownership)"
+        return 1
+    fi
+
     if command_exists rustc && command_exists cargo; then
         print_skip "Rust/Cargo"
         track_skipped "Rust"
 
-        # Check ownership and permissions
+        # Belt-and-suspenders: passive checks for edge cases the sweep misses
+        # (e.g., individual files inside .cargo/bin with bad mode).
         if ! check_dir_ownership "$HOME/.cargo" "Cargo"; then
             return 1
         fi

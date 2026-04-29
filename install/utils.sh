@@ -795,6 +795,90 @@ check_home_ownership_sweep() {
     return 0
 }
 
+# Detect mis-ownership inside the cargo/rustup install dirs and offer to chown
+# only the affected subtrees. Unlike the HOME sweep, this triggers on a single
+# bad path because cargo install fails the moment it can't write to registry/,
+# git/, or bin/ — even when the rest of HOME is clean.
+# Honors --auto-fix the same way as check_home_ownership_sweep.
+# Usage: check_cargo_ownership_sweep [--auto-fix]
+# Returns: 0 if OK or fixed, 1 if mismatched and not fixed.
+_CARGO_OWN_SWEEP_RAN=false
+check_cargo_ownership_sweep() {
+    # Run at most once per install — install_rust calls this, and downstream
+    # cargo callers don't need to re-prompt.
+    if [[ "$_CARGO_OWN_SWEEP_RAN" == true ]]; then
+        return 0
+    fi
+
+    local auto_fix=false
+    [[ "${1:-}" == "--auto-fix" ]] && auto_fix=true
+
+    [[ -n "${HOME:-}" ]] || return 0
+    local me
+    me=$(id -un 2>/dev/null) || return 0
+    [[ -n "$me" ]] || return 0
+
+    local probes=(
+        "$HOME/.cargo"
+        "$HOME/.cargo/bin"
+        "$HOME/.cargo/registry"
+        "$HOME/.cargo/git"
+        "$HOME/.rustup"
+    )
+    local mismatched=()
+    local sample_owner=""
+    local p owner
+    for p in "${probes[@]}"; do
+        [[ -e "$p" ]] || continue
+        owner=$(stat -c '%U' "$p" 2>/dev/null || stat -f '%Su' "$p" 2>/dev/null)
+        if [[ -n "$owner" && "$owner" != "$me" ]]; then
+            mismatched+=("$p")
+            sample_owner="$owner"
+        fi
+    done
+
+    if (( ${#mismatched[@]} == 0 )); then
+        _CARGO_OWN_SWEEP_RAN=true
+        return 0
+    fi
+
+    print_error "${#mismatched[@]} cargo/rustup path(s) owned by '$sample_owner', not '$me':"
+    for p in "${mismatched[@]}"; do
+        print_info "  $p"
+    done
+    print_info "Likely cause: a previous 'sudo cargo install' or rsync from another host."
+    print_info "Proposed fix: sudo chown -R $me:$me <each path above>"
+
+    local do_fix=false
+    if $auto_fix; then
+        do_fix=true
+    elif [[ -t 0 ]]; then
+        local reply
+        printf "  Run the chown now? [y/N] "
+        read -r reply
+        [[ "$reply" =~ ^[Yy]$ ]] && do_fix=true
+    fi
+
+    if ! $do_fix; then
+        return 1
+    fi
+
+    if ! sudo -n true 2>/dev/null && ! sudo -v 2>/dev/null; then
+        print_error "sudo unavailable; cannot apply fix"
+        return 1
+    fi
+
+    for p in "${mismatched[@]}"; do
+        if ! sudo chown -R "$me:$me" "$p"; then
+            print_error "chown failed for $p"
+            return 1
+        fi
+    done
+    print_success "Cargo/rustup ownership reset to $me:$me"
+    _CARGO_OWN_SWEEP_RAN=true
+    return 0
+}
+
 # ============================================================================
 # Platform Detection
 # ============================================================================
