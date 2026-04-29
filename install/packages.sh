@@ -67,11 +67,13 @@ BREW_CASKS_MAC_DEV=(
 )
 
 # ============================================================================
-# Dev Repos (cloned to ~/dev on dev machines and Docker containers)
+# Dev Repos (cloned to ~/dev when gh CLI is authenticated)
+# Authed gh implies the user wants to use git as a dev — also gives us a
+# token so private repos clone without an interactive credential prompt.
 # ============================================================================
 DEV_REPOS=(
-    "CaseyRo/casey-claude-setup"  # Claude Code config, skills, and settings
-    "fission-ai/openspec.dev"     # OpenSpec spec-driven development
+    "CaseyRo/casey-claude-setup"  # Claude Code config, skills, and settings (private)
+    "Fission-AI/OpenSpec"         # OpenSpec spec-driven development
 )
 
 # Cargo packages (installed via cargo install)

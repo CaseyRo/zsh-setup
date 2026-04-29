@@ -605,11 +605,10 @@ main() {
 
     install_npm_global_packages
 
-    # Dev repos: clone on dev machines and Docker containers
+    # Dev repos: gated on `gh auth status` inside install_dev_repos —
+    # authed gh CLI is the dev signal and supplies the token for private clones.
     if [[ "$LIGHT_MODE" != true ]]; then
-        if [[ "$IS_MAC_DEV_MACHINE" == true ]] || [[ "$IS_DOCKER" == true ]]; then
-            install_dev_repos
-        fi
+        install_dev_repos
 
         install_php_dev_tools
 
