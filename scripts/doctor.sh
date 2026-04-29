@@ -278,6 +278,43 @@ fi
 echo ""
 
 # ============================================================================
+# 7b. Atuin executable bit
+# ============================================================================
+# `command -v atuin` filters by executability in zsh but not always in bash —
+# so a 664 atuin in PATH passes "Core Tools" while breaking the actual shell.
+# Probe the known install paths explicitly and assert -x.
+echo "${CYAN}Atuin${RESET}"
+
+atuin_paths=()
+[[ -f "$HOME/.atuin/bin/atuin" ]] && atuin_paths+=("$HOME/.atuin/bin/atuin")
+if command -v brew &>/dev/null; then
+    brew_atuin="$(brew --prefix atuin 2>/dev/null)/bin/atuin"
+    [[ -f "$brew_atuin" ]] && atuin_paths+=("$brew_atuin")
+fi
+path_atuin=$(command -v atuin 2>/dev/null)
+if [[ -n "$path_atuin" ]]; then
+    already=false
+    for existing in "${atuin_paths[@]}"; do
+        [[ "$existing" == "$path_atuin" ]] && already=true && break
+    done
+    [[ "$already" == false ]] && atuin_paths+=("$path_atuin")
+fi
+
+if (( ${#atuin_paths[@]} == 0 )); then
+    check_warn "atuin not installed"
+else
+    for atuin_bin in "${atuin_paths[@]}"; do
+        if [[ -x "$atuin_bin" ]]; then
+            check_pass "atuin executable: $atuin_bin"
+        else
+            check_fail "atuin not executable: $atuin_bin — fix: chmod +x $atuin_bin"
+        fi
+    done
+fi
+
+echo ""
+
+# ============================================================================
 # 8. HOME Ownership
 # ============================================================================
 echo "${CYAN}HOME Ownership${RESET}"
