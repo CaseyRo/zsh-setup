@@ -26,6 +26,7 @@ export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
 export LIGHT_MODE=false
 export SYNCTHING_WIPE=false
+export FIX_HOME_OWNERSHIP=false
 UI_MODE="${ZSH_SETUP_UI:-auto}"
 UI_THEME="${ZSH_SETUP_THEME:-classic}"
 
@@ -51,6 +52,7 @@ show_help() {
     echo "  --light              Minimal server/VPS install (no Rust, prebuilt bins)"
     echo "  --server, --vps      Aliases for --light"
     echo "  --syncthing-wipe     Wipe any pre-existing Syncthing state before install"
+    echo "  --fix-home-ownership Auto-repair HOME ownership drift (sudo chown -R \$USER:\$USER \$HOME)"
     echo "  --ui MODE        UI mode: auto, classic, gum, plain"
     echo "  --theme THEME    UI theme: classic, mono, minimal"
     echo ""
@@ -124,6 +126,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --syncthing-wipe)
             export SYNCTHING_WIPE=true
+            shift
+            ;;
+        --fix-home-ownership)
+            export FIX_HOME_OWNERSHIP=true
             shift
             ;;
         --ui)
@@ -234,6 +240,23 @@ main() {
     fi
 
     ui_init "$UI_MODE" "$UI_THEME"
+
+    # Pre-flight: refuse to install on a HOME with majority mis-owned paths.
+    # log_init below mkdirs $HOME/.local/state/zsh-setup, and downstream
+    # installers (cargo, nvm, oh-my-zsh, atuin) all write into $HOME — if
+    # ownership is wrong they either silently fail or spawn more root-owned
+    # files via cached sudo. Catch it here before anything writes.
+    local sweep_args=()
+    if [[ "$FIX_HOME_OWNERSHIP" == true ]]; then
+        sweep_args=(--auto-fix)
+    fi
+    if ! check_home_ownership_sweep "${sweep_args[@]}"; then
+        echo ""
+        print_info "Re-run with --fix-home-ownership to apply the chown automatically,"
+        print_info "or repair manually: sudo chown -R \"\$USER:\$USER\" \"\$HOME\""
+        exit 1
+    fi
+
     log_init
 
     # Read persisted install state (unless overridden by CLI flags)

@@ -717,7 +717,11 @@ check_binary_executable() {
 # Triggers on rsync/restore from a host with different numeric UIDs, or LXD
 # userns shifts where guest 1000 mapped to a different host UID. Only acts
 # when a majority of probed paths are mismatched; never runs without
-# confirmation (YES_TO_ALL or --auto-fix bypasses the prompt).
+# confirmation. YES_TO_ALL alone does NOT auto-fix because chown -R $HOME is
+# privileged and irreversible; pass --auto-fix (installer surfaces this as
+# --fix-home-ownership) when an explicit auto-repair is wanted.
+# Probe path list is mirrored read-only in scripts/doctor.sh — keep them
+# in sync.
 # Usage: check_home_ownership_sweep [--auto-fix]
 # Returns: 0 if OK or fixed, 1 if mismatched and not fixed.
 check_home_ownership_sweep() {
@@ -760,11 +764,11 @@ check_home_ownership_sweep() {
     print_info "Proposed fix: sudo chown -R $me:$me $HOME"
 
     local do_fix=false
-    if $auto_fix || [[ "${YES_TO_ALL:-}" == "true" ]]; then
+    if $auto_fix; then
         do_fix=true
     elif [[ -t 0 ]]; then
         local reply
-        printf "Run the chown now? [y/N] "
+        printf "  Run the chown now? [y/N] "
         read -r reply
         [[ "$reply" =~ ^[Yy]$ ]] && do_fix=true
     fi

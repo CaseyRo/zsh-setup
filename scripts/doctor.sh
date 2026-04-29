@@ -286,6 +286,8 @@ me=$(id -un 2>/dev/null || echo "")
 own_mismatched=0
 own_checked=0
 own_sample=""
+# Probe path list mirrors check_home_ownership_sweep in install/utils.sh —
+# keep them in sync so doctor and installer flag the same drift.
 for p in "$HOME" "$HOME/.config" "$HOME/.local" "$HOME/.cache" "$HOME/.cargo" "$HOME/.ssh" "$HOME/.zsh-setup"; do
     [[ -e "$p" ]] || continue
     owner=$(stat -c '%U' "$p" 2>/dev/null || stat -f '%Su' "$p" 2>/dev/null)
