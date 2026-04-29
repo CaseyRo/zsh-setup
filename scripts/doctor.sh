@@ -291,7 +291,7 @@ if command -v brew &>/dev/null; then
     brew_atuin="$(brew --prefix atuin 2>/dev/null)/bin/atuin"
     [[ -f "$brew_atuin" ]] && atuin_paths+=("$brew_atuin")
 fi
-path_atuin=$(command -v atuin 2>/dev/null)
+path_atuin=$(command -v atuin 2>/dev/null || true)
 if [[ -n "$path_atuin" ]]; then
     already=false
     for existing in "${atuin_paths[@]}"; do
