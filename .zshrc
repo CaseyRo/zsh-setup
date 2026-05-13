@@ -123,3 +123,4 @@ export PATH="$HOME/go/bin:$PATH"
 if command -v zoxide &> /dev/null; then
     eval "$(zoxide init zsh --cmd cd)"
 fi
+export RECRAFT_API_KEY="W0EbqnD5LzBs12ETUg4IpBCWKr2LqPzTqQAf8S7BYRtmFqz9RZjb40XPBMlXNRCa"
