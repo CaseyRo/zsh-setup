@@ -3,6 +3,30 @@
 # Starship Prompt Installation
 # ============================================================================
 
+# Fallback installer using the official starship.rs script. Downloads a
+# prebuilt binary into /usr/local/bin without needing brew or cargo.
+# Returns 0 on success, 1 on failure.
+install_starship_prebuilt() {
+    if ! command_exists curl; then
+        return 1
+    fi
+
+    local tmp_script
+    tmp_script=$(mktemp)
+    if ! curl -fsSL https://starship.rs/install.sh -o "$tmp_script"; then
+        rm -f "$tmp_script"
+        return 1
+    fi
+
+    if run_with_spinner "Downloading Starship binary" sudo sh "$tmp_script" --yes --bin-dir /usr/local/bin; then
+        rm -f "$tmp_script"
+        return 0
+    fi
+
+    rm -f "$tmp_script"
+    return 1
+}
+
 install_starship() {
     print_section "Starship Prompt"
 
@@ -32,12 +56,21 @@ install_starship() {
                 print_success "Starship installed (Cargo)"
                 track_installed "Starship"
             else
-                print_error "Failed to install Starship"
-                track_failed "Starship"
-                return 1
+                print_error "Cargo install failed, trying official installer..."
+                if install_starship_prebuilt; then
+                    print_success "Starship installed (prebuilt)"
+                    track_installed "Starship"
+                else
+                    print_error "Failed to install Starship"
+                    track_failed "Starship"
+                    return 1
+                fi
             fi
+        elif install_starship_prebuilt; then
+            print_success "Starship installed (prebuilt)"
+            track_installed "Starship"
         else
-            print_error "No package manager available for Starship (need brew or cargo)"
+            print_error "Failed to install Starship"
             track_failed "Starship"
             return 1
         fi

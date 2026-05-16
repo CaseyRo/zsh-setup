@@ -8,6 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update -qq \
  && apt-get install -y --no-install-recommends \
       ca-certificates curl git sudo locales tzdata zsh \
+      libatomic1 xz-utils \
  && sed -i 's/^# *en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen \
  && locale-gen \
  && rm -rf /var/lib/apt/lists/*

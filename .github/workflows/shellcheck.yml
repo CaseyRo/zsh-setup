@@ -34,7 +34,8 @@ jobs:
         with:
           severity: warning
           scandir: .
-          ignore_paths: modules preload_configs .zshrc
+          ignore_paths: modules preload_configs
+          ignore_names: .zshrc
 
       - name: ShellCheck (runtime modules, bash mode)
         run: |
