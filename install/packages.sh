@@ -22,7 +22,8 @@ BREW_PACKAGES=(
     "gh"         # GitHub CLI
     "1password-cli" # 1Password CLI
     "fzf"        # fuzzy finder (keybindings install better via brew)
-    "byobu"      # terminal multiplexer
+    "tmux"       # terminal multiplexer
+    "byobu"      # tmux wrapper with extras
     "fastfetch"  # fast system info (faster alternative to hyfetch)
     "btop"       # modern system monitor (successor to bashtop)
     "figlet"     # ASCII art text banners
@@ -110,6 +111,7 @@ APT_PACKAGES=(
     "curl"       # HTTP client (not always present in slim images)
     "ca-certificates" # HTTPS certificate authorities
     "fzf"
+    "tmux"       # terminal multiplexer
     "byobu"
     "bat"
     "fd-find"

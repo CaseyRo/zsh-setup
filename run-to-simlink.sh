@@ -12,3 +12,12 @@ fi
 # Create symlink
 ln -s "$SCRIPT_DIR/.zshrc" "$ZSHRC_TARGET"
 echo "New symlink: ~/.zshrc → $SCRIPT_DIR/.zshrc"
+
+# Symlink tmux config
+TMUX_TARGET="$HOME/.tmux.conf"
+if [ -f "$TMUX_TARGET" ] || [ -L "$TMUX_TARGET" ]; then
+    mv "$TMUX_TARGET" "$TMUX_TARGET.backup"
+    echo "Save existing ~/.tmux.conf as ~/.tmux.conf.backup for backup"
+fi
+ln -s "$SCRIPT_DIR/configs/tmux.conf" "$TMUX_TARGET"
+echo "New symlink: ~/.tmux.conf → $SCRIPT_DIR/configs/tmux.conf"

@@ -1,27 +1,23 @@
 # ============================================================================
-# Byobu session helpers — pair with cmux-setup remote workspaces
+# tmux session helpers — pair with cmux-setup remote workspaces
 # ============================================================================
-# Background: cmux 0.64.x doesn't deliver Enter to cmux-ssh workspace surfaces
-# via `cmux send`, so cmux-setup's byobu auto-launch in the SSH path was
-# dropped (cmux-setup commit 4cc31ed). Until that's fixed upstream, the user
-# manually attaches to the right byobu session on the remote host after the
-# workspace lands.
-#
-# These helpers exist so that step is a 2-keystroke command, not a 70-char
-# byobu invocation. They live in modules/common so every machine reachable
-# via SSH (notably cc1) gets them after a normal zsh-setup install.
+# These helpers exist so attaching to the right tmux session on a remote host
+# is a 2-keystroke command, not a 70-char invocation. They live in
+# modules/common so every machine reachable via SSH (notably cc1) gets them
+# after a normal zsh-setup install.
 #
 # Conventions match cmux-setup's session naming:
 #   project-N workspace  → pane 1: project<N>-1, pane 2: project<N>-2
 #   storykeep-N workspace → pane 1: storykeep<N>-1, pane 2: storykeep<N>-2
 # ============================================================================
 
-# pj N [pane]  →  cd ~/dev then attach/create byobu session "project<N>-<pane>"
+# pj N [pane]  →  cd ~/dev then attach/create tmux session "project<N>-<pane>"
 #                 pane defaults to 1.
 # Examples:
 #   pj 1     # project-1 pane 1   →  project1-1
 #   pj 1 2   # project-1 pane 2   →  project1-2
 #   pj 3     # project-3 pane 1   →  project3-1
+# shellcheck disable=SC2164
 pj() {
     if [[ -z "${1:-}" ]]; then
         echo "usage: pj <workspace-number> [pane-suffix]" >&2
@@ -31,13 +27,14 @@ pj() {
     fi
     local n="$1"
     local p="${2:-1}"
-    cd ~/dev && byobu new-session -A -s "project${n}-${p}"
+    cd ~/dev && tmux new-session -A -s "project${n}-${p}"
 }
 
 # sk N [pane]  →  cd ~/dev/StoryKeep then attach/create "storykeep<N>-<pane>"
 # Examples:
 #   sk 1     # storykeep-1 pane 1
 #   sk 1 2   # storykeep-1 pane 2
+# shellcheck disable=SC2164
 sk() {
     if [[ -z "${1:-}" ]]; then
         echo "usage: sk <workspace-number> [pane-suffix]" >&2
@@ -47,9 +44,9 @@ sk() {
     fi
     local n="$1"
     local p="${2:-1}"
-    cd ~/dev/StoryKeep && byobu new-session -A -s "storykeep${n}-${p}"
+    cd ~/dev/StoryKeep && tmux new-session -A -s "storykeep${n}-${p}"
 }
 
-# Bare attacher — pass an explicit session name. Useful when the naming
-# convention doesn't fit (one-off sessions, monitoring boxes, etc.).
-alias bya='byobu new-session -A -s'
+# Bare attacher — pass an explicit session name.
+# shellcheck disable=SC2139
+alias txa='tmux new-session -A -s'

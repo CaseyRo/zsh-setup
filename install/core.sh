@@ -705,6 +705,27 @@ main() {
         track_installed "topgrade config"
     fi
 
+    # Setup tmux config symlink
+    print_section "Tmux Configuration"
+    TMUX_TARGET="$HOME/.tmux.conf"
+    TMUX_SOURCE="$SCRIPT_DIR/configs/tmux.conf"
+
+    if [[ -L "$TMUX_TARGET" ]] && [[ "$(readlink "$TMUX_TARGET")" == "$TMUX_SOURCE" ]]; then
+        print_skip "tmux config symlink"
+        track_skipped "tmux config"
+    else
+        if [[ -f "$TMUX_TARGET" ]] || [[ -L "$TMUX_TARGET" ]]; then
+            print_step "Backing up existing .tmux.conf"
+            mv "$TMUX_TARGET" "$TMUX_TARGET.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backup created"
+        fi
+
+        print_step "Creating tmux config symlink"
+        ln -s "$TMUX_SOURCE" "$TMUX_TARGET"
+        print_success "\$HOME/.tmux.conf → $TMUX_SOURCE"
+        track_installed "tmux config"
+    fi
+
     if [[ "$LIGHT_MODE" != true ]] && { [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; }; then
         install_git_confirmer_optional
     fi
