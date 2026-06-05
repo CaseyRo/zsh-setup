@@ -726,6 +726,24 @@ main() {
         track_installed "tmux config"
     fi
 
+    # tmux helper scripts (URL picker) → ~/.config/tmux/
+    TMUX_SCRIPTS_DIR="$HOME/.config/tmux"
+    TMUX_URLPICKER_SOURCE="$SCRIPT_DIR/configs/tmux/tmux-fzf-url.sh"
+    TMUX_URLPICKER_TARGET="$TMUX_SCRIPTS_DIR/tmux-fzf-url.sh"
+    if [[ -f "$TMUX_URLPICKER_SOURCE" ]]; then
+        mkdir -p "$TMUX_SCRIPTS_DIR"
+        if [[ -L "$TMUX_URLPICKER_TARGET" ]] && [[ "$(readlink "$TMUX_URLPICKER_TARGET")" == "$TMUX_URLPICKER_SOURCE" ]]; then
+            print_skip "tmux url-picker symlink"
+            track_skipped "tmux url-picker"
+        else
+            [[ -e "$TMUX_URLPICKER_TARGET" || -L "$TMUX_URLPICKER_TARGET" ]] && rm -f "$TMUX_URLPICKER_TARGET"
+            print_step "Linking tmux url-picker"
+            ln -s "$TMUX_URLPICKER_SOURCE" "$TMUX_URLPICKER_TARGET"
+            print_success "\$HOME/.config/tmux/tmux-fzf-url.sh → $TMUX_URLPICKER_SOURCE"
+            track_installed "tmux url-picker"
+        fi
+    fi
+
     if [[ "$LIGHT_MODE" != true ]] && { [[ "$IS_MACOS" == true ]] || [[ "$IS_UBUNTU" == true ]]; }; then
         install_git_confirmer_optional
     fi
