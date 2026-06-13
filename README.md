@@ -47,6 +47,27 @@ Newer tools come with guarded aliases (defined in `modules/common/modern-cli.sh`
 
 **Node & other runtimes** are managed by [mise](https://mise.jdx.dev) (replaces NVM): versions auto-switch per directory from `mise.toml` / `.tool-versions` / `.node-version`. **carapace** adds argument-aware completions for hundreds of CLIs.
 
+### What they look like
+
+<table>
+  <tr>
+    <td align="center"><b>Starship</b> — the prompt<br><img src="https://raw.githubusercontent.com/starship/starship/main/media/demo.gif" width="380"></td>
+    <td align="center"><b>btop</b> — system monitor<br><img src="https://raw.githubusercontent.com/aristocratos/btop/main/Img/normal.png" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>lazygit</b> — Git TUI<br><img src="https://user-images.githubusercontent.com/8456633/174470852-339b5011-5800-4bb9-a628-ff230aa8cd4e.png" width="380"></td>
+    <td align="center"><b>git-delta</b> — better diffs<br><img src="https://user-images.githubusercontent.com/52205/147996902-9829bd3f-cd33-466e-833e-49a6f3ebd623.png" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>atuin</b> — shell history<br><img src="https://raw.githubusercontent.com/atuinsh/atuin/main/demo.gif" width="380"></td>
+    <td align="center"><b>zellij</b> — terminal workspace<br><img src="https://raw.githubusercontent.com/zellij-org/zellij/main/assets/demo.gif" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>glow</b> — markdown reader<br><img src="https://stuff.charm.sh/glow/glow-banner-github.gif" width="380"></td>
+    <td align="center"><b>yazi</b> — file manager<br><br><a href="https://yazi-rs.github.io/">▶ live demo &amp; screenshots →</a></td>
+  </tr>
+</table>
+
 ## Manual Installation
 
 ```bash
