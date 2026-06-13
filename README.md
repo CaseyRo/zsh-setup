@@ -14,11 +14,14 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 
 | Category | Tools |
 |----------|-------|
-| Shell | ZSH, Starship prompt |
-| CLI tools | bat, eza, ripgrep, fd, fzf, zoxide, btop, fastfetch, atuin |
-| Dev tools | git, gh (GitHub CLI), lazygit |
-| Languages | Rust/Cargo, NVM + Node.js, uv + Python |
-| Services | Docker, Tailscale, Copyparty |
+| Shell | ZSH, Starship prompt, carapace (completions), atuin (history) |
+| File & search | eza, bat, fd, ripgrep, fzf, zoxide, yazi (file manager) |
+| System | btop, fastfetch, duf / dysk (disk), procs, dust, bandwhich |
+| Data & net | jq, yq, jnv (interactive JSON), xh (HTTP), ouch (archives) |
+| Docs | glow (markdown), tlrc (tldr) |
+| Dev tools | git, gh (GitHub CLI), lazygit, jj (Jujutsu VCS), git-delta |
+| Languages | mise (Node.js + runtimes), Rust/Cargo, uv + Python |
+| Services | Docker, Tailscale, Copyparty, Syncthing |
 | Fonts | Nerd Fonts (FiraMono, JetBrainsMono, Meslo) - desktop only |
 
 ### Platform-specific installation
@@ -27,6 +30,22 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 |----------|----------------|-------|
 | macOS | Homebrew + Cargo | No Docker |
 | Raspberry Pi / ARM Linux | APT + Cargo | Docker via APT, pre-built packages where available |
+
+### Modern CLI tools & shortcuts
+
+Newer tools come with guarded aliases (defined in `modules/common/modern-cli.sh`; each only activates if the tool is installed):
+
+| Shortcut | Expands to | Tool |
+|----------|-----------|------|
+| `y` | open file manager, `cd` to where you quit | yazi |
+| `md <file>` / `readme` | render markdown in the terminal | glow |
+| `pack` / `unpack` | compress / extract any archive format | ouch |
+| `http` / `https` | HTTPie-style HTTP client | xh |
+| `jqi <file>` | interactive/live JSON filtering | jnv |
+| `df` | richer disk-usage table | dysk (Linux) / duf |
+| `jjs` / `jjl` / `jjd` | `jj status` / `log` / `diff` | jj (Jujutsu) |
+
+**Node & other runtimes** are managed by [mise](https://mise.jdx.dev) (replaces NVM): versions auto-switch per directory from `mise.toml` / `.tool-versions` / `.node-version`. **carapace** adds argument-aware completions for hundreds of CLIs.
 
 ## Manual Installation
 
