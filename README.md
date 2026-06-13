@@ -49,24 +49,85 @@ Newer tools come with guarded aliases (defined in `modules/common/modern-cli.sh`
 
 ### What they look like
 
+_Prompt & shell history_
+
 <table>
   <tr>
     <td align="center"><b>Starship</b> — the prompt<br><img src="https://raw.githubusercontent.com/starship/starship/main/media/demo.gif" width="380"></td>
-    <td align="center"><b>btop</b> — system monitor<br><img src="https://raw.githubusercontent.com/aristocratos/btop/main/Img/normal.png" width="380"></td>
+    <td align="center"><b>atuin</b> — shell history<br><img src="https://raw.githubusercontent.com/atuinsh/atuin/main/demo.gif" width="380"></td>
   </tr>
+</table>
+
+_Files & navigation_
+
+<table>
+  <tr>
+    <td align="center"><b>eza</b> — modern ls<br><img src="https://raw.githubusercontent.com/eza-community/eza/main/docs/images/screenshots.png" width="380"></td>
+    <td align="center"><b>fzf</b> — fuzzy finder<br><img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-color.png" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>zoxide</b> — smarter cd<br><img src="https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/contrib/tutorial.webp" width="380"></td>
+    <td align="center"><b>yazi</b> — file manager<br><br><a href="https://yazi-rs.github.io/">▶ live demo &amp; screenshots →</a></td>
+  </tr>
+</table>
+
+_Viewing & search_
+
+<table>
+  <tr>
+    <td align="center"><b>bat</b> — cat w/ highlighting<br><img src="https://i.imgur.com/rGsdnDe.png" width="380"></td>
+    <td align="center"><b>ripgrep</b> — fast grep<br><img src="https://burntsushi.net/stuff/ripgrep1.png" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>glow</b> — markdown reader<br><img src="https://stuff.charm.sh/glow/glow-banner-github.gif" width="380"></td>
+    <td align="center"><b>jnv</b> — interactive JSON<br><img src="https://raw.githubusercontent.com/ynqa/ynqa/master/demo/jnv.gif" width="380"></td>
+  </tr>
+</table>
+
+_Git & dev_
+
+<table>
   <tr>
     <td align="center"><b>lazygit</b> — Git TUI<br><img src="https://user-images.githubusercontent.com/8456633/174470852-339b5011-5800-4bb9-a628-ff230aa8cd4e.png" width="380"></td>
     <td align="center"><b>git-delta</b> — better diffs<br><img src="https://user-images.githubusercontent.com/52205/147996902-9829bd3f-cd33-466e-833e-49a6f3ebd623.png" width="380"></td>
   </tr>
+</table>
+
+_System & monitoring_
+
+<table>
   <tr>
-    <td align="center"><b>atuin</b> — shell history<br><img src="https://raw.githubusercontent.com/atuinsh/atuin/main/demo.gif" width="380"></td>
-    <td align="center"><b>zellij</b> — terminal workspace<br><img src="https://raw.githubusercontent.com/zellij-org/zellij/main/assets/demo.gif" width="380"></td>
+    <td align="center"><b>btop</b> — system monitor<br><img src="https://raw.githubusercontent.com/aristocratos/btop/main/Img/normal.png" width="380"></td>
+    <td align="center"><b>fastfetch</b> — system info<br><img src="https://raw.githubusercontent.com/fastfetch-cli/fastfetch/dev/screenshots/example1.png" width="380"></td>
   </tr>
   <tr>
-    <td align="center"><b>glow</b> — markdown reader<br><img src="https://stuff.charm.sh/glow/glow-banner-github.gif" width="380"></td>
-    <td align="center"><b>yazi</b> — file manager<br><br><a href="https://yazi-rs.github.io/">▶ live demo &amp; screenshots →</a></td>
+    <td align="center"><b>procs</b> — modern ps<br><img src="https://user-images.githubusercontent.com/4331004/55446625-5e5fce00-55fb-11e9-8914-69e8640d89d7.png" width="380"></td>
+    <td align="center"><b>bandwhich</b> — network usage<br><img src="https://raw.githubusercontent.com/imsnif/bandwhich/main/res/demo.gif" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>dust</b> — disk usage tree<br><img src="https://raw.githubusercontent.com/bootandy/dust/master/media/snap.png" width="380"></td>
+    <td align="center"><b>duf</b> — disk usage / df<br><img src="https://raw.githubusercontent.com/muesli/duf/master/duf.png" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>dysk</b> — filesystem table<br><img src="https://raw.githubusercontent.com/Canop/dysk/main/website/src/img/dysk.png" width="380"></td>
+    <td></td>
   </tr>
 </table>
+
+_Multiplexer, runtimes & HTTP_
+
+<table>
+  <tr>
+    <td align="center"><b>zellij</b> — terminal workspace<br><img src="https://raw.githubusercontent.com/zellij-org/zellij/main/assets/demo.gif" width="380"></td>
+    <td align="center"><b>mise</b> — version manager<br><img src="https://raw.githubusercontent.com/jdx/mise/main/docs/tapes/demo.gif" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>xh</b> — HTTP client<br><img src="https://raw.githubusercontent.com/ducaale/xh/master/assets/xh-demo.gif" width="380"></td>
+    <td></td>
+  </tr>
+</table>
+
+> Text-only utilities (no screenshot): `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the reading list for what each does.
 
 ## Manual Installation
 
