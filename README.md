@@ -127,7 +127,75 @@ _Multiplexer, runtimes & HTTP_
   </tr>
 </table>
 
-> Non-visual utilities (nothing meaningful to screenshot): `zoxide`, `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the reading list for what each does.
+> Non-visual utilities (nothing meaningful to screenshot): `zoxide`, `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the table below for what each does.
+
+### Tool reference & links
+
+Want to dig into any of these? Each links to its source repo.
+
+**Shell & prompt**
+
+| Tool | What it does |
+|------|--------------|
+| [starship](https://github.com/starship/starship) | Fast, customizable cross-shell prompt |
+| [atuin](https://github.com/atuinsh/atuin) | Synced, searchable, encrypted shell history (Ctrl+R) |
+| [carapace](https://github.com/carapace-sh/carapace-bin) | Argument-aware completions for 1000+ CLIs |
+
+**Files & navigation**
+
+| Tool | What it does |
+|------|--------------|
+| [eza](https://github.com/eza-community/eza) | Modern `ls` with icons & git status |
+| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` that learns your habits |
+| [yazi](https://github.com/sxyazi/yazi) | Blazing-fast terminal file manager |
+| [fzf](https://github.com/junegunn/fzf) | General-purpose fuzzy finder |
+| [fd](https://github.com/sharkdp/fd) | Fast, friendly `find` |
+
+**Viewing, search & text**
+
+| Tool | What it does |
+|------|--------------|
+| [bat](https://github.com/sharkdp/bat) | `cat` with syntax highlighting & git integration |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | Extremely fast recursive `grep` (`rg`) |
+| [glow](https://github.com/charmbracelet/glow) | Render markdown in the terminal |
+| [sd](https://github.com/chmln/sd) | Intuitive find-and-replace (`sed` alternative) |
+| [jq](https://github.com/jqlang/jq) | Command-line JSON processor |
+| [yq](https://github.com/mikefarah/yq) | `jq` for YAML |
+| [jnv](https://github.com/ynqa/jnv) | Interactive JSON viewer/filter (live `jq`) |
+
+**Git & dev**
+
+| Tool | What it does |
+|------|--------------|
+| [lazygit](https://github.com/jesseduffield/lazygit) | Full-featured Git TUI |
+| [git-delta](https://github.com/dandavison/delta) | Syntax-highlighted git diffs & pager |
+| [jj](https://github.com/jj-vcs/jj) | Jujutsu — Git-compatible next-gen VCS |
+| [mise](https://github.com/jdx/mise) | Runtime/version manager (Node, Python, …) |
+| [tokei](https://github.com/XAMPPRocky/tokei) | Count lines of code by language |
+| [hyperfine](https://github.com/sharkdp/hyperfine) | Command-line benchmarking |
+
+**System & monitoring**
+
+| Tool | What it does |
+|------|--------------|
+| [btop](https://github.com/aristocratos/btop) | Resource monitor (CPU/mem/net/disk) |
+| [fastfetch](https://github.com/fastfetch-cli/fastfetch) | Fast system info (neofetch successor) |
+| [procs](https://github.com/dalance/procs) | Modern `ps` replacement |
+| [bandwhich](https://github.com/imsnif/bandwhich) | Per-process network usage |
+| [dust](https://github.com/bootandy/dust) | Intuitive `du` (disk usage tree) |
+| [duf](https://github.com/muesli/duf) | Friendly `df` (disk usage) |
+| [dysk](https://github.com/Canop/dysk) | Filesystem usage table (Linux) |
+
+**Multiplexer, HTTP & misc**
+
+| Tool | What it does |
+|------|--------------|
+| [zellij](https://github.com/zellij-org/zellij) | Terminal multiplexer / workspace |
+| [xh](https://github.com/ducaale/xh) | Fast HTTPie-style HTTP client |
+| [ouch](https://github.com/ouch-org/ouch) | Compress/decompress any archive format |
+| [tlrc](https://github.com/tldr-pages/tlrc) | `tldr` client — simplified, example-driven man pages |
+| [topgrade](https://github.com/topgrade-rs/topgrade) | One command to update everything |
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | Media downloader |
 
 ## Manual Installation
 
