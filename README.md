@@ -63,11 +63,11 @@ _Files & navigation_
 <table>
   <tr>
     <td align="center"><b>eza</b> — modern ls<br><img src="https://raw.githubusercontent.com/eza-community/eza/main/docs/images/screenshots.png" width="380"></td>
-    <td align="center"><b>fzf</b> — fuzzy finder<br><img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-color.png" width="380"></td>
+    <td align="center"><b>fzf</b> — fuzzy finder<br><img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-preview.png" width="380"></td>
   </tr>
   <tr>
-    <td align="center"><b>zoxide</b> — smarter cd<br><img src="https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/contrib/tutorial.webp" width="380"></td>
     <td align="center"><b>yazi</b> — file manager<br><br><a href="https://yazi-rs.github.io/">▶ live demo &amp; screenshots →</a></td>
+    <td></td>
   </tr>
 </table>
 
@@ -79,7 +79,7 @@ _Viewing & search_
     <td align="center"><b>ripgrep</b> — fast grep<br><img src="https://burntsushi.net/stuff/ripgrep1.png" width="380"></td>
   </tr>
   <tr>
-    <td align="center"><b>glow</b> — markdown reader<br><img src="https://stuff.charm.sh/glow/glow-banner-github.gif" width="380"></td>
+    <td align="center"><b>glow</b> — markdown reader<br><img src="https://raw.githubusercontent.com/charmbracelet/glow/master/example.png" width="380"></td>
     <td align="center"><b>jnv</b> — interactive JSON<br><img src="https://raw.githubusercontent.com/ynqa/ynqa/master/demo/jnv.gif" width="380"></td>
   </tr>
 </table>
@@ -88,8 +88,8 @@ _Git & dev_
 
 <table>
   <tr>
-    <td align="center"><b>lazygit</b> — Git TUI<br><img src="https://user-images.githubusercontent.com/8456633/174470852-339b5011-5800-4bb9-a628-ff230aa8cd4e.png" width="380"></td>
-    <td align="center"><b>git-delta</b> — better diffs<br><img src="https://user-images.githubusercontent.com/52205/147996902-9829bd3f-cd33-466e-833e-49a6f3ebd623.png" width="380"></td>
+    <td align="center"><b>lazygit</b> — Git TUI<br><img src="https://raw.githubusercontent.com/jesseduffield/lazygit/assets/viewing-commit-diffs.png" width="380"></td>
+    <td align="center"><b>git-delta</b> — better diffs<br><img src="https://user-images.githubusercontent.com/52205/81058545-a5725f80-8e9c-11ea-912e-d21954586a44.png" width="380"></td>
   </tr>
 </table>
 
@@ -127,7 +127,7 @@ _Multiplexer, runtimes & HTTP_
   </tr>
 </table>
 
-> Text-only utilities (no screenshot): `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the reading list for what each does.
+> Non-visual utilities (nothing meaningful to screenshot): `zoxide`, `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the reading list for what each does.
 
 ## Manual Installation
 
