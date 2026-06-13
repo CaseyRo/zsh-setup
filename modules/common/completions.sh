@@ -50,8 +50,8 @@ fi
 # ----------------------------------------------------------------------------
 # Adds rich, argument-aware completions for hundreds of CLIs. Bridges to
 # existing zsh/bash/fish completers so nothing already working is lost.
-# No-op when carapace isn't installed (macOS via Homebrew; apt servers can
-# install carapace-bin manually).
+# No-op when carapace isn't installed (Homebrew on macOS, prebuilt binary on
+# apt systems — see install/prebuilt-bins.sh).
 if command -v carapace >/dev/null 2>&1; then
     export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense'
     # shellcheck disable=SC1090  # dynamic completion script emitted by carapace

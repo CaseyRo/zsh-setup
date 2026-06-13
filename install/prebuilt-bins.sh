@@ -103,7 +103,111 @@ install_eza_prebuilt() {
     rm -rf "$tmp_dir"
 }
 
+install_glow_prebuilt() {
+    print_section "Glow (prebuilt)"
+
+    if command_exists glow; then
+        print_skip "glow"
+        track_skipped "glow"
+        return 0
+    fi
+
+    print_package "glow"
+
+    local arch
+    case "$(uname -m)" in
+        x86_64)        arch="x86_64" ;;
+        aarch64)       arch="arm64" ;;
+        armv7l|armv6l) arch="arm" ;;
+        *)
+            print_warning "No prebuilt glow binary for $(uname -m), skipping"
+            track_skipped "glow (no prebuilt for $(uname -m))"
+            return 0
+            ;;
+    esac
+
+    local version
+    version=$(curl -fsSL "https://api.github.com/repos/charmbracelet/glow/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [[ -z "$version" ]]; then
+        print_error "Failed to fetch latest glow version"
+        track_failed "glow"
+        return 1
+    fi
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local url="https://github.com/charmbracelet/glow/releases/download/v${version}/glow_${version}_Linux_${arch}.tar.gz"
+
+    if run_with_spinner "Downloading glow v${version}" curl -fsSL "$url" -o "${tmp_dir}/glow.tar.gz" && \
+       tar xzf "${tmp_dir}/glow.tar.gz" -C "$tmp_dir" && \
+       sudo install "$(find "$tmp_dir" -type f -name glow | head -n1)" /usr/local/bin/glow; then
+        print_success "glow v${version} installed"
+        track_installed "glow"
+    else
+        print_error "Failed to install glow"
+        track_failed "glow"
+    fi
+
+    rm -rf "$tmp_dir"
+}
+
+install_carapace_prebuilt() {
+    print_section "Carapace (prebuilt)"
+
+    if command_exists carapace; then
+        print_skip "carapace"
+        track_skipped "carapace"
+        return 0
+    fi
+
+    print_package "carapace"
+
+    # carapace-bin ships amd64/arm64 only — no 32-bit ARM (Pi) build.
+    local arch
+    case "$(uname -m)" in
+        x86_64)  arch="amd64" ;;
+        aarch64) arch="arm64" ;;
+        *)
+            print_warning "No prebuilt carapace binary for $(uname -m), skipping"
+            track_skipped "carapace (no prebuilt for $(uname -m))"
+            return 0
+            ;;
+    esac
+
+    local version
+    version=$(curl -fsSL "https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [[ -z "$version" ]]; then
+        print_error "Failed to fetch latest carapace version"
+        track_failed "carapace"
+        return 1
+    fi
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    local url="https://github.com/carapace-sh/carapace-bin/releases/download/v${version}/carapace-bin_${version}_linux_${arch}.tar.gz"
+
+    if run_with_spinner "Downloading carapace v${version}" curl -fsSL "$url" -o "${tmp_dir}/carapace.tar.gz" && \
+       tar xzf "${tmp_dir}/carapace.tar.gz" -C "$tmp_dir" && \
+       sudo install "$(find "$tmp_dir" -type f -name carapace | head -n1)" /usr/local/bin/carapace; then
+        print_success "carapace v${version} installed"
+        track_installed "carapace"
+    else
+        print_error "Failed to install carapace"
+        track_failed "carapace"
+    fi
+
+    rm -rf "$tmp_dir"
+}
+
+# glow + carapace are Go binaries with no apt/cargo package — fetch prebuilt
+# release binaries on apt systems (macOS gets them via Homebrew).
+install_charm_prebuilt_bins() {
+    install_glow_prebuilt
+    install_carapace_prebuilt
+}
+
 install_prebuilt_bins() {
     install_zoxide_prebuilt
     install_eza_prebuilt
+    install_charm_prebuilt_bins
 }

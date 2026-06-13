@@ -583,6 +583,12 @@ main() {
         else
             install_cargo_packages
         fi
+
+        # glow + carapace ship no apt/cargo package; grab prebuilt binaries on
+        # apt systems (light mode already does this via install_prebuilt_bins).
+        if [[ "$USE_APT" == true ]]; then
+            install_charm_prebuilt_bins
+        fi
     fi
 
     install_uv

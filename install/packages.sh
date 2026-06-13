@@ -159,10 +159,9 @@ CARGO_PACKAGES_APT=(
 )
 
 # Additional cargo packages for APT host machines (not Docker)
-# NOTE: glow + carapace are Go binaries (not on crates.io / apt); they install
-# on macOS via Homebrew. On apt servers install them manually if wanted:
-#   go install github.com/charmbracelet/glow@latest
-#   https://carapace-sh.github.io/carapace-bin/install.html
+# NOTE: glow + carapace are Go binaries (not on crates.io / apt). They install
+# via Homebrew on macOS and as prebuilt GitHub-release binaries on apt systems
+# (install_charm_prebuilt_bins in install/prebuilt-bins.sh).
 CARGO_PACKAGES_APT_HOST=(
     "topgrade"   # system updater (not in apt)
     "zellij"     # terminal multiplexer / workspace (not in apt)
