@@ -38,20 +38,16 @@ _zsh_setup_log_event() {
 }
 
 # git fetch with short connect/transfer timeouts so we never hang a shell.
-# Works for both SSH and HTTPS remotes.
+# Works for both SSH and HTTPS remotes. GIT_TERMINAL_PROMPT=0 + an empty
+# credential helper guarantee we fail fast instead of prompting for creds on
+# an HTTPS remote (BatchMode covers the SSH side).
 _zsh_setup_fetch() {
+    GIT_TERMINAL_PROMPT=0 \
     GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh} -o ConnectTimeout=5 -o BatchMode=yes" \
-        git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=10 fetch --quiet 2>/dev/null
+        git -c credential.helper= -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=10 \
+            fetch --quiet 2>/dev/null
 }
 
-# Whether install/upgrade.sh can run non-interactively from this context.
-# macOS (brew-only) is always fine; Linux needs a cached sudo token.
-_zsh_setup_can_run_upgrade() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        return 0
-    fi
-    sudo -n true 2>/dev/null
-}
 
 # Stash local changes, pull, and pop stash. Returns 0 on success.
 _zsh_setup_safe_pull() {
@@ -62,7 +58,7 @@ _zsh_setup_safe_pull() {
         git stash push --quiet -m "zsh-setup auto-update $(date +%Y-%m-%d)" 2>/dev/null && stashed=true
     fi
 
-    if git pull --ff-only --quiet 2>/dev/null; then
+    if GIT_TERMINAL_PROMPT=0 git -c credential.helper= pull --ff-only --quiet 2>/dev/null; then
         if [[ "$stashed" == true ]]; then
             if ! git stash pop --quiet 2>/dev/null; then
                 echo "[zsh-setup] Auto-update: stash pop failed. Run 'cd $ZSH_SETUP_FOLDER && git stash pop' to recover." >&2
@@ -162,14 +158,12 @@ _zsh_setup_check_update() {
         if _zsh_setup_safe_pull; then
             _new_sha=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
             _zsh_setup_log_event "${_old_sha:0:7} -> ${_new_sha:0:7} [pulled]"
-            # Install any new packages added in the update — but only if we can do
-            # it non-interactively (apt needs sudo; a background shell can't prompt).
+            # Install any new packages added in the update. UPGRADE_NONINTERACTIVE=1
+            # tells upgrade.sh to skip the sudo-requiring steps (apt) — which a
+            # background shell can't authorize — while still running the
+            # user-space ones (mise/node, cargo, npm, fonts).
             if [[ -f "$ZSH_SETUP_FOLDER/install/upgrade.sh" ]]; then
-                if _zsh_setup_can_run_upgrade; then
-                    bash "$ZSH_SETUP_FOLDER/install/upgrade.sh"
-                else
-                    _zsh_setup_log_event "[upgrade-deferred: sudo-required]"
-                fi
+                UPGRADE_NONINTERACTIVE=1 bash "$ZSH_SETUP_FOLDER/install/upgrade.sh"
             fi
             echo "[zsh-setup] Updated to $(git rev-parse --short HEAD). Restart shell to apply."
         else

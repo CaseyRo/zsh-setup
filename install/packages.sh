@@ -37,6 +37,15 @@ BREW_PACKAGES=(
     "yt-dlp"     # YouTube downloader
     "atuin"      # shell history sync & search
     "syncthing"  # peer-to-peer continuous file sync
+    # --- modern CLI additions (prebuilt via brew; fast install on macOS) ---
+    "yazi"       # blazing-fast terminal file manager (Rust)
+    "glow"       # render markdown in the terminal
+    "jj"         # Jujutsu: Git-compatible VCS
+    "xh"         # friendly, fast HTTP client (HTTPie in Rust)
+    "ouch"       # painless compress/decompress for any archive format
+    "jnv"        # interactive JSON viewer/filter (live jq)
+    "duf"        # friendly disk usage / df replacement
+    "carapace"   # multi-shell completion engine
 )
 
 # Homebrew packages for macOS dev machines only
@@ -125,6 +134,7 @@ APT_PACKAGES=(
     "jq"         # JSON processor
     "wget"       # file downloader
     "tree"       # directory tree viewer
+    "duf"        # friendly disk usage / df replacement
     "htop"       # interactive process viewer
     "procps"     # ps, top, etc. (missing in slim Docker images)
     "locales"    # locale generation (UTF-8 support in containers)
@@ -141,13 +151,26 @@ CARGO_PACKAGES_APT=(
     "eza"        # modern ls (not in apt)
     "cargo-cache" # manage cargo cache disk usage (not in apt)
     "parsync"    # parallel rsync replacement (drop-in, faster)
+    # --- modern CLI additions (lightweight Rust crates) ---
+    "xh"         # friendly, fast HTTP client (HTTPie in Rust)
+    "ouch"       # compress/decompress any archive format
+    "jnv"        # interactive JSON viewer/filter (live jq)
+    "dysk"       # fast filesystem usage table (Linux)
 )
 
 # Additional cargo packages for APT host machines (not Docker)
+# NOTE: glow + carapace are Go binaries (not on crates.io / apt); they install
+# on macOS via Homebrew. On apt servers install them manually if wanted:
+#   go install github.com/charmbracelet/glow@latest
+#   https://carapace-sh.github.io/carapace-bin/install.html
 CARGO_PACKAGES_APT_HOST=(
     "topgrade"   # system updater (not in apt)
     "zellij"     # terminal multiplexer / workspace (not in apt)
     "llmfit"     # LLM toolkit CLI
+    # --- modern CLI additions (heavier compiles; host machines only) ---
+    "yazi-fm"    # terminal file manager (Rust)
+    "yazi-cli"   # yazi companion CLI (provides `ya`)
+    "jj-cli"     # Jujutsu: Git-compatible VCS
 )
 
 # APT packages only for Ubuntu (not Raspberry Pi)

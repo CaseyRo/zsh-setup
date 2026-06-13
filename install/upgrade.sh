@@ -109,9 +109,16 @@ upgrade_cargo_packages() {
         return 0
     fi
 
+    # Mirror install_cargo_packages_minimal(): on apt hosts the host-only list
+    # (yazi, jj, topgrade, …) is part of the install, so it must roll out via
+    # auto-update too — otherwise those tools only ever arrive on a full
+    # ./install.sh run.
     local packages
     if should_use_apt; then
         packages=("${CARGO_PACKAGES_APT[@]}")
+        if ! is_docker && [[ ${#CARGO_PACKAGES_APT_HOST[@]} -gt 0 ]]; then
+            packages+=("${CARGO_PACKAGES_APT_HOST[@]}")
+        fi
     else
         packages=("${CARGO_PACKAGES[@]}")
     fi
@@ -125,6 +132,45 @@ upgrade_cargo_packages() {
                 echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install $package"
         fi
     done
+}
+
+# mise supersedes NVM. On existing machines the nvm.sh runtime modules are
+# disabled by this update, so install mise AND provision Node here — otherwise
+# `node` would vanish until the next full install.sh run.
+upgrade_mise() {
+    local mise=""
+    if command_exists mise; then
+        mise="mise"
+    elif [[ -x "$HOME/.local/bin/mise" ]]; then
+        mise="$HOME/.local/bin/mise"
+    else
+        INSTALLED_SOMETHING=true
+        echo -e "${SYMBOL_PACKAGE} Installing new tool: ${BOLD}mise${RESET}"
+        if [[ "$OSTYPE" == "darwin"* ]] && command_exists brew; then
+            brew install mise &>/dev/null && mise="mise"
+        else
+            curl -fsSL https://mise.run 2>/dev/null | sh &>/dev/null
+            [[ -x "$HOME/.local/bin/mise" ]] && mise="$HOME/.local/bin/mise"
+        fi
+        if [[ -n "$mise" ]]; then
+            echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} mise installed"
+        else
+            echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to install mise"
+            return 0
+        fi
+    fi
+
+    # Provision a global Node LTS if mise isn't managing one yet.
+    export PATH="$HOME/.local/bin:$PATH"
+    if ! "$mise" which node &>/dev/null; then
+        INSTALLED_SOMETHING=true
+        echo -e "${SYMBOL_PACKAGE} Provisioning ${BOLD}Node.js LTS${RESET} via mise"
+        "$mise" use -g node@lts &>/dev/null && \
+            echo -e "  ${GREEN}${SYMBOL_SUCCESS}${RESET} Node.js installed" || \
+            echo -e "  ${RED}${SYMBOL_FAIL}${RESET} Failed to provision Node.js"
+        "$mise" reshim &>/dev/null || true
+    fi
+    export PATH="$HOME/.local/share/mise/shims:$PATH"
 }
 
 upgrade_npm_packages() {
@@ -212,25 +258,47 @@ upgrade_nerd_fonts() {
 # Main Upgrade Function
 # ============================================================================
 
+# Whether the sudo-requiring upgrade steps (apt, system-wide binaries) can run.
+# macOS upgrades never need sudo. On Linux we need either cached/passwordless
+# sudo, or an interactive tty we're allowed to prompt on — the background
+# auto-update sets UPGRADE_NONINTERACTIVE=1 to forbid prompting, so it skips
+# the sudo steps but the user-space steps (mise/node, cargo, npm, fonts) below
+# still run.
+_upgrade_can_sudo() {
+    [[ "$OSTYPE" == "darwin"* ]] && return 0
+    sudo -n true 2>/dev/null && return 0
+    [[ "${UPGRADE_NONINTERACTIVE:-0}" != 1 && -t 0 ]]
+}
+
 run_upgrade() {
     upgrade_log_rotate
 
-    # Determine platform
+    local can_sudo=false
+    _upgrade_can_sudo && can_sudo=true
+
+    # --- Steps that write system-wide and need root --------------------------
     if should_use_apt; then
-        upgrade_apt_packages
-        upgrade_lazygit
+        if [[ "$can_sudo" == true ]]; then
+            upgrade_apt_packages
+            upgrade_lazygit
+            upgrade_tailscale
+        else
+            echo -e "${SYMBOL_PACKAGE} Skipping apt/lazygit/tailscale (no sudo); run ${BOLD}zsh-update${RESET} to install them."
+        fi
     else
         upgrade_brew_taps
         upgrade_brew_packages
         upgrade_lazygit
+        upgrade_tailscale
     fi
 
-    # Drop cached sudo credentials before user-space operations
+    # Drop cached sudo credentials before user-space operations (must not run as root)
     sudo -k 2>/dev/null || true
 
+    # --- User-space steps — always safe to run, no sudo required -------------
     upgrade_cargo_packages
+    upgrade_mise
     upgrade_npm_packages
-    upgrade_tailscale
     upgrade_nerd_fonts
     upgrade_git_confirmer
     if [[ "$INSTALLED_SOMETHING" == true ]]; then

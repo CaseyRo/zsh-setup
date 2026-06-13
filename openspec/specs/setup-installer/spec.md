@@ -3,7 +3,9 @@
 ## Purpose
 
 Provides automated installation and setup of zsh-setup on new machines, with cross-platform support for macOS, Linux, and Raspberry Pi/ARM.
+
 ## Requirements
+
 ### Requirement: One-Liner Remote Installation
 
 The system SHALL provide a bootstrap script that can be executed via `bash -c "$(curl ...)"` to install zsh-setup on a fresh machine.
@@ -337,4 +339,3 @@ The system SHALL allow users to opt in or opt out of installing macOS GUI apps d
 
 - **WHEN** setup runs with a skip flag for macOS apps (e.g., `--skip-mac-apps`, `--skip-casks`, or `--skip-mas`)
 - **THEN** Homebrew casks and Mac App Store apps are skipped without prompting
-

@@ -57,6 +57,10 @@ The loader uses `find ... | sort`, so lexicographic order within a directory mat
 
 Any file or folder whose name starts with `#` is skipped by the loader (`find ... ! -name "#*"`). Use `#old_aliases.sh` or `modules/#deprecated/` to disable code without deleting it.
 
+### Version management: mise (not NVM)
+
+Node (and other runtimes) are managed by [`mise`](https://mise.jdx.dev), not NVM. `install/mise.sh` installs mise and pins `node@lts`; `modules/common/mise.sh` activates it on every shell with per-directory auto-switching. The old per-OS `nvm.sh` runtime modules are disabled (`#nvm.sh`) and `install_nvm`/`install_node` are no longer called — but `install/nvm.sh` is still sourced because it defines `install_npm_global_packages`. `install/upgrade.sh`'s `upgrade_mise` installs mise *and* provisions Node so existing machines don't lose `node` when they pull the disabling commit.
+
 ### Platform detection in installers
 
 `install/utils.sh` provides `is_macos`, `is_ubuntu`, `is_debian`, `is_raspberry_pi`, `is_arm`, `is_docker`, `should_use_apt`, `command_exists`. Use these rather than re-checking `$OSTYPE` / `/etc/os-release`. Package-manager preference is **Cargo for Rust tools → Homebrew on macOS → APT on ARM/Linux**, with `install/prebuilt-bins.sh` as a last-resort fallback for `--light` servers where Rust is too heavy to build.

@@ -1,8 +1,11 @@
 # shell-aliases Specification
 
 ## Purpose
+
 TBD - created by archiving change add-git-confirmer-alias. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: git_confirmer aliases
 
 The system SHALL provide `gc` and `gcs` aliases for `git_confirmer` when the command is available.
@@ -17,4 +20,3 @@ The system SHALL provide `gc` and `gcs` aliases for `git_confirmer` when the com
 
 - **WHEN** `git_confirmer` is not available on PATH
 - **THEN** no `gc` or `gcs` alias is defined
-

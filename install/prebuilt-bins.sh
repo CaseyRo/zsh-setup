@@ -64,10 +64,13 @@ install_eza_prebuilt() {
 
     print_package "eza"
 
-    local arch
+    # eza only publishes a musl build for x86_64; aarch64 is gnu-only. Picking
+    # the wrong libc 404s the release asset, so map each arch to its full target
+    # triple rather than assuming musl everywhere.
+    local target
     case "$(uname -m)" in
-        x86_64)  arch="x86_64" ;;
-        aarch64) arch="aarch64" ;;
+        x86_64)  target="x86_64-unknown-linux-musl" ;;
+        aarch64) target="aarch64-unknown-linux-gnu" ;;
         *)
             print_warning "No prebuilt eza binary for $(uname -m), skipping"
             track_skipped "eza (no prebuilt for $(uname -m))"
@@ -85,7 +88,7 @@ install_eza_prebuilt() {
 
     local tmp_dir
     tmp_dir=$(mktemp -d)
-    local url="https://github.com/eza-community/eza/releases/download/v${version}/eza_${arch}-unknown-linux-musl.tar.gz"
+    local url="https://github.com/eza-community/eza/releases/download/v${version}/eza_${target}.tar.gz"
 
     if run_with_spinner "Downloading eza v${version}" curl -fsSL "$url" -o "${tmp_dir}/eza.tar.gz" && \
        tar xzf "${tmp_dir}/eza.tar.gz" -C "$tmp_dir" && \

@@ -185,6 +185,7 @@ source "$INSTALL_DIR/brew.sh"
 source "$INSTALL_DIR/apt.sh"
 source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
+source "$INSTALL_DIR/mise.sh"
 source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/starship.sh"
@@ -392,9 +393,9 @@ main() {
         fi
     fi
     if [[ "$LIGHT_MODE" == true ]]; then
-        echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2)"
+        echo -e "  ${SYMBOL_BULLET} mise + Node.js LTS + global packages (pm2)"
     else
-        echo -e "  ${SYMBOL_BULLET} NVM + Node.js stable + global packages (pm2, node-red)"
+        echo -e "  ${SYMBOL_BULLET} mise + Node.js LTS + global packages (pm2, node-red)"
     fi
     echo -e "  ${SYMBOL_BULLET} uv + Python stable"
     echo -e "  ${SYMBOL_BULLET} Starship prompt + zsh plugins"
@@ -588,19 +589,16 @@ main() {
 
     install_python_uv
 
-    # Skip NVM if Node.js is already provided (e.g., Docker base image)
+    # Node.js via mise (supersedes NVM). Skip if Node is already provided
+    # (e.g., a Docker base image ships it).
     if [[ "$IS_DOCKER" == true ]] && command_exists node; then
-        print_section "NVM (Node Version Manager)"
-        print_skip "NVM (Node.js $(node --version) provided by base image)"
-        track_skipped "NVM (base image)"
-
         print_section "Node.js"
         print_skip "Node.js $(node --version) (from base image)"
         track_skipped "Node.js (base image)"
     else
-        install_nvm
+        install_mise
 
-        install_node
+        mise_install_node
     fi
 
     install_npm_global_packages

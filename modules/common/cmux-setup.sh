@@ -5,9 +5,18 @@
 
 _cmux_setup_dir="$HOME/dev/cmux-setup"
 
-# Clone or update on first load (quiet, background-safe)
+# Clone on first load — must never block login or prompt for credentials.
+# GIT_TERMINAL_PROMPT=0 makes git fail fast instead of hanging on a credential
+# prompt (git writes that prompt to /dev/tty, so 2>/dev/null can't hide it);
+# the low-speed timeout guards against a dead network; running it backgrounded
+# means a slow clone never delays the prompt. Picks up next login if it fails.
 if [[ ! -d "$_cmux_setup_dir" ]]; then
-    git clone --depth 1 https://github.com/CaseyRo/cmux-setup.git "$_cmux_setup_dir" 2>/dev/null
+    (
+        GIT_TERMINAL_PROMPT=0 git \
+            -c credential.helper= \
+            -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=10 \
+            clone --depth 1 https://github.com/CaseyRo/cmux-setup.git "$_cmux_setup_dir"
+    ) &>/dev/null &
 fi
 
 # Alias
