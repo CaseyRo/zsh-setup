@@ -192,11 +192,11 @@ install_fastfetch_apt() {
     esac
 
     local version
-    version=$(curl -fsSL "https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    version=$(github_latest_version "fastfetch-cli/fastfetch")
     if [[ -z "$version" ]]; then
         print_error "Failed to fetch latest Fastfetch version"
         track_failed "Fastfetch"
-        return 1
+        return 0
     fi
 
     local tmp_dir

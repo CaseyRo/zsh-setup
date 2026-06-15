@@ -29,11 +29,11 @@ install_zoxide_prebuilt() {
     esac
 
     local version
-    version=$(curl -fsSL "https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    version=$(github_latest_version "ajeetdsouza/zoxide")
     if [[ -z "$version" ]]; then
         print_error "Failed to fetch latest zoxide version"
         track_failed "zoxide"
-        return 1
+        return 0
     fi
 
     local tmp_dir
@@ -79,11 +79,11 @@ install_eza_prebuilt() {
     esac
 
     local version
-    version=$(curl -fsSL "https://api.github.com/repos/eza-community/eza/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    version=$(github_latest_version "eza-community/eza")
     if [[ -z "$version" ]]; then
         print_error "Failed to fetch latest eza version"
         track_failed "eza"
-        return 1
+        return 0
     fi
 
     local tmp_dir
@@ -127,11 +127,11 @@ install_glow_prebuilt() {
     esac
 
     local version
-    version=$(curl -fsSL "https://api.github.com/repos/charmbracelet/glow/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    version=$(github_latest_version "charmbracelet/glow")
     if [[ -z "$version" ]]; then
         print_error "Failed to fetch latest glow version"
         track_failed "glow"
-        return 1
+        return 0
     fi
 
     local tmp_dir
@@ -175,11 +175,11 @@ install_carapace_prebuilt() {
     esac
 
     local version
-    version=$(curl -fsSL "https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    version=$(github_latest_version "carapace-sh/carapace-bin")
     if [[ -z "$version" ]]; then
         print_error "Failed to fetch latest carapace version"
         track_failed "carapace"
-        return 1
+        return 0
     fi
 
     local tmp_dir

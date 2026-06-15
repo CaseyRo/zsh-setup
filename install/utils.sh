@@ -217,6 +217,35 @@ command_exists() {
     command -v "$1" &> /dev/null
 }
 
+# Resolve the latest release tag for a GitHub repo (e.g. "owner/name"), printing
+# the bare version without the leading "v". Prefers the unauthenticated
+# /releases/latest redirect, which — unlike api.github.com (60 req/hr/IP) — is
+# not aggressively rate-limited, so it survives shared CI runner IPs that would
+# otherwise 403. Falls back to the API (authenticated when GITHUB_TOKEN is set).
+github_latest_version() {
+    local repo="$1" version=""
+
+    version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
+        "https://github.com/${repo}/releases/latest" 2>/dev/null \
+        | grep -oE 'tag/v?[^/[:space:]]+$' | sed -E 's#^tag/v?##')
+    if [[ -n "$version" ]]; then
+        printf '%s\n' "$version"
+        return 0
+    fi
+
+    local auth=()
+    [[ -n "${GITHUB_TOKEN:-}" ]] && auth=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+    version=$(curl -fsSL "${auth[@]}" \
+        "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null \
+        | grep '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/')
+    if [[ -n "$version" ]]; then
+        printf '%s\n' "$version"
+        return 0
+    fi
+
+    return 1
+}
+
 # ============================================================================
 # Battery Detection (for installer safety checks)
 # ============================================================================

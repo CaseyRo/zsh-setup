@@ -39,11 +39,11 @@ install_lazygit() {
         esac
 
         local version
-        version=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+        version=$(github_latest_version "jesseduffield/lazygit")
         if [[ -z "$version" ]]; then
             print_error "Failed to fetch latest Lazygit version"
             track_failed "Lazygit"
-            return 1
+            return 0
         fi
 
         local tmp_dir
@@ -102,11 +102,11 @@ install_lazydocker() {
         esac
 
         local version
-        version=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+        version=$(github_latest_version "jesseduffield/lazydocker")
         if [[ -z "$version" ]]; then
             print_error "Failed to fetch latest Lazydocker version"
             track_failed "Lazydocker"
-            return 1
+            return 0
         fi
 
         local tmp_dir
