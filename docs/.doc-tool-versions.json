@@ -1,6 +1,6 @@
 {
   "_note": "Last-documented major versions for the zsh-setup toolkit. Written by the weekly docs-sync agent. Tool versions that could not be fetched (GitHub API rate-limited) are omitted — they will be populated on the next run.",
-  "_updated": "2026-06-15",
+  "_updated": "2026-06-22",
   "atuin": "18.16.1",
   "carapace": "1.7.0",
   "dust": "1.2.4",
@@ -11,7 +11,9 @@
   "jj": "0.42.0",
   "jq": "1.8.1",
   "lazygit": "0.62.2",
+  "llmfit": "0.9.31",
   "ouch": "0.8.0",
+  "parsync": "0.2.0",
   "ripgrep": "15.1.0",
   "yazi": "26.5.6",
   "zellij": "0.44.3",
