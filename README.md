@@ -216,6 +216,8 @@ cd ~/.zsh-setup
 ./install.sh --theme minimal # Minimal color theme
 ./install.sh --skip-casks    # Skip macOS Homebrew casks
 ./install.sh --skip-mas      # Skip macOS App Store installs
+./install.sh --install-warp  # Install Warp terminal + config (macOS GUI machines)
+./install.sh --skip-warp     # Skip Warp terminal install/config
 ./install.sh --mac-dev-machine     # Enable macOS dev machine profile
 ./install.sh --no-mac-dev-machine  # Disable macOS dev machine profile
 ./install.sh --skip-mac-networked  # Skip macOS networked services
@@ -227,6 +229,16 @@ cd ~/.zsh-setup
 - If sudo is unavailable, Homebrew installs to `~/homebrew` and the setup adds that path automatically.
 - macOS app installs (casks/MAS) and networked services are opt-in during install.
 - macOS dev profile installs: OrbStack, UTM, Cursor, PHP/Composer/WP-CLI, PHPCS+WPCS, and Cursor settings/extensions seeding.
+
+### Warp terminal (macOS, opt-in)
+
+On GUI-capable macOS machines the installer offers Warp as a standalone choice (prompt, or `--install-warp` / `--skip-warp`). It is independent of the dev profile and is **not** affected by `--skip-casks`. When enabled it:
+
+- installs Warp and the official Cascadia font cask (`font-cascadia-code`, which provides the `Cascadia Code NF` family);
+- seeds the **Cobalt2** theme to `~/.warp/themes/Cobalt2.yaml`;
+- writes a starter `~/.warp/settings.toml` (font `Cascadia Code NF` + Cobalt2 theme) **only if one does not already exist** — Warp rewrites this file at runtime, so an existing config is never clobbered.
+
+Warp uses its own input editor and bypasses zsh's ZLE, so the zsh-abbr Claude shortcuts (`cl`, `clc`, …) don't expand there. `modules/common/warp.sh` mirrors them as plain aliases under `TERM_PROGRAM=WarpTerminal` so they work in Warp too.
 
 ## Directory Structure
 

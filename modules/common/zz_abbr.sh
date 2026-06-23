@@ -13,6 +13,10 @@
 #
 # Expansion is triggered by SPACE or ENTER, so the full command is visible in
 # the prompt, recorded in history, and picked up by zsh-autosuggestions.
+#
+# NOTE: abbr expansion needs zsh's ZLE, which Warp bypasses. The same
+# shortcuts are mirrored as plain aliases for Warp in modules/common/warp.sh —
+# keep the two lists in sync.
 
 # shellcheck disable=SC1090,SC2215  # abbr is a zsh function from the plugin
 if (( ${+functions[abbr]} )); then

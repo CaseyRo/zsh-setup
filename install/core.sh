@@ -21,6 +21,8 @@ export ENABLE_MAC_NETWORKED=false
 export ALLOW_MAC_NETWORKED_SERVICES=false
 export IS_MAC_DEV_MACHINE=false
 export MAC_DEV_MACHINE_EXPLICIT=false
+export INSTALL_WARP=false
+export WARP_EXPLICIT=false
 export USE_STARSHIP=true
 export ALLOW_LOW_BATTERY=false
 export SKIP_SPLASH=false
@@ -47,6 +49,8 @@ show_help() {
     echo "  --dev                Enable dev machine profile installs"
     echo "  --mac-dev-machine    Alias for --dev"
     echo "  --no-mac-dev-machine  Disable dev machine profile installs"
+    echo "  --install-warp       Install Warp terminal + config (macOS GUI machines)"
+    echo "  --skip-warp          Skip Warp terminal install/config"
     echo "  --allow-low-battery  Allow install to proceed below 25% battery"
     echo "  --skip-splash        Skip the intro splash screen"
     echo "  --light              Minimal server/VPS install (no Rust, prebuilt bins)"
@@ -104,6 +108,16 @@ while [[ $# -gt 0 ]]; do
         --no-mac-dev-machine)
             export IS_MAC_DEV_MACHINE=false
             export MAC_DEV_MACHINE_EXPLICIT=true
+            shift
+            ;;
+        --install-warp)
+            export INSTALL_WARP=true
+            export WARP_EXPLICIT=true
+            shift
+            ;;
+        --skip-warp)
+            export INSTALL_WARP=false
+            export WARP_EXPLICIT=true
             shift
             ;;
         --allow-low-battery)
@@ -200,6 +214,7 @@ source "$INSTALL_DIR/mas.sh"
 source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
+source "$INSTALL_DIR/warp.sh"
 source "$INSTALL_DIR/dev-repos.sh"
 source "$INSTALL_DIR/prebuilt-bins.sh"
 source "$INSTALL_DIR/atuin.sh"
@@ -291,6 +306,16 @@ main() {
                 ALLOW_MAC_NETWORKED_SERVICES=true
             elif [[ "$saved_networked" == "false" ]]; then
                 ALLOW_MAC_NETWORKED_SERVICES=false
+            fi
+        fi
+        # Read Warp choice
+        if [[ "$WARP_EXPLICIT" != true ]]; then
+            local saved_warp
+            saved_warp=$(grep '^WARP=' "$STATE_FILE" 2>/dev/null | cut -d= -f2)
+            if [[ "$saved_warp" == "true" ]]; then
+                INSTALL_WARP=true
+            elif [[ "$saved_warp" == "false" ]]; then
+                INSTALL_WARP=false
             fi
         fi
     fi
@@ -449,6 +474,20 @@ main() {
         if [[ "$IS_MAC_DEV_MACHINE" == true ]]; then
             print_info "macOS dev machine profile enabled"
         fi
+
+        # Warp terminal: standalone opt-in on GUI machines (independent of the
+        # dev profile). has_display is always true on macOS, but we gate on it
+        # so the choice tracks "GUI machine" semantics.
+        if [[ "$WARP_EXPLICIT" != true ]] && has_display; then
+            if [[ "$YES_TO_ALL" == true ]]; then
+                INSTALL_WARP=false
+                print_info "Warp terminal: not installed by default in --yes mode"
+            elif ui_confirm "Install Warp terminal?"; then
+                INSTALL_WARP=true
+            else
+                INSTALL_WARP=false
+            fi
+        fi
     fi
 
     print_info "Prompt: Starship"
@@ -458,6 +497,7 @@ main() {
         echo "PROMPT_CHOICE=starship"
         echo "IS_DEV_MACHINE=$IS_MAC_DEV_MACHINE"
         echo "MAC_NETWORKED=$ALLOW_MAC_NETWORKED_SERVICES"
+        echo "WARP=$INSTALL_WARP"
     } > "$SCRIPT_DIR/.install-state" 2>/dev/null || true
 
     if [[ "$IS_MACOS" == true ]]; then
@@ -554,6 +594,7 @@ main() {
         install_brew_casks
         install_brew_casks_mac_dev
         install_mas_apps
+        install_warp
     fi
 
     # =========================================================================

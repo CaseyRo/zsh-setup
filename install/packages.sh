@@ -76,6 +76,12 @@ BREW_CASKS_MAC_DEV=(
     "cursor"     # IDE
 )
 
+# Warp terminal — installed via a standalone opt-in (install/warp.sh), NOT the
+# cask arrays above, so it has its own prompt/flags and is not skipped by
+# --skip-casks. macOS GUI machines only.
+WARP_CASK="warp"
+WARP_FONT_CASK="font-cascadia-code"   # official MS Cascadia (Code/Mono + NF + PL); provides the "Cascadia Code NF" family the Warp seed selects
+
 # ============================================================================
 # Dev Repos (cloned to ~/dev when gh CLI is authenticated)
 # Authed gh implies the user wants to use git as a dev — also gives us a
