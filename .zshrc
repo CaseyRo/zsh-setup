@@ -112,3 +112,11 @@ done
 #   preload_configs/common/env.sh   — locale, aliases, PATH extensions
 #   modules/common/zz_atuin.sh      — atuin (loads last to win Ctrl+R)
 #   modules/common/zz_zoxide.sh     — zoxide (strictly last; overrides cd)
+
+# pnpm
+export PNPM_HOME="/Users/cornelis.romkes/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
