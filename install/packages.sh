@@ -231,4 +231,5 @@ NERD_FONTS=(
     "FiraMono"       # clean, readable mono font
     "JetBrainsMono"  # excellent for coding, ligature support
     "Meslo"          # recommended by Powerlevel10k
+    "CascadiaCode"   # macOS: official font-cascadia-code ("Cascadia Code NF", same cask the Warp opt-in seeds); Linux: ryanoasis CaskaydiaCove build
 )

@@ -28,6 +28,26 @@ has_display() {
 is_nerd_font_installed() {
     local font_name="$1"
 
+    # Cascadia is special-cased. On macOS we install Microsoft's official
+    # font-cascadia-code cask (files CascadiaCode*.ttf, family "Cascadia Code
+    # NF"); on Linux the generic loop fetches the ryanoasis CaskaydiaCove
+    # build. Neither matches the "*<name>*Nerd*" pattern used below, so detect
+    # them explicitly to keep re-runs idempotent.
+    if [[ "$font_name" == "CascadiaCode" ]]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            brew list --cask font-cascadia-code &>/dev/null 2>&1 && return 0
+            find ~/Library/Fonts /Library/Fonts -iname "CascadiaCode*.ttf" \
+                -print -quit 2>/dev/null | grep -q . && return 0
+        else
+            if find ~/.local/share/fonts ~/.fonts /usr/share/fonts /usr/local/share/fonts \
+                -iname "*Caskaydia*" -print -quit 2>/dev/null | grep -q .; then
+                return 0
+            fi
+            command_exists fc-list && fc-list | grep -qi "caskaydia" && return 0
+        fi
+        return 1
+    fi
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS: check via brew or font directory
         if brew list --cask "font-${font_name}-nerd-font" &>/dev/null 2>&1; then
@@ -103,7 +123,7 @@ get_brew_cask_name() {
         Hack)           echo "font-hack-nerd-font" ;;
         FiraCode)       echo "font-fira-code-nerd-font" ;;
         SourceCodePro)  echo "font-sauce-code-pro-nerd-font" ;;
-        CascadiaCode)   echo "font-caskaydia-cove-nerd-font" ;;
+        CascadiaCode)   echo "font-cascadia-code" ;;   # official MS Cascadia; provides the "Cascadia Code NF" family (matches the Warp opt-in seed)
         UbuntuMono)     echo "font-ubuntu-mono-nerd-font" ;;
         RobotoMono)     echo "font-roboto-mono-nerd-font" ;;
         *)
