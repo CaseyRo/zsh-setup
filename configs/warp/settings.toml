@@ -104,9 +104,12 @@ honor_ps1 = false
 # Warp offers to install a per-user remote server under the remote's $HOME
 # (no root). Requires the remote to have glibc >= 2.31 and a bash/zsh default
 # shell — set "never_install" per host via ssh_hosts_denylist if it misbehaves.
+# cc1 is denylisted: wsx drives durable tmux/mosh panes over ssh to cc1, and
+# Warpification is incompatible with tmux/RemoteCommand (the panes would hang).
+# Denylisting cc1 keeps it plain ssh there while every other host stays warpified.
 enable_ssh_warpification = true
 ssh_extension_install_mode = "always_ask"
-ssh_hosts_denylist = []
+ssh_hosts_denylist = ["cc1"]
 
 [account]
 is_settings_sync_enabled = true
