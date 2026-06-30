@@ -10,12 +10,16 @@
 #
 # Beyond installing the app, this seeds Warp-specific config:
 #   - the Cobalt2 theme (configs/warp/themes/Cobalt2.yaml → ~/.warp/themes/)
-#   - a starter settings.toml (font + theme) ONLY when none exists yet; Warp
-#     rewrites settings.toml at runtime, so an existing one is never clobbered.
+#   - a full starter settings.toml (appearance, vertical tabs, cursor, app
+#     icon, ligatures, notifications, secret-redaction regexes, …) snapshotted
+#     from a "looks cool" config (configs/warp/settings.toml) ONLY when none
+#     exists yet; Warp rewrites settings.toml at runtime, so an existing one is
+#     never clobbered. The __HOME__ placeholder is expanded to $HOME on seed.
 # The Cascadia font cask is installed so the seeded font_name resolves.
 # ============================================================================
 
 WARP_THEME_SOURCE="$SCRIPT_DIR/configs/warp/themes/Cobalt2.yaml"
+WARP_SETTINGS_SOURCE="$SCRIPT_DIR/configs/warp/settings.toml"
 
 # Seed Warp config files. Safe to re-run.
 seed_warp_config() {
@@ -40,32 +44,27 @@ seed_warp_config() {
         track_failed "Warp Cobalt2 theme"
     fi
 
-    # --- settings.toml (font + theme), only when absent --------------------
+    # --- settings.toml (full appearance config), only when absent ----------
     # Warp owns this file and rewrites it as the user changes preferences in
-    # the GUI; we only provide a sensible starting point on a fresh install.
+    # the GUI; we only provide a "looks cool" starting point on a fresh install.
     if [[ -f "$settings" ]]; then
         print_skip "Warp settings.toml (exists — left untouched)"
         track_skipped "Warp settings.toml"
-        print_info "To apply manually: font 'Cascadia Code NF' and theme 'Cobalt2' in Warp → Settings → Appearance."
+        print_info "To apply manually: font 'Cascadia Code NF', theme 'Cobalt2', vertical tabs + 'aurora' icon in Warp → Settings → Appearance."
+        return 0
+    fi
+
+    if [[ ! -f "$WARP_SETTINGS_SOURCE" ]]; then
+        print_warning "Warp settings seed missing: $WARP_SETTINGS_SOURCE"
+        track_failed "Warp settings.toml"
         return 0
     fi
 
     mkdir -p "$warp_dir"
-    cat > "$settings" <<EOF
-# Seeded by zsh-setup (install/warp.sh). Warp rewrites this file as you change
-# preferences in the GUI — edits here are a starting point, not authoritative.
-
-[appearance]
-
-[appearance.text]
-font_name = "Cascadia Code NF"
-ai_font_name = "Cascadia Code NF"
-
-[appearance.themes]
-system_theme = false
-selected_system_themes = { dark = { custom = { name = "Cobalt2", path = "$HOME/.warp/themes/Cobalt2.yaml" } }, light = { custom = { name = "Cobalt2", path = "$HOME/.warp/themes/Cobalt2.yaml" } } }
-EOF
-    print_success "Warp settings.toml seeded (Cascadia Code NF + Cobalt2)"
+    # Expand the __HOME__ placeholder to the real home dir for absolute theme
+    # paths (sed '|' delimiter avoids clashing with slashes in $HOME).
+    sed "s|__HOME__|$HOME|g" "$WARP_SETTINGS_SOURCE" > "$settings"
+    print_success "Warp settings.toml seeded (full appearance: Cascadia Code NF + Cobalt2 + vertical tabs)"
     track_installed "Warp settings.toml"
 }
 

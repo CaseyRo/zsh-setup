@@ -236,7 +236,9 @@ On GUI-capable macOS machines the installer offers Warp as a standalone choice (
 
 - installs Warp and the official Cascadia font cask (`font-cascadia-code`, which provides the `Cascadia Code NF` family);
 - seeds the **Cobalt2** theme to `~/.warp/themes/Cobalt2.yaml`;
-- writes a starter `~/.warp/settings.toml` (font `Cascadia Code NF` + Cobalt2 theme) **only if one does not already exist** — Warp rewrites this file at runtime, so an existing config is never clobbered.
+- writes a full starter `~/.warp/settings.toml` from `configs/warp/settings.toml` (font `Cascadia Code NF`, Cobalt2 theme, vertical tabs, `aurora` app icon, block cursor, ligatures, notification prefs, and a secret-redaction regex list) **only if one does not already exist** — Warp rewrites this file at runtime, so an existing config is never clobbered. The `__HOME__` placeholder in the seed is expanded to your `$HOME`.
+
+This snapshots the parts of a "looks cool" Warp setup that Warp's own account sync doesn't reliably bootstrap on a fresh machine (custom theme files + a baseline `settings.toml`). To re-capture after tweaking Warp's appearance, copy your live `~/.warp/settings.toml` back over `configs/warp/settings.toml`, restoring the `__HOME__` placeholder for the theme paths.
 
 Warp uses its own input editor and bypasses zsh's ZLE, so the zsh-abbr Claude shortcuts (`cl`, `clc`, …) don't expand there. `modules/common/warp.sh` mirrors them as plain aliases under `TERM_PROGRAM=WarpTerminal` so they work in Warp too.
 
