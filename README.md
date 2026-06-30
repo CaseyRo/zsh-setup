@@ -21,7 +21,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | Docs | glow (markdown), tlrc (tldr) |
 | Dev tools | git, gh (GitHub CLI), lazygit, jj (Jujutsu VCS), git-delta, llmfit (LLM hardware checker) |
 | Languages | mise (Node.js + runtimes), Rust/Cargo, uv + Python |
-| Services | Docker, Tailscale, Copyparty, Syncthing |
+| Services | Docker, Tailscale, Copyparty |
 | Fonts | Nerd Fonts (FiraMono, JetBrainsMono, Meslo) - desktop only |
 
 ### Platform-specific installation

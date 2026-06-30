@@ -38,7 +38,6 @@ BREW_PACKAGES=(
     "tlrc"       # tldr pages client (Rust, fast)
     "yt-dlp"     # YouTube downloader
     "atuin"      # shell history sync & search
-    "syncthing"  # peer-to-peer continuous file sync
     # --- modern CLI additions (prebuilt via brew; fast install on macOS) ---
     "yazi"       # blazing-fast terminal file manager (Rust)
     "glow"       # render markdown in the terminal

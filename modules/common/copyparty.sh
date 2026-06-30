@@ -5,17 +5,22 @@
 # https://github.com/9001/copyparty
 # ============================================================================
 
+_copyparty_ok() {
+    command -v copyparty &>/dev/null && return 0
+    echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
+    return 1
+}
+
+_copyparty_pw() { openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12; }
+
 # Start copyparty sharing home folder via SMB (read-write)
 # Usage: copyparty-home [password]
 #   If no password provided, generates a random one
 copyparty-home() {
-    if ! command -v copyparty &>/dev/null; then
-        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
-        return 1
-    fi
+    _copyparty_ok || return 1
 
     local user="${USER:-$(whoami)}"
-    local password="${1:-$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12)}"
+    local password="${1:-$(_copyparty_pw)}"
     local home_dir="$HOME"
     local port="${COPYPARTY_PORT:-3923}"
     local smb_port="${COPYPARTY_SMB_PORT:-445}"
@@ -59,13 +64,10 @@ copyparty-home() {
 # Start copyparty sharing a specific folder
 # Usage: copyparty-share <folder> [password]
 copyparty-share() {
-    if ! command -v copyparty &>/dev/null; then
-        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
-        return 1
-    fi
+    _copyparty_ok || return 1
 
     local folder="${1:-.}"
-    local password="${2:-$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12)}"
+    local password="${2:-$(_copyparty_pw)}"
     local user="${USER:-$(whoami)}"
     local port="${COPYPARTY_PORT:-3923}"
 
@@ -103,10 +105,7 @@ copyparty-share() {
 # Quick read-only share of current directory (no auth)
 # Usage: copyparty-quick
 copyparty-quick() {
-    if ! command -v copyparty &>/dev/null; then
-        echo "\033[0;31m[copyparty]\033[0m Not installed. Run: uv tool install copyparty (or pipx/pip)"
-        return 1
-    fi
+    _copyparty_ok || return 1
 
     local port="${COPYPARTY_PORT:-3923}"
 

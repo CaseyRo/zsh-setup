@@ -11,26 +11,6 @@ ZSH_SETUP_LAST_UPDATE_FILE="$ZSH_SETUP_FOLDER/.last-update-check"
 ZSH_SETUP_LOCK_FILE="$ZSH_SETUP_FOLDER/.update-lock"
 ZSH_SETUP_UPGRADE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-setup/upgrades.log"
 
-cleanup_legacy_zsh_manager() {
-    local legacy_dir="$HOME/.zsh-manager"
-    local legacy_state="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-manager"
-    local legacy_real=""
-    local current_real=""
-
-    if [[ -d "$legacy_dir" ]]; then
-        legacy_real="$(cd "$legacy_dir" 2>/dev/null && pwd -P)"
-    fi
-    current_real="$(cd "$ZSH_SETUP_FOLDER" 2>/dev/null && pwd -P)"
-
-    if [[ -n "$legacy_real" ]] && [[ "$legacy_real" != "$current_real" ]]; then
-        rm -rf "$legacy_dir"
-    fi
-
-    if [[ -d "$legacy_state" ]]; then
-        rm -rf "$legacy_state"
-    fi
-}
-
 # Append a line to the upgrade audit log. Silent if dir cannot be created.
 _zsh_setup_log_event() {
     mkdir -p "$(dirname "$ZSH_SETUP_UPGRADE_LOG")" 2>/dev/null || return 0
@@ -74,11 +54,10 @@ _zsh_setup_safe_pull() {
     fi
 }
 
-# Atomic timestamp write (temp file + mv to prevent corruption)
+# Lock (_zsh_setup_acquire_lock) serializes writers and the read side tolerates
+# a half-written value, so a plain write is enough.
 _zsh_setup_write_timestamp() {
-    local tmpfile
-    tmpfile=$(mktemp "${ZSH_SETUP_LAST_UPDATE_FILE}.XXXXXX" 2>/dev/null) || return 1
-    echo "$1" > "$tmpfile" && mv "$tmpfile" "$ZSH_SETUP_LAST_UPDATE_FILE" || rm -f "$tmpfile"
+    echo "$1" > "$ZSH_SETUP_LAST_UPDATE_FILE"
 }
 
 # Acquire update lock (prevents concurrent runs from multiple tabs)
@@ -105,8 +84,6 @@ _zsh_setup_release_lock() {
 }
 
 _zsh_setup_check_update() {
-    cleanup_legacy_zsh_manager
-
     # User opt-out
     [[ -n "${ZSH_SETUP_DISABLE_AUTOUPDATE:-}" ]] && return
 
@@ -178,8 +155,6 @@ _zsh_setup_check_update
 
 # Manual update command
 zsh-update() {
-    cleanup_legacy_zsh_manager
-
     echo "Updating zsh-setup..."
 
     cd "$ZSH_SETUP_FOLDER" || { echo "Failed to cd to $ZSH_SETUP_FOLDER"; return 1; }

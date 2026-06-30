@@ -6,10 +6,9 @@
 # manages Node (and other runtimes) with per-directory auto-switching and a
 # near-zero shell-startup cost. It supersedes NVM in this setup:
 #
-#   - The runtime modules modules/**/nvm.sh are disabled (renamed #nvm.sh).
+#   - The old per-OS nvm runtime modules have been removed.
 #   - modules/common/mise.sh activates mise on every shell.
-#   - install/nvm.sh is still sourced for install_npm_global_packages(), but
-#     install_nvm/install_node are no longer called.
+#   - install/nvm.sh now only provides install_npm_global_packages().
 #
 # Idempotent: re-running skips an already-installed mise and an already-pinned
 # global Node.

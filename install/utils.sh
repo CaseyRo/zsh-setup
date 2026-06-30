@@ -41,9 +41,7 @@ SYMBOL_ARROW="→"
 SYMBOL_BULLET="•"
 SYMBOL_SPARKLE="✨"
 SYMBOL_PACKAGE="📦"
-SYMBOL_WRENCH="🔧"
 SYMBOL_ROCKET="🚀"
-SYMBOL_CHECK="✅"
 SYMBOL_WARN="⚠️"
 
 # ============================================================================
@@ -58,13 +56,6 @@ UI_GUM=false
 UI_NO_COLOR=false
 UI_WARN_GUM_MISSING=false
 UI_START_TIME=0
-UI_WIDTH=80
-UI_HEIGHT=24
-UI_HEADER_LINES=2
-UI_FOOTER_LINES=3
-UI_PLATFORM="Unknown"
-UI_LAST_ERROR=""
-UI_STATUS_NOW="Starting..."
 
 # Print a styled header
 print_header() {
@@ -90,7 +81,6 @@ print_success() {
 # Print error message
 print_error() {
     echo -e "  ${RED}${SYMBOL_FAIL}${RESET} $1"
-    ui_set_error "$1"
 }
 
 # Print warning/skip message
@@ -114,27 +104,13 @@ log_kv() {
 
 log_init() {
     local base_dir="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-setup"
-    local ts
+    local ts old
 
     mkdir -p "$base_dir"
-    # Keep only the most recent logs to avoid unbounded growth.
-    local keep_logs=5
-    local old_logs=()
-    local old_count
-    local remove_count
-
-    # Avoid mapfile for macOS bash 3.2 compatibility.
-    while IFS= read -r line; do
-        old_logs+=("$line")
-    done < <(ls -1t "$base_dir"/install-*.log 2>/dev/null)
-    old_count=${#old_logs[@]}
-    if (( old_count > keep_logs )); then
-        remove_count=$((old_count - keep_logs))
-        for ((i=old_count-1; i>=keep_logs; i--)); do
-            rm -f -- "${old_logs[$i]}"
-        done
-        log_line "Log retention: removed $remove_count old log(s)"
-    fi
+    # Keep only the 5 most recent logs (portable: no mapfile, no xargs -r).
+    ls -1t "$base_dir"/install-*.log 2>/dev/null | tail -n +6 | while IFS= read -r old; do
+        rm -f -- "$old"
+    done
 
     ts=$(date +%Y%m%d_%H%M%S)
     LOG_FILE="$base_dir/install-$ts.log"
@@ -158,7 +134,6 @@ track_skipped() {
 # Track a failed item (for summary)
 track_failed() {
     FAILED_ITEMS+=("$1")
-    ui_set_error "$1"
     log_line "FAILED: $1"
 }
 
@@ -175,7 +150,6 @@ print_warning() {
 # Print step being executed
 print_step() {
     echo -e "  ${CYAN}${SYMBOL_ARROW}${RESET} $1..."
-    ui_set_now "$1"
 }
 
 # Print package installation
@@ -203,12 +177,6 @@ ui_confirm() {
     if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
         return 1
     fi
-    return 0
-}
-
-# Clear screen safely
-ui_clear() {
-    # Screen clearing disabled - no-op
     return 0
 }
 
@@ -404,203 +372,11 @@ ui_init() {
     UI_START_TIME=$SECONDS
 }
 
-ui_set_context() {
-    UI_PLATFORM="$1"
-}
-
-ui_set_now() {
-    UI_STATUS_NOW="$1"
-}
-
-ui_set_error() {
-    UI_LAST_ERROR="$1"
-    if [[ "$UI_HAS_TUI" == true ]]; then
-        progress_draw "$UI_STATUS_NOW"
-    fi
-}
-
-ui_refresh_dimensions() {
-    if [[ "$UI_HAS_TUI" == true ]]; then
-        UI_WIDTH=$(tput cols 2>/dev/null || echo 80)
-        UI_HEIGHT=$(tput lines 2>/dev/null || echo 24)
-    else
-        UI_WIDTH=80
-        UI_HEIGHT=24
-    fi
-}
-
 ui_format_elapsed() {
     local elapsed=$((SECONDS - UI_START_TIME))
     local minutes=$((elapsed / 60))
     local seconds=$((elapsed % 60))
     printf "%02d:%02d" "$minutes" "$seconds"
-}
-
-ui_pad_line() {
-    local left="$1"
-    local right="$2"
-    local width="$UI_WIDTH"
-    local pad=$((width - ${#left} - ${#right}))
-
-    if (( pad < 1 )); then
-        local max_left=$((width - ${#right} - 1))
-        if (( max_left < 0 )); then
-            max_left=0
-        fi
-        left="${left:0:max_left}"
-        pad=$((width - ${#left} - ${#right}))
-        if (( pad < 1 )); then
-            right="${right:0:$((width - ${#left} - 1))}"
-            pad=$((width - ${#left} - ${#right}))
-        fi
-    fi
-
-    printf "%s%*s%s" "$left" "$pad" "" "$right"
-}
-
-ui_gum_style() {
-    local text="$1"
-    shift
-    if [[ "$UI_GUM" == true ]]; then
-        gum style "$@" <<<"$text" 2>/dev/null | tr -d '\n'
-    else
-        printf "%s" "$text"
-    fi
-}
-
-ui_render_line() {
-    local text="$1"
-    local style="$2"
-
-    if [[ "$UI_GUM" == true ]]; then
-        case "$style" in
-            header1)
-                ui_gum_style "$text" --bold
-                ;;
-            header2)
-                ui_gum_style "$text"
-                ;;
-            status)
-                ui_gum_style "$text"
-                ;;
-            separator)
-                ui_gum_style "$text"
-                ;;
-            progress)
-                ui_gum_style "$text"
-                ;;
-            *)
-                ui_gum_style "$text"
-                ;;
-        esac
-        return 0
-    fi
-
-    case "$style" in
-        header1)
-            printf "%s%s%s" "${BOLD}${MAGENTA}" "$text" "${RESET}"
-            ;;
-        header2)
-            printf "%s%s%s" "${DIM}" "$text" "${RESET}"
-            ;;
-        status)
-            printf "%s%s%s" "${CYAN}" "$text" "${RESET}"
-            ;;
-        separator)
-            printf "%s%s%s" "${DIM}" "$text" "${RESET}"
-            ;;
-        progress)
-            printf "%s" "$text"
-            ;;
-        *)
-            printf "%s" "$text"
-            ;;
-    esac
-}
-
-ui_draw_header() {
-    [[ "$UI_HAS_TUI" == true ]] || return 0
-
-    ui_refresh_dimensions
-
-    local left1="ZSH-Setup Installer"
-    local right1=""
-    local elapsed
-    elapsed=$(ui_format_elapsed)
-    local left2="Platform: ${UI_PLATFORM}"
-    local right2="Steps: ${PROGRESS_CURRENT}/${PROGRESS_TOTAL}  Elapsed: ${elapsed}"
-
-    local line1
-    local line2
-    line1=$(ui_pad_line "$left1" "$right1")
-    line2=$(ui_pad_line "$left2" "$right2")
-
-    printf "\033[s"
-    printf "\033[1;1H"
-    printf "\033[K"
-    ui_render_line "$line1" "header1"
-    printf "\033[2;1H"
-    printf "\033[K"
-    ui_render_line "$line2" "header2"
-    printf "\033[u"
-}
-
-ui_draw_footer() {
-    local message="$1"
-
-    [[ "$UI_HAS_TUI" == true ]] || return 0
-    ui_refresh_dimensions
-
-    if [[ -n "$message" ]]; then
-        UI_STATUS_NOW="$message"
-    fi
-
-    local term_height=$UI_HEIGHT
-    local sep_line
-    sep_line=$(printf "%*s" "$UI_WIDTH" "" | tr ' ' '─')
-
-    local status_left="Now: ${UI_STATUS_NOW}"
-    local status_right=""
-    if [[ -n "$UI_LAST_ERROR" ]]; then
-        status_right="Last error: ${UI_LAST_ERROR}"
-    fi
-    local status_line
-    status_line=$(ui_pad_line "$status_left" "$status_right")
-
-    local percent=0
-    if (( PROGRESS_TOTAL > 0 )); then
-        percent=$((PROGRESS_CURRENT * 100 / PROGRESS_TOTAL))
-    fi
-    local bar_width=$((UI_WIDTH - 20))
-    if (( bar_width < 10 )); then
-        bar_width=10
-    elif (( bar_width > 60 )); then
-        bar_width=60
-    fi
-    local filled=0
-    if (( PROGRESS_TOTAL > 0 )); then
-        filled=$((PROGRESS_CURRENT * bar_width / PROGRESS_TOTAL))
-    fi
-    local empty=$((bar_width - filled))
-
-    local bar=""
-    for ((i=0; i<filled; i++)); do bar+="█"; done
-    for ((i=0; i<empty; i++)); do bar+="░"; done
-
-    local progress_line
-    progress_line=$(ui_pad_line "Progress [${bar}] ${percent}%" "")
-
-    printf "\033[s"
-    printf "\033[$((term_height-2));1H"
-    printf "\033[K"
-    ui_render_line "$sep_line" "separator"
-    printf "\033[$((term_height-1));1H"
-    printf "\033[K"
-    ui_render_line "$status_line" "status"
-    printf "\033[$((term_height));1H"
-    printf "\033[K"
-    ui_render_line "$progress_line" "progress"
-    printf "\033[u"
 }
 
 # Run command, respecting VERBOSE flag
@@ -610,16 +386,6 @@ run_cmd() {
         "$@"
     else
         "$@" &>/dev/null
-    fi
-}
-
-# Redirect for commands - returns the redirect string
-# Usage: some_command $(quiet_redirect)
-quiet_redirect() {
-    if [[ "$VERBOSE" == true ]]; then
-        echo ""
-    else
-        echo "&>/dev/null"
     fi
 }
 
@@ -1037,43 +803,6 @@ run_with_spinner() {
         wait $pid
         return $?
     fi
-}
-
-# ============================================================================
-# Progress Bar (sticky bottom)
-# ============================================================================
-
-PROGRESS_CURRENT=0
-PROGRESS_TOTAL=10
-PROGRESS_WIDTH=40
-
-# Initialize progress tracking and setup scrolling region
-progress_init() {
-    # Progress bar disabled - no-op
-    return 0
-}
-
-# Draw progress bar at bottom (without changing scroll position)
-progress_draw() {
-    # Progress bar disabled - no-op
-    return 0
-}
-
-# Update progress
-progress_update() {
-    # Progress bar disabled - no-op
-    return 0
-}
-
-# Clean up: reset scroll region and preserve output
-progress_cleanup() {
-    # Progress bar disabled - no-op
-    return 0
-}
-
-# Legacy function for compatibility
-progress_show() {
-    progress_draw "Initializing..."
 }
 
 # ============================================================================

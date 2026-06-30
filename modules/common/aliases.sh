@@ -5,7 +5,6 @@
 
 # Command replacements
 alias ls="eza --icons"
-alias z="eza --icons"
 alias ll="eza -la --icons --git"
 alias lt="eza --tree --level=2 --icons"
 # cd is handled by zoxide init --cmd cd in tools.sh (creates cd + cdi)
@@ -53,19 +52,11 @@ fi
 alias dcdcu="docker-compose down && docker-compose up -d"
 alias dcdcur="docker-compose down && docker-compose pull && docker-compose up -d"
 
-# git_confirmer shortcuts (friendly fallback if missing)
+# git_confirmer shortcuts (only when installed; otherwise the shell's own
+# "command not found" is a fine signal)
 if command -v git_confirmer >/dev/null 2>&1; then
     alias gc="git_confirmer"
     alias gcs="git_confirmer --ship"
-else
-    function gc {
-        echo "git_confirmer not found. Run \"$ZSH_SETUP_FOLDER/install.sh\" and opt in to enable gc."
-        return 127
-    }
-    function gcs {
-        echo "git_confirmer not found. Run \"$ZSH_SETUP_FOLDER/install.sh\" and opt in to enable gcs."
-        return 127
-    }
 fi
 
 # YouTube downloader

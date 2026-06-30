@@ -6,58 +6,38 @@
 # https://github.com/9001/copyparty
 # ============================================================================
 
+# Ensure a build dependency is present; warn (don't fail) if it can't install.
+# Usage: _copyparty_dep <cmd> <brew-pkg> <apt-pkg> <purpose>
+_copyparty_dep() {
+    local cmd="$1" brew_pkg="$2" apt_pkg="$3" purpose="$4"
+    if command_exists "$cmd"; then
+        print_skip "$cmd"
+        track_skipped "$cmd"
+        return 0
+    fi
+    print_step "Installing $cmd dependency"
+    if command_exists brew; then
+        if run_with_spinner "Installing $cmd" brew install "$brew_pkg"; then
+            print_success "$cmd installed"; track_installed "$cmd"
+        else
+            print_warning "Failed to install $cmd. $purpose may not work."
+        fi
+    elif command_exists apt-get; then
+        if run_with_spinner "Installing $cmd" sudo apt-get install -y "$apt_pkg"; then
+            print_success "$cmd installed"; track_installed "$cmd"
+        else
+            print_warning "Failed to install $cmd. $purpose may not work."
+        fi
+    else
+        print_warning "No supported package manager found. Install $cmd manually for $purpose."
+    fi
+}
+
 install_copyparty() {
     print_section "Copyparty"
 
-    # Install ffmpeg dependency (required for media transcoding)
-    if ! command_exists ffmpeg; then
-        print_step "Installing ffmpeg dependency"
-        if command_exists brew; then
-            if run_with_spinner "Installing ffmpeg" brew install ffmpeg; then
-                print_success "ffmpeg installed"
-                track_installed "ffmpeg"
-            else
-                print_warning "Failed to install ffmpeg. Media transcoding may not work."
-            fi
-        elif command_exists apt-get; then
-            if run_with_spinner "Installing ffmpeg" sudo apt-get install -y ffmpeg; then
-                print_success "ffmpeg installed"
-                track_installed "ffmpeg"
-            else
-                print_warning "Failed to install ffmpeg. Media transcoding may not work."
-            fi
-        else
-            print_warning "No supported package manager found. Install ffmpeg manually for media transcoding."
-        fi
-    else
-        print_skip "ffmpeg"
-        track_skipped "ffmpeg"
-    fi
-
-    # Install cfssl dependency (required for TLS certificate generation)
-    if ! command_exists cfssl; then
-        print_step "Installing cfssl dependency"
-        if command_exists brew; then
-            if run_with_spinner "Installing cfssl" brew install cfssl; then
-                print_success "cfssl installed"
-                track_installed "cfssl"
-            else
-                print_warning "Failed to install cfssl. TLS certificate generation may not work."
-            fi
-        elif command_exists apt-get; then
-            if run_with_spinner "Installing cfssl" sudo apt-get install -y golang-cfssl; then
-                print_success "cfssl installed"
-                track_installed "cfssl"
-            else
-                print_warning "Failed to install cfssl. TLS certificate generation may not work."
-            fi
-        else
-            print_warning "No supported package manager found. Install cfssl manually for TLS certificates."
-        fi
-    else
-        print_skip "cfssl"
-        track_skipped "cfssl"
-    fi
+    _copyparty_dep ffmpeg ffmpeg ffmpeg "media transcoding"
+    _copyparty_dep cfssl cfssl golang-cfssl "TLS certificate generation"
 
     if command_exists copyparty; then
         # Copyparty exists, but check if impacket is available for SMB support
