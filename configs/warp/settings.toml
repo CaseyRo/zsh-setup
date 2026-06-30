@@ -6,6 +6,11 @@
 # __HOME__ below is substituted with $HOME at seed time. Keep this file in sync
 # with your live ~/.warp/settings.toml when you settle on new appearance prefs.
 
+[general]
+# Restore windows/tabs/panes on relaunch (persistent sessions).
+restore_session = true
+default_session_mode = "terminal"
+
 [agents]
 cloud_conversation_storage_enabled = true
 
@@ -91,6 +96,17 @@ osc52_clipboard_access = "write_only"
 [terminal.input]
 input_box_type_setting = "universal"
 honor_ps1 = false
+
+[warpify]
+
+[warpify.ssh]
+# Bring Warp's blocks/completions/input-editor to SSH sessions. On a new host
+# Warp offers to install a per-user remote server under the remote's $HOME
+# (no root). Requires the remote to have glibc >= 2.31 and a bash/zsh default
+# shell — set "never_install" per host via ssh_hosts_denylist if it misbehaves.
+enable_ssh_warpification = true
+ssh_extension_install_mode = "always_ask"
+ssh_hosts_denylist = []
 
 [account]
 is_settings_sync_enabled = true
