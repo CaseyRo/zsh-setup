@@ -1,0 +1,24 @@
+name: Cobalt2 Dim
+accent: '#f0bd00'
+background: '#1b3a4b'
+foreground: '#b8c4d0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#0a0a0a'
+    red: '#e84a4a'
+    green: '#4fce3a'
+    yellow: '#f0bd00'
+    blue: '#3a7fd6'
+    magenta: '#f0508a'
+    cyan: '#3fb8b8'
+    white: '#a8a8a8'
+  bright:
+    black: '#5a5a5a'
+    red: '#ef5a60'
+    green: '#54cf3c'
+    yellow: '#e0c43c'
+    blue: '#6a8fe0'
+    magenta: '#f06ad0'
+    cyan: '#7fcfe0'
+    white: '#d0d0d0'

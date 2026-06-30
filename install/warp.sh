@@ -9,16 +9,20 @@
 # never skipped by --skip-casks.
 #
 # Beyond installing the app, this seeds Warp-specific config:
-#   - the Cobalt2 theme (configs/warp/themes/Cobalt2.yaml → ~/.warp/themes/)
+#   - the Cobalt2 themes (configs/warp/themes/*.yaml → ~/.warp/themes/); the
+#     seeded settings.toml defaults to "Cobalt2 Dim" — a lower-contrast variant
+#     (off-white fg instead of pure #fff) that avoids halation/eye-strain on
+#     high-density Retina displays. Plain "Cobalt2" ships too, switchable in-GUI.
 #   - a full starter settings.toml (appearance, vertical tabs, cursor, app
 #     icon, ligatures, notifications, secret-redaction regexes, …) snapshotted
 #     from a "looks cool" config (configs/warp/settings.toml) ONLY when none
 #     exists yet; Warp rewrites settings.toml at runtime, so an existing one is
 #     never clobbered. The __HOME__ placeholder is expanded to $HOME on seed.
-# The Cascadia font cask is installed so the seeded font_name resolves.
+# The Cascadia font cask is installed so the seeded font_name resolves, and
+# AppleFontSmoothing is nudged to medium so thin glyph strokes don't shimmer.
 # ============================================================================
 
-WARP_THEME_SOURCE="$SCRIPT_DIR/configs/warp/themes/Cobalt2.yaml"
+WARP_THEMES_SOURCE_DIR="$SCRIPT_DIR/configs/warp/themes"
 WARP_SETTINGS_SOURCE="$SCRIPT_DIR/configs/warp/settings.toml"
 WARP_WORKFLOWS_SOURCE_DIR="$SCRIPT_DIR/configs/warp/workflows"
 
@@ -26,24 +30,23 @@ WARP_WORKFLOWS_SOURCE_DIR="$SCRIPT_DIR/configs/warp/workflows"
 seed_warp_config() {
     local warp_dir="$HOME/.warp"
     local themes_dir="$warp_dir/themes"
-    local theme_target="$themes_dir/Cobalt2.yaml"
     local settings="$warp_dir/settings.toml"
 
-    # --- Cobalt2 theme -----------------------------------------------------
-    if [[ -f "$WARP_THEME_SOURCE" ]]; then
+    # --- themes (Cobalt2 + Cobalt2 Dim; settings.toml defaults to Dim) -----
+    local src target
+    for src in "$WARP_THEMES_SOURCE_DIR"/*.yaml; do
+        [[ -e "$src" ]] || continue   # no matches → glob stays literal
         mkdir -p "$themes_dir"
-        if [[ -f "$theme_target" ]] && cmp -s "$WARP_THEME_SOURCE" "$theme_target"; then
-            print_skip "Warp Cobalt2 theme"
-            track_skipped "Warp Cobalt2 theme"
+        target="$themes_dir/$(basename "$src")"
+        if [[ -f "$target" ]] && cmp -s "$src" "$target"; then
+            print_skip "Warp theme $(basename "$src")"
+            track_skipped "Warp theme $(basename "$src")"
         else
-            cp "$WARP_THEME_SOURCE" "$theme_target"
-            print_success "Warp Cobalt2 theme seeded"
-            track_installed "Warp Cobalt2 theme"
+            cp "$src" "$target"
+            print_success "Warp theme seeded: $(basename "$src")"
+            track_installed "Warp theme $(basename "$src")"
         fi
-    else
-        print_warning "Warp theme seed missing: $WARP_THEME_SOURCE"
-        track_failed "Warp Cobalt2 theme"
-    fi
+    done
 
     # --- settings.toml (full appearance config), only when absent ----------
     # Warp owns this file and rewrites it as the user changes preferences in
@@ -51,7 +54,7 @@ seed_warp_config() {
     if [[ -f "$settings" ]]; then
         print_skip "Warp settings.toml (exists — left untouched)"
         track_skipped "Warp settings.toml"
-        print_info "To apply manually: font 'Cascadia Code NF', theme 'Cobalt2', vertical tabs + 'aurora' icon in Warp → Settings → Appearance."
+        print_info "To apply manually: font 'Cascadia Code NF', theme 'Cobalt2 Dim', vertical tabs + 'aurora' icon in Warp → Settings → Appearance."
         return 0
     fi
 
@@ -138,4 +141,11 @@ install_warp() {
 
     seed_warp_config
     seed_warp_workflows
+
+    # Nudge font smoothing to medium so thin glyph strokes don't shimmer on
+    # Retina (pure-crisp rendering strains the eyes). Takes effect on next
+    # Warp relaunch; harmless if Warp re-reads it. Idempotent.
+    defaults write dev.warp.Warp-Stable AppleFontSmoothing -int 2 2>/dev/null \
+        && print_success "Warp font smoothing set to medium" \
+        || print_warning "Could not set Warp font smoothing"
 }
