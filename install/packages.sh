@@ -25,7 +25,7 @@ BREW_PACKAGES=(
     "tmux"       # terminal multiplexer
     "byobu"      # tmux wrapper with extras
     "mosh"       # roaming, resilient SSH (survives Wi-Fi/sleep/IP changes)
-    "eternal-terminal" # persistent SSH that auto-reconnects (et); Warp has no mosh integration, this is the recommended alternative
+    "et"         # Eternal Terminal: persistent SSH that auto-reconnects with IP roaming; Warp has no mosh integration, this is the recommended alternative
     "fastfetch"  # fast system info (faster alternative to hyfetch)
     "btop"       # modern system monitor (successor to bashtop)
     "figlet"     # ASCII art text banners
