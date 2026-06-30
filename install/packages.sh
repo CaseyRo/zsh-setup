@@ -24,6 +24,8 @@ BREW_PACKAGES=(
     "fzf"        # fuzzy finder (keybindings install better via brew)
     "tmux"       # terminal multiplexer
     "byobu"      # tmux wrapper with extras
+    "mosh"       # roaming, resilient SSH (survives Wi-Fi/sleep/IP changes)
+    "eternal-terminal" # persistent SSH that auto-reconnects (et); Warp has no mosh integration, this is the recommended alternative
     "fastfetch"  # fast system info (faster alternative to hyfetch)
     "btop"       # modern system monitor (successor to bashtop)
     "figlet"     # ASCII art text banners
@@ -128,6 +130,7 @@ APT_PACKAGES=(
     "fzf"
     "tmux"       # terminal multiplexer
     "byobu"
+    "mosh"       # roaming, resilient SSH (in apt; Eternal Terminal needs the jgmath2000 PPA, so it's macOS-brew-only here)
     "bat"
     "fd-find"
     "ripgrep"

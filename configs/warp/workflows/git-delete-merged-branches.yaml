@@ -1,0 +1,9 @@
+---
+name: git • delete merged branches
+command: git branch --merged {{base}} | grep -vE '^[*+]|\s({{base}}|main|master)$' | xargs -r -n1 git branch -d
+tags: [git, cleanup]
+description: Delete local branches already merged into the base branch (safe -d; skips main/master and the current branch).
+arguments:
+  - name: base
+    description: Branch to check merges against
+    default_value: main

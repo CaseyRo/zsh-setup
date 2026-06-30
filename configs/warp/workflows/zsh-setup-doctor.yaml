@@ -1,0 +1,5 @@
+---
+name: zsh-setup • doctor
+command: bash ~/dev/zsh-setup/scripts/doctor.sh
+tags: [zsh-setup, diagnostics]
+description: Health-check the current dotfiles install (same as the zsh-doctor alias).

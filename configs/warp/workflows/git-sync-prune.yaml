@@ -1,0 +1,5 @@
+---
+name: git • sync & prune
+command: git fetch --all --prune && git pull --ff-only
+tags: [git, sync]
+description: Fetch all remotes, prune deleted remote-tracking branches, then fast-forward the current branch.

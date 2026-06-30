@@ -1,0 +1,9 @@
+---
+name: zsh-setup • reinstall
+command: cd ~/dev/zsh-setup && git pull --ff-only && ./install.sh {{flags}}
+tags: [zsh-setup, bootstrap]
+description: Pull the latest dotfiles and re-run the idempotent installer.
+arguments:
+  - name: flags
+    description: "Installer flags, e.g. -y, --light, --dev (blank for interactive)"
+    default_value: ""

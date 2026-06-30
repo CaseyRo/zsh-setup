@@ -20,6 +20,7 @@
 
 WARP_THEME_SOURCE="$SCRIPT_DIR/configs/warp/themes/Cobalt2.yaml"
 WARP_SETTINGS_SOURCE="$SCRIPT_DIR/configs/warp/settings.toml"
+WARP_WORKFLOWS_SOURCE_DIR="$SCRIPT_DIR/configs/warp/workflows"
 
 # Seed Warp config files. Safe to re-run.
 seed_warp_config() {
@@ -68,6 +69,31 @@ seed_warp_config() {
     track_installed "Warp settings.toml"
 }
 
+# Seed repo-owned Warp workflows (parameterized commands in the command palette).
+# The repo is the source of truth: copy each when missing or changed; idempotent.
+seed_warp_workflows() {
+    local workflows_dir="$HOME/.warp/workflows"
+
+    if [[ ! -d "$WARP_WORKFLOWS_SOURCE_DIR" ]]; then
+        return 0
+    fi
+
+    local src target
+    for src in "$WARP_WORKFLOWS_SOURCE_DIR"/*.yaml; do
+        [[ -e "$src" ]] || continue   # no matches → glob stays literal
+        mkdir -p "$workflows_dir"
+        target="$workflows_dir/$(basename "$src")"
+        if [[ -f "$target" ]] && cmp -s "$src" "$target"; then
+            print_skip "Warp workflow $(basename "$src")"
+            track_skipped "Warp workflow $(basename "$src")"
+        else
+            cp "$src" "$target"
+            print_success "Warp workflow seeded: $(basename "$src")"
+            track_installed "Warp workflow $(basename "$src")"
+        fi
+    done
+}
+
 install_warp() {
     # macOS GUI machines only, and only when the user opted in.
     if [[ "$OSTYPE" != "darwin"* ]] || ! has_display; then
@@ -111,4 +137,5 @@ install_warp() {
     fi
 
     seed_warp_config
+    seed_warp_workflows
 }
