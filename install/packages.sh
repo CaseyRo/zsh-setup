@@ -148,11 +148,6 @@ APT_PACKAGES=(
     "locales"    # locale generation (UTF-8 support in containers)
 )
 
-# APT packages only for non-Docker (host machines)
-APT_PACKAGES_HOST_ONLY=(
-    "nfs-common" # NFS client for network mounts
-)
-
 # Cargo packages for APT systems - only what's NOT available via apt
 CARGO_PACKAGES_APT=(
     "zoxide"     # smarter cd (not in apt)

@@ -82,24 +82,6 @@ install_apt_packages() {
         print_success "Locale generated"
     fi
 
-    # Install host-only packages (skip in Docker)
-    if ! is_docker; then
-        for package in "${APT_PACKAGES_HOST_ONLY[@]}"; do
-            if dpkg -s "$package" &>/dev/null; then
-                print_skip "$package"
-                track_skipped "$package"
-            else
-                print_package "$package"
-                if run_with_spinner "Installing $package" sudo apt-get install -y -qq "$package"; then
-                    print_success "$package installed"
-                    track_installed "$package"
-                else
-                    print_error "Failed to install $package"
-                    track_failed "$package"
-                fi
-            fi
-        done
-    fi
 }
 
 install_apt_packages_ubuntu() {
