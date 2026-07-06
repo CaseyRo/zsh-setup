@@ -26,10 +26,34 @@ _mise_bin() {
     fi
 }
 
+# True only if a mise binary exists AND actually executes. An executable-but-
+# broken binary (e.g. glibc build on a too-old libc) must not count as
+# installed, or the skip guard would keep a dead mise forever.
+_mise_works() {
+    { command_exists mise && mise --version; } &>/dev/null && return 0
+    [[ -x "$HOME/.local/bin/mise" ]] && "$HOME/.local/bin/mise" --version &>/dev/null
+}
+
+# The official installer picks the glibc build, which needs GLIBC >= 2.38 —
+# newer than Debian 12 / Raspberry Pi OS bookworm ships (2.36). The musl build
+# is static and runs on any libc; runtimes mise manages (node etc.) pick their
+# own libc and are unaffected.
+_mise_install_musl() {
+    local arch
+    case "$(uname -m)" in
+        aarch64 | arm64) arch="arm64" ;;
+        x86_64) arch="x64" ;;
+        *) return 1 ;;
+    esac
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL "https://mise.jdx.dev/mise-latest-linux-${arch}-musl" -o "$HOME/.local/bin/mise" \
+        && chmod +x "$HOME/.local/bin/mise"
+}
+
 install_mise() {
     print_section "mise (version manager)"
 
-    if command_exists mise || [[ -x "$HOME/.local/bin/mise" ]]; then
+    if _mise_works; then
         print_skip "mise"
         track_skipped "mise"
         return 0
@@ -53,7 +77,13 @@ install_mise() {
             curl -fsSL https://mise.run 2>/dev/null | sh &>/dev/null
         fi
 
-        if [[ -x "$HOME/.local/bin/mise" ]]; then
+        # Glibc-too-old (bookworm) leaves a binary that exists but can't run.
+        if ! _mise_works; then
+            print_step "mise glibc build doesn't run on this libc — installing musl build"
+            _mise_install_musl
+        fi
+
+        if _mise_works; then
             print_success "mise installed"
             track_installed "mise"
         else

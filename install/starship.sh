@@ -51,24 +51,22 @@ install_starship() {
                     return 1
                 fi
             fi
+        # Prebuilt before cargo: identical binary in seconds, and compiling
+        # starship (~600 crates) OOM-livelocks low-RAM ARM boxes (a Pi needed
+        # a power cycle). Cargo remains a fallback for when the download fails.
+        elif install_starship_prebuilt; then
+            print_success "Starship installed (prebuilt)"
+            track_installed "Starship"
         elif command_exists cargo; then
+            print_error "Prebuilt download failed — compiling from source. On low-RAM devices this can take an hour and may exhaust memory."
             if run_cmd cargo install starship; then
                 print_success "Starship installed (Cargo)"
                 track_installed "Starship"
             else
-                print_error "Cargo install failed, trying official installer..."
-                if install_starship_prebuilt; then
-                    print_success "Starship installed (prebuilt)"
-                    track_installed "Starship"
-                else
-                    print_error "Failed to install Starship"
-                    track_failed "Starship"
-                    return 1
-                fi
+                print_error "Failed to install Starship"
+                track_failed "Starship"
+                return 1
             fi
-        elif install_starship_prebuilt; then
-            print_success "Starship installed (prebuilt)"
-            track_installed "Starship"
         else
             print_error "Failed to install Starship"
             track_failed "Starship"
