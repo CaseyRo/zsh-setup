@@ -95,16 +95,19 @@ fi
 include "$HOME/.env.sh"
 
 # 5. LOAD PRELOAD CONFIGS THEN MODULES
+# Native zsh globbing rather than `find | sort` — same order (zsh sorts glob
+# matches lexicographically), no subprocess per folder. Qualifiers: N = no
+# match is not an error, . = regular files only (matches `find -type f`).
 for base_folder in "${BASE_FOLDERS[@]}"; do
     for os_folder in "${OS_SCRIPT_FOLDERS[@]}"; do
         folder="$base_folder/$os_folder"
-        if [[ -d "$folder" ]]; then
-            # Find all .sh files, excluding those starting with #
-            # Skip path.sh files (already loaded above)
-            find "$folder" -maxdepth 1 -type f -name "*.sh" ! -name "path.sh" ! -name "#*" -print0 2>/dev/null | sort -z | while IFS= read -r -d '' script; do
-                source "$script"
-            done
-        fi
+        for script in "$folder"/*.sh(N.); do
+            # Skip path.sh (already loaded above) and #-prefixed opt-outs
+            case "${script:t}" in
+                path.sh|'#'*) continue ;;
+            esac
+            source "$script"
+        done
     done
 done
 

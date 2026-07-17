@@ -49,7 +49,16 @@ docker build -f test/Dockerfile.ubuntu -t zsh-smoke .    # Run install smoke tes
 3. `preload_configs/common/*.sh` → `preload_configs/<os>/*.sh` → `preload_configs/<os>/<subos>/*.sh` — includes `env.sh` (locale, `PATH` extensions, shared aliases). Runs **before** modules so modules see a settled environment.
 4. `modules/common/*.sh` → `modules/<os>/*.sh` → `modules/<os>/<subos>/*.sh`
 
-The loader uses `find ... | sort`, so lexicographic order within a directory matters. The `zz_` prefix is reserved for tail-init modules that *must* load last — currently `modules/common/zz_atuin.sh` (must follow fzf to win Ctrl+R) and `modules/common/zz_zoxide.sh` (must be absolute last; overrides `cd`). Do not add anything that sorts after `zz_zoxide.sh`.
+The loader globs each folder with zsh's `*.sh(N.)`, which sorts lexicographically, so filename order within a directory matters. The `zz_` prefix is reserved for tail-init modules that *must* load last:
+
+- `modules/common/zz_abbr.sh` — needs the zsh-abbr plugin sourced in `starship.sh`.
+- `modules/common/zz_atuin.sh` — must follow fzf to win Ctrl+R.
+- `modules/common/zz_completions.sh` — must follow the plugins in `starship.sh` so zsh-autocomplete owns `compinit`. Running `compinit` before autocomplete loads makes it delete and rebuild `~/.zcompdump` at the first prompt, running `compinit` twice and never reusing the dump (~700ms per shell).
+- `modules/common/zz_zoxide.sh` — must be absolute last; overrides `cd`.
+
+Do not add anything that sorts after `zz_zoxide.sh`.
+
+Beware that ordering constraints here are implicit in filenames and fail *silently* — a module that loads too early usually still "works", just slowly or with a cache defeated. When a module depends on another, say so in its header comment.
 
 `<os>` is `macos`, `linux`, or `windows`. `<subos>` on Linux is `ubuntu` or `raspberry-pi` — detected from `/etc/os-release` + `uname -m` + the Raspberry Pi devicetree model. If adding new config, place it in the narrowest scope that applies.
 
