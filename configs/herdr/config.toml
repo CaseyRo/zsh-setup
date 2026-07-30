@@ -1,0 +1,69 @@
+# herdr config — seeded by install/herdr.sh, only when ~/.config/herdr/config.toml
+# does not already exist. herdr rewrites this file itself (it migrated keybindings
+# once and left a config.toml.bak-keybind-v2-* behind), so it is copied, never
+# symlinked — same reasoning as configs/warp/settings.toml.
+#
+# Warp-shaped navigation: Cmd chords never reach a TUI (Warp consumes them and
+# has no send-keys action), so every Warp binding below is transposed to ctrl/alt.
+
+[keys]
+# Warp Cmd+1..9 — jump straight to a tab. Replaces the default prefix+1..9.
+switch_tab = "ctrl+1..9"
+
+# No Warp equivalent (workspaces are herdr-only); unset by default.
+switch_workspace = "ctrl+shift+1..9"
+previous_workspace = "ctrl+shift+up"
+next_workspace = "ctrl+shift+down"
+
+# Warp Cmd+Option+arrow — directional pane focus. Replaces prefix+h/j/k/l.
+# Costs option+left/right word-jump inside panes; swap to alt+h/j/k/l if that bites.
+focus_pane_left = "alt+left"
+focus_pane_down = "alt+down"
+focus_pane_up = "alt+up"
+focus_pane_right = "alt+right"
+
+# ============================================================================
+# Cobalt2
+# ============================================================================
+# All 16 tokens of CustomThemeColors are overridden, so the base theme only
+# supplies structure — no catppuccin colour survives.
+#
+# These style herdr's *own* chrome (sidebar, tab bar, borders, status text).
+# Pane contents keep Warp's terminal colours, which is why the values come from
+# Cobalt2's UI palette rather than the ANSI slots in ~/.warp/themes/Cobalt2.yaml
+# — e.g. ANSI red #ff0000 sits at ~3.3:1 on this background, while Cobalt2's own
+# UI red clears 6:1.
+[theme]
+name = "catppuccin"
+
+[theme.custom]
+accent      = "#ffc600"  # the Cobalt2 yellow
+panel_bg    = "#193549"  # editor background
+surface_dim = "#15232d"  # sidebar / tab bar
+surface0    = "#1f4662"  # line highlight
+surface1    = "#234e6d"  # selection-adjacent, one step brighter
+# overlay0/overlay1 are the muted-text tiers, not just borders — herdr paints
+# the sidebar's "new"/"menu" hints with them. My first pass (#3e6d92/#5f92b3)
+# was picked as border colours and landed at 2.9:1 on panel_bg, under the 4.5:1
+# floor for text. These clear it on panel_bg, surface_dim and surface0 alike.
+overlay0    = "#9ab8cf"  # 6.1:1 on panel_bg, 4.8:1 on a selected row
+overlay1    = "#b9d0e0"  # brighter tier: hover + secondary labels
+text        = "#ffffff"  # foreground
+subtext0    = "#bbbbbb"  # dimmed labels
+yellow      = "#ffc600"  # functions
+peach       = "#ff9d00"  # keywords
+red         = "#ff628c"  # variables / invalid
+mauve       = "#ff005d"  # the Cobalt2 pink
+green       = "#3ad900"  # strings
+teal        = "#80fcff"
+blue        = "#0088ff"  # comments / links
+
+# The agent label ("claude" under each space) is faint because its contextual
+# default renders dim, not because of the palette — so no colour change alone
+# fixes it. These are herdr's default agent rows, restated verbatim, with the
+# one token given an explicit fg and dim turned off.
+[ui.sidebar.agents]
+rows = [
+    ["state_icon", "workspace", "tab"],
+    [{ token = "agent", fg = "#9ab8cf", dim = false }],
+]

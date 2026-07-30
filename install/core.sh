@@ -194,6 +194,7 @@ source "$INSTALL_DIR/apt.sh"
 source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
 source "$INSTALL_DIR/mise.sh"
+source "$INSTALL_DIR/herdr.sh"
 source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/starship.sh"
@@ -638,6 +639,8 @@ main() {
         mise_install_node
 
         mise_install_tools
+
+        deploy_herdr_config
     fi
 
     install_npm_global_packages
