@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Read [`docs/wiki/quickstart.md`](docs/wiki/quickstart.md) before exploring source.** The wiki is the canonical home for *why* this repo is shaped the way it is — installer profiles and idempotence, the loader's ordering contract, the two shellcheck scopes. It carries a Map of every page. Regenerate it with `/wiki-compile`; structure rules live in `docs/wiki/schema.md`.
+
 ## Project
 
 Cross-platform dotfiles and machine bootstrap for macOS, Ubuntu, and Raspberry Pi (ARM Linux). The repo *is* the deliverable — `~/.zshrc` is symlinked to this repo's `.zshrc`, and `install.sh` is the single entry point for provisioning a machine.

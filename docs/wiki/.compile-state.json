@@ -1,0 +1,15 @@
+{
+  "last_compiled": "2026-07-30",
+  "layout": "flat",
+  "entrypoint": "quickstart.md",
+  "topics": [
+    "installer",
+    "shell-runtime",
+    "quality-gates"
+  ],
+  "concepts": [],
+  "source_locations": [
+    "./"
+  ],
+  "total_sources_scanned": 113
+}

@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "mode": "codebase",
+  "name": "zsh-setup",
+  "sources": [
+    {
+      "path": "./",
+      "exclude": [
+        ".git/",
+        "docs/wiki/",
+        ".claude/",
+        "node_modules/"
+      ]
+    }
+  ],
+  "output": "docs/wiki/",
+  "service_discovery": "manual",
+  "knowledge_files": [
+    "README.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    ".zshrc",
+    "install.sh",
+    "bootstrap.sh",
+    "install/*.sh",
+    "modules/**/*.sh",
+    "preload_configs/**/*.sh",
+    "scripts/*.sh",
+    "hooks/*",
+    "openspec/**/*.md",
+    ".github/workflows/*.yml",
+    ".pre-commit-config.yaml",
+    ".markdownlint.yaml",
+    "test/Dockerfile.*"
+  ],
+  "deep_scan": false,
+  "auto_update": "prompt",
+  "article_sections": [
+    { "name": "Purpose", "description": "What this part of the setup is for and who depends on it", "required": true },
+    { "name": "Architecture", "description": "Structure and entry points, at the level of why it is shaped this way", "required": false },
+    { "name": "Key Decisions", "description": "Tradeoffs taken and rejected, with the reasoning", "required": false },
+    { "name": "Gotchas", "description": "Failure modes, silent breakage, ordering traps", "required": false },
+    { "name": "Sources", "description": "Backlinks to all contributing files", "required": true }
+  ],
+  "link_style": "markdown",
+  "doctrine": {
+    "skill": "wiki-doctrine",
+    "notes": [
+      "Output is docs/wiki/ with quickstart.md as the single entrypoint, not wiki/INDEX.md. Doctrine rule 1.",
+      "API Surface and Data were dropped from the default codebase sections. Doctrine rule 0 deletes pages that paraphrase code, and those two invite it.",
+      "Talks To was dropped: nothing here talks to a service.",
+      "Pages stay flat. Doctrine rule 2 requires a folder to hold multiple substantive pages.",
+      ".claude/ is excluded: the 10 markdown files under .claude/commands/opsx are plugin boilerplate, not project knowledge."
+    ]
+  }
+}
