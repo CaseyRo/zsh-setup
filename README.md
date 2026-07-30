@@ -171,6 +171,7 @@ Want to dig into any of these? Each links to its source repo.
 | [git-delta](https://github.com/dandavison/delta) | Syntax-highlighted git diffs & pager |
 | [jj](https://github.com/jj-vcs/jj) | Jujutsu — Git-compatible next-gen VCS |
 | [mise](https://github.com/jdx/mise) | Runtime/version manager (Node, Python, …) |
+| [herdr](https://herdr.dev) | Terminal workspace manager for AI coding agents |
 | [tokei](https://github.com/XAMPPRocky/tokei) | Count lines of code by language |
 | [hyperfine](https://github.com/sharkdp/hyperfine) | Command-line benchmarking |
 | [llmfit](https://github.com/AlexsJones/llmfit) | Find which LLM models fit your hardware (RAM/CPU/GPU) |
@@ -290,7 +291,7 @@ modules/
     └── macos_shortcuts.sh
 ```
 
-Modules in each folder load in lexicographic order. The `zz_` prefix is **reserved** for tail-init modules that must run last — currently `zz_atuin.sh` (overrides fzf's Ctrl+R) and `zz_zoxide.sh` (must be strictly last to override `cd`). Don't prefix your own modules with `zz_`.
+Modules in each folder load in lexicographic order. The `zz_` prefix is **reserved** for tail-init modules that must run last — currently `zz_abbr.sh` (needs the zsh-abbr plugin), `zz_atuin.sh` (overrides fzf's Ctrl+R), `zz_completions.sh` (lets zsh-autocomplete own `compinit`), and `zz_zoxide.sh` (must be strictly last to override `cd`). Don't prefix your own modules with `zz_`.
 
 ### Ignoring files
 

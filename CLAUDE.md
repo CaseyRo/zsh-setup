@@ -64,11 +64,11 @@ Beware that ordering constraints here are implicit in filenames and fail *silent
 
 ### Ignore convention
 
-Any file or folder whose name starts with `#` is skipped by the loader (`find ... ! -name "#*"`). Use `#old_aliases.sh` or `modules/#deprecated/` to disable code without deleting it.
+Any file or folder whose name starts with `#` is skipped by the loader — the glob's `case "${script:t}" in path.sh|'#'*) continue` guard skips `#`-prefixed files, and `#`-prefixed folders are never in the traversal list. Use `#old_aliases.sh` or `modules/#deprecated/` to disable code without deleting it.
 
 ### Version management: mise (not NVM)
 
-Node (and other runtimes) are managed by [`mise`](https://mise.jdx.dev), not NVM. `install/mise.sh` installs mise and pins `node@lts`; `modules/common/mise.sh` activates it on every shell with per-directory auto-switching. The old per-OS `nvm.sh` runtime modules are disabled (`#nvm.sh`) and `install_nvm`/`install_node` are no longer called — but `install/nvm.sh` is still sourced because it defines `install_npm_global_packages`. `install/upgrade.sh`'s `upgrade_mise` installs mise *and* provisions Node so existing machines don't lose `node` when they pull the disabling commit.
+Node (and other runtimes) are managed by [`mise`](https://mise.jdx.dev), not NVM. `install/mise.sh` installs mise and pins `node@lts`, then `mise_install_tools` pins everything in `MISE_TOOLS` (`install/packages.sh`) — Node stays out of that list because `install_npm_global_packages` needs its shims on PATH immediately after; `modules/common/mise.sh` activates it on every shell with per-directory auto-switching. The old per-OS `nvm.sh` runtime modules are disabled (`#nvm.sh`) and `install_nvm`/`install_node` are no longer called — but `install/nvm.sh` is still sourced because it defines `install_npm_global_packages`. `install/upgrade.sh`'s `upgrade_mise` installs mise *and* provisions Node so existing machines don't lose `node` when they pull the disabling commit.
 
 ### Platform detection in installers
 

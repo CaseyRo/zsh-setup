@@ -181,6 +181,16 @@ APT_PACKAGES_UBUNTU=(
 )
 
 # ============================================================================
+# mise-managed tools (installed via `mise use -g`)
+# ============================================================================
+# Prebuilt binaries from mise's registry — cheap enough for --light servers.
+# Node is NOT listed here: mise_install_node handles it separately because
+# install_npm_global_packages needs its shims on PATH straight after.
+MISE_TOOLS=(
+    "herdr@latest"  # terminal workspace manager for AI coding agents
+)
+
+# ============================================================================
 # Go packages (installed via go install, macOS dev machines only)
 # ============================================================================
 GO_PACKAGES=(

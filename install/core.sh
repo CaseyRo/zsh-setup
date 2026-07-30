@@ -636,6 +636,8 @@ main() {
         install_mise
 
         mise_install_node
+
+        mise_install_tools
     fi
 
     install_npm_global_packages

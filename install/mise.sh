@@ -132,3 +132,39 @@ mise_install_node() {
     "$mise" reshim &>/dev/null || true
     export PATH="$HOME/.local/share/mise/shims:$PATH"
 }
+
+# Pin the MISE_TOOLS list globally. Separate from mise_install_node because
+# nothing later in the installer depends on these being on PATH mid-run.
+mise_install_tools() {
+    if [[ ${#MISE_TOOLS[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    local mise
+    if ! mise="$(_mise_bin)"; then
+        print_warning "mise not installed, skipping mise tools"
+        return 0
+    fi
+
+    print_section "mise Tools"
+
+    local tool name
+    for tool in "${MISE_TOOLS[@]}"; do
+        name="${tool%%@*}"
+
+        if "$mise" which "$name" &>/dev/null; then
+            print_skip "$name ($("$mise" exec -- "$name" --version 2>/dev/null | head -1))"
+            track_skipped "$name (mise)"
+            continue
+        fi
+
+        print_step "Installing $name via mise"
+        if run_cmd "$mise" use -g "$tool"; then
+            print_success "$name installed"
+            track_installed "$name (mise)"
+        else
+            print_error "Failed to install $name"
+            track_failed "$name (mise)"
+        fi
+    done
+}
