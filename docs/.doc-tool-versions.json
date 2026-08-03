@@ -1,6 +1,6 @@
 {
   "_note": "Last-documented major versions for the zsh-setup toolkit. Written by the weekly docs-sync agent. Tool versions that could not be fetched (GitHub API rate-limited) are omitted — they will be populated on the next run.",
-  "_updated": "2026-07-27",
+  "_updated": "2026-08-03",
   "atuin": "18.17.1",
   "bandwhich": "0.23.1",
   "bat": "0.26.1",
@@ -15,6 +15,7 @@
   "fzf": "0.74.1",
   "git-delta": "0.19.2",
   "glow": "2.1.2",
+  "herdr": "0.7.1",
   "hyperfine": "1.20.0",
   "jj": "0.43.0",
   "jnv": "0.7.1",
