@@ -401,15 +401,29 @@ set_default_shell_zsh() {
     if ! command_exists zsh; then
         print_error "zsh is not installed - cannot set as default shell"
         track_failed "default shell"
-        return 1
+        return 0
     fi
 
     local zsh_path
     zsh_path=$(which zsh)
 
-    # Get current shell
-    local current_shell
-    current_shell=$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || echo "$SHELL")
+    # Current login shell.
+    #
+    # This used to be a single `getent passwd | cut -f7 || echo "$SHELL"`, which
+    # silently never worked on macOS: getent doesn't exist there, and `||` binds
+    # to the pipeline's status — which is cut's, always 0 — so the fallback never
+    # fired and current_shell came back empty. The already-zsh check below then
+    # never matched, so every macOS run re-ran chsh on a shell that was already
+    # correct, and failed doing it whenever sudo had no TTY to prompt on.
+    local current_shell=""
+    if command_exists getent; then
+        current_shell=$(getent passwd "$USER" 2>/dev/null | cut -d: -f7)
+    elif command_exists dscl; then
+        current_shell=$(dscl . -read "/Users/$USER" UserShell 2>/dev/null | awk '{print $2}')
+    fi
+    if [[ -z "$current_shell" ]]; then
+        current_shell="$SHELL"
+    fi
 
     # Check if zsh is already the default
     if [[ "$current_shell" == *"zsh"* ]]; then
@@ -448,10 +462,13 @@ set_default_shell_zsh() {
         # Set flag to indicate shell was changed
         export SHELL_CHANGED=true
     else
+        # Non-fatal: main() calls this second-to-last under `set -e`, so a
+        # return 1 skipped ensure_install_dirs_executable and print_summary —
+        # the run ended with no summary at all, looking like a hard crash.
         print_error "Failed to change default shell"
         print_info "You can manually run: chsh -s $(which zsh)"
         track_failed "default shell"
-        return 1
+        return 0
     fi
 }
 
