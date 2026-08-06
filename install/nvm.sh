@@ -70,7 +70,15 @@ install_npm_global_packages() {
     fi
 
     for package in "${packages[@]}"; do
-        if npm list -g "$package" &>/dev/null; then
+        # --depth=0 is load-bearing. Without it `npm list -g <pkg>` searches the
+        # whole global tree and exits 0 when the package is merely a transitive
+        # dependency of another global, so the guard reports "already installed"
+        # for something that has no global binary. That silently skipped
+        # typescript (a dep of typescript-language-server) and prettier (a dep of
+        # another global), leaving `:format` broken in Helix with the installer
+        # reporting success. Depth 0 matches only true top-level globals, and
+        # still resolves scoped names like @fission-ai/openspec correctly.
+        if npm list -g --depth=0 "$package" &>/dev/null; then
             print_skip "$package"
             track_skipped "$package"
         else
