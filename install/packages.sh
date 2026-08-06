@@ -38,6 +38,9 @@ BREW_PACKAGES=(
     "tlrc"       # tldr pages client (Rust, fast)
     "yt-dlp"     # YouTube downloader
     "atuin"      # shell history sync & search
+    "helix"      # modal editor (hx). Linux has no usable package — see
+                 # install/helix.sh, which also repairs the runtime dir the
+                 # bottle hardcodes to /opt/homebrew (wrong on a custom prefix)
     # --- modern CLI additions (prebuilt via brew; fast install on macOS) ---
     "yazi"       # blazing-fast terminal file manager (Rust)
     "glow"       # render markdown in the terminal
@@ -136,6 +139,7 @@ APT_PACKAGES=(
     "btop"       # modern system monitor (successor to bashtop)
     "micro"      # simple terminal text editor
     "unzip"      # required for Nerd Fonts installation
+    "xz-utils"   # tar -J, needed to unpack the helix release tarball
     "figlet"     # ASCII art text banners
     "cmatrix"    # Matrix rain effect for splash screen
     "toilet"     # ASCII art text generator

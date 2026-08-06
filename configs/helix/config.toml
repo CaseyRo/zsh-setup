@@ -1,0 +1,53 @@
+# Helix config — symlinked by install/helix.sh to ~/.config/helix/config.toml.
+#
+# Symlinked, not copied: Helix never rewrites this file at runtime (`:theme x`
+# and `:set …` are session-only), so unlike the herdr and Warp configs there is
+# no atomic write-then-rename waiting to replace the symlink with a real file.
+# Edits here reach every machine on the next pull.
+
+theme = "cobalt2"   # configs/helix/themes/cobalt2.toml, symlinked alongside
+
+[editor]
+line-number = "relative"      # pairs with Helix's count-prefixed motions
+cursorline = true
+color-modes = true            # statusline picks up the mode colour from the theme
+bufferline = "multiple"
+true-color = true             # Warp reports truecolor; don't let Helix guess
+rulers = [100]
+text-width = 100
+popup-border = "all"
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false                # dotfiles are the whole point of this repo
+
+[editor.statusline]
+left = ["mode", "spinner", "version-control", "file-name", "read-only-indicator", "file-modification-indicator"]
+center = []
+right = ["diagnostics", "selections", "register", "position", "file-encoding", "file-type"]
+
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true
+
+[editor.indent-guides]
+render = true
+character = "┊"
+
+[editor.soft-wrap]
+enable = true
+
+[editor.whitespace.render]
+tab = "all"
+nbsp = "all"
+nnbsp = "all"
+
+[keys.normal]
+# Warp/Cursor muscle memory: Ctrl-S saves. Helix has no default for it.
+C-s = ":write"
+# Space-w / Space-q are Helix idiom already; these are the extras worth having.
+X = "extend_line_above"

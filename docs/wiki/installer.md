@@ -71,7 +71,8 @@ sourced because it defines `install_npm_global_packages`.
 **Config files are seeded two different ways, and the difference is
 load-bearing.** Files the owning tool never rewrites are symlinked into the
 repository, so edits propagate both directions: `~/.zshrc`, `starship.toml`,
-`topgrade.toml`, `tmux.conf`. Files the owning tool rewrites at runtime are
+`topgrade.toml`, `tmux.conf`, and Helix's `config.toml` plus its Cobalt2 theme.
+Files the owning tool rewrites at runtime are
 copied once and only when absent: Warp's `settings.toml`, atuin's `config.toml`,
 and herdr's `config.toml`. A tool that writes its config atomically replaces the
 file through a rename, which silently swaps a symlink for a regular file and
@@ -106,6 +107,15 @@ the system libc. `_mise_works` therefore tests execution rather than presence,
 and falls back to the static musl build. An installed-but-dead binary must never
 satisfy a skip guard.
 
+A Homebrew bottle can hardcode an absolute path that is wrong under a custom
+prefix. The `helix` bottle bakes in `/opt/homebrew/.../libexec/runtime`, so on a
+`$HOME/homebrew` prefix — which this repo explicitly supports — `hx` installs
+cleanly and then loses highlighting, indent and textobjects for every language,
+with no error anywhere except a column of ✘ in `hx --health`. `_link_helix_runtime`
+resolves the real directory through `brew --prefix` and links
+`~/.config/helix/runtime` at it. Prefix-relative paths belong in the installer,
+not in whatever the upstream package assumed.
+
 `VERSION` is written by a pre-commit hook from the commit count. Editing it by
 hand produces a conflict on the next commit.
 
@@ -117,6 +127,7 @@ hand produces a conflict on the next commit.
 - [install/packages.sh](../../install/packages.sh)
 - [install/mise.sh](../../install/mise.sh)
 - [install/herdr.sh](../../install/herdr.sh)
+- [install/helix.sh](../../install/helix.sh)
 - [install/atuin.sh](../../install/atuin.sh)
 - [install/starship.sh](../../install/starship.sh)
 - [install/go.sh](../../install/go.sh)

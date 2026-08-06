@@ -195,6 +195,7 @@ source "$INSTALL_DIR/rust.sh"
 source "$INSTALL_DIR/nvm.sh"
 source "$INSTALL_DIR/mise.sh"
 source "$INSTALL_DIR/herdr.sh"
+source "$INSTALL_DIR/helix.sh"
 source "$INSTALL_DIR/uv.sh"
 source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/starship.sh"
@@ -569,6 +570,10 @@ main() {
 
         install_fastfetch_apt
 
+        # Not in the apt repos before Ubuntu 24.10 / Debian trixie — see
+        # install/helix.sh. macOS gets helix from BREW_PACKAGES instead.
+        install_helix
+
     else
         # macOS - use Homebrew
         install_homebrew
@@ -692,6 +697,10 @@ main() {
         install_atuin
     fi
     deploy_atuin_config
+
+    # Helix config + Cobalt2 theme (the binary itself came from brew or
+    # install_helix above)
+    deploy_helix_config
 
     # Setup zsh-setup symlink
     print_section "ZSH-Setup Configuration"

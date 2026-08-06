@@ -1,0 +1,256 @@
+# ============================================================================
+# Cobalt2 for Helix
+# ============================================================================
+# The house theme, matching configs/warp/themes/Cobalt2.yaml (terminal),
+# configs/herdr/config.toml (workspace chrome) and Cursor's Cobalt2 extension.
+#
+# Standalone on purpose — no `inherits`. Inheriting a built-in would leave the
+# unlisted scopes tracking whatever upstream does to that base theme between
+# Helix releases, and Cobalt2's whole point is that every surface matches.
+#
+# Contrast notes (WCAG AA, 4.5:1 on the #193549 editor background):
+#   - The Warp ANSI slots are NOT reused for text. ANSI red #ff0000 sits at
+#     ~3.3:1 here; Cobalt2's own UI red (#ff628c) clears 6:1. Same trade the
+#     herdr config documents.
+#   - `comment` is the one deliberate exception. #0088ff is ~3.1:1 — that's
+#     Cobalt2's signature comment blue, and dimming comments is the intent.
+# ============================================================================
+
+# --- editor surface ---------------------------------------------------------
+"ui.background" = { bg = "bg" }
+"ui.background.separator" = { fg = "surface2" }
+"ui.text" = { fg = "fg" }
+"ui.text.focus" = { fg = "fg", bg = "surface1", modifiers = ["bold"] }
+"ui.text.inactive" = { fg = "fg_dim" }
+"ui.text.info" = { fg = "fg" }
+
+"ui.window" = { fg = "surface2" }
+"ui.cursorline.primary" = { bg = "surface0" }
+"ui.cursorcolumn.primary" = { bg = "surface0" }
+
+# --- cursor -----------------------------------------------------------------
+# Cobalt2's caret is the yellow accent; reversed so the glyph under it stays
+# readable regardless of the token's own foreground.
+"ui.cursor" = { fg = "bg", bg = "yellow" }
+"ui.cursor.primary" = { fg = "bg", bg = "yellow" }
+"ui.cursor.normal" = { fg = "bg", bg = "yellow" }
+"ui.cursor.insert" = { fg = "bg", bg = "green" }
+"ui.cursor.select" = { fg = "fg", bg = "selection" }
+"ui.cursor.match" = { fg = "yellow", bg = "surface1", modifiers = ["bold"] }
+"ui.cursor.primary.normal" = { fg = "bg", bg = "yellow" }
+"ui.cursor.primary.insert" = { fg = "bg", bg = "green" }
+"ui.cursor.primary.select" = { fg = "fg", bg = "selection" }
+
+# --- selection --------------------------------------------------------------
+"ui.selection" = { bg = "surface1" }
+"ui.selection.primary" = { bg = "selection" }
+"ui.highlight" = { bg = "surface1" }
+"ui.highlight.frameline" = { bg = "surface2" }
+
+# --- gutter -----------------------------------------------------------------
+"ui.linenr" = { fg = "line_nr" }
+"ui.linenr.selected" = { fg = "yellow", modifiers = ["bold"] }
+"ui.gutter" = { bg = "bg" }
+"ui.gutter.selected" = { bg = "surface0" }
+
+# --- statusline -------------------------------------------------------------
+# Mode is carried by colour, matching the cursor: yellow normal, green insert,
+# selection-blue select. The separator/inactive tiers stay on the dim sidebar
+# surface so split windows read as one chrome.
+"ui.statusline" = { fg = "fg", bg = "surface_dim" }
+"ui.statusline.inactive" = { fg = "fg_dim", bg = "surface_dim" }
+"ui.statusline.normal" = { fg = "bg", bg = "yellow", modifiers = ["bold"] }
+"ui.statusline.insert" = { fg = "bg", bg = "green", modifiers = ["bold"] }
+"ui.statusline.select" = { fg = "fg", bg = "selection", modifiers = ["bold"] }
+"ui.statusline.separator" = { fg = "surface2", bg = "surface_dim" }
+
+"ui.bufferline" = { fg = "fg_muted", bg = "surface_dim" }
+"ui.bufferline.active" = { fg = "yellow", bg = "bg", modifiers = ["bold"] }
+"ui.bufferline.background" = { bg = "surface_dim" }
+
+# --- popups, menus, pickers -------------------------------------------------
+"ui.popup" = { fg = "fg", bg = "surface_dim" }
+"ui.popup.info" = { fg = "fg", bg = "surface_dim" }
+"ui.menu" = { fg = "fg", bg = "surface_dim" }
+"ui.menu.selected" = { fg = "bg", bg = "yellow", modifiers = ["bold"] }
+"ui.menu.scroll" = { fg = "fg_muted", bg = "surface1" }
+"ui.help" = { fg = "fg", bg = "surface_dim" }
+"ui.picker.header" = { fg = "fg_muted", modifiers = ["bold"] }
+"ui.picker.header.column" = { fg = "fg_muted" }
+"ui.picker.header.column.active" = { fg = "yellow", modifiers = ["bold"] }
+
+# --- virtual text -----------------------------------------------------------
+"ui.virtual" = { fg = "fg_faint" }
+"ui.virtual.ruler" = { bg = "surface0" }
+"ui.virtual.whitespace" = { fg = "fg_faint" }
+"ui.virtual.indent-guide" = { fg = "surface2" }
+"ui.virtual.inlay-hint" = { fg = "fg_faint", modifiers = ["italic"] }
+"ui.virtual.jump-label" = { fg = "bg", bg = "orange", modifiers = ["bold"] }
+"ui.virtual.wrap" = { fg = "surface2" }
+
+# --- debug ------------------------------------------------------------------
+"ui.debug.breakpoint" = { fg = "red" }
+"ui.debug.active" = { fg = "yellow" }
+
+# --- syntax: comments and literals ------------------------------------------
+"comment" = { fg = "comment", modifiers = ["italic"] }
+"comment.line" = { fg = "comment", modifiers = ["italic"] }
+"comment.block" = { fg = "comment", modifiers = ["italic"] }
+"comment.block.documentation" = { fg = "comment", modifiers = ["italic"] }
+
+"string" = { fg = "green" }
+"string.regexp" = { fg = "teal" }
+"string.special" = { fg = "teal" }
+"string.special.path" = { fg = "teal" }
+"string.special.url" = { fg = "blue", modifiers = ["underlined"] }
+"string.special.symbol" = { fg = "teal" }
+
+"constant" = { fg = "orange" }
+"constant.builtin" = { fg = "orange" }
+"constant.builtin.boolean" = { fg = "orange" }
+"constant.character" = { fg = "green" }
+"constant.character.escape" = { fg = "teal" }
+"constant.numeric" = { fg = "orange" }
+
+# --- syntax: names ----------------------------------------------------------
+# Cobalt2's core signal: variables pink, functions yellow, keywords orange.
+"variable" = { fg = "pink" }
+"variable.builtin" = { fg = "pink", modifiers = ["italic"] }
+"variable.parameter" = { fg = "pink" }
+"variable.other" = { fg = "pink" }
+"variable.other.member" = { fg = "fg" }
+"variable.other.member.private" = { fg = "fg_dim" }
+
+"label" = { fg = "yellow" }
+
+"function" = { fg = "yellow" }
+"function.builtin" = { fg = "yellow" }
+"function.method" = { fg = "yellow" }
+"function.method.private" = { fg = "yellow" }
+"function.macro" = { fg = "magenta" }
+"function.special" = { fg = "magenta" }
+
+"constructor" = { fg = "yellow" }
+
+"type" = { fg = "teal" }
+"type.builtin" = { fg = "teal" }
+"type.parameter" = { fg = "teal" }
+"type.enum.variant" = { fg = "orange" }
+
+"attribute" = { fg = "magenta" }
+
+"namespace" = { fg = "teal" }
+"module" = { fg = "teal" }
+
+# --- syntax: keywords and operators -----------------------------------------
+"keyword" = { fg = "orange" }
+"keyword.control" = { fg = "orange" }
+"keyword.control.conditional" = { fg = "orange" }
+"keyword.control.repeat" = { fg = "orange" }
+"keyword.control.import" = { fg = "orange" }
+"keyword.control.return" = { fg = "orange" }
+"keyword.control.exception" = { fg = "orange" }
+"keyword.operator" = { fg = "orange" }
+"keyword.directive" = { fg = "magenta" }
+"keyword.function" = { fg = "orange" }
+"keyword.storage" = { fg = "orange" }
+"keyword.storage.type" = { fg = "orange" }
+"keyword.storage.modifier" = { fg = "orange" }
+
+"operator" = { fg = "fg" }
+"punctuation" = { fg = "fg_muted" }
+"punctuation.delimiter" = { fg = "fg_muted" }
+"punctuation.bracket" = { fg = "fg" }
+"punctuation.special" = { fg = "orange" }
+
+"special" = { fg = "magenta" }
+
+# --- syntax: tags (HTML/JSX/XML) --------------------------------------------
+"tag" = { fg = "teal" }
+"tag.builtin" = { fg = "teal" }
+
+# --- markup (markdown and friends) ------------------------------------------
+"markup.heading" = { fg = "yellow", modifiers = ["bold"] }
+"markup.heading.marker" = { fg = "orange" }
+"markup.heading.1" = { fg = "yellow", modifiers = ["bold"] }
+"markup.heading.2" = { fg = "orange", modifiers = ["bold"] }
+"markup.heading.3" = { fg = "green", modifiers = ["bold"] }
+"markup.heading.4" = { fg = "teal", modifiers = ["bold"] }
+"markup.heading.5" = { fg = "blue", modifiers = ["bold"] }
+"markup.heading.6" = { fg = "pink", modifiers = ["bold"] }
+"markup.list" = { fg = "orange" }
+"markup.list.numbered" = { fg = "orange" }
+"markup.list.unnumbered" = { fg = "orange" }
+"markup.list.checked" = { fg = "green" }
+"markup.list.unchecked" = { fg = "fg_muted" }
+"markup.bold" = { fg = "yellow", modifiers = ["bold"] }
+"markup.italic" = { fg = "pink", modifiers = ["italic"] }
+"markup.strikethrough" = { modifiers = ["crossed_out"] }
+"markup.link" = { fg = "blue" }
+"markup.link.url" = { fg = "teal", modifiers = ["underlined"] }
+"markup.link.label" = { fg = "blue" }
+"markup.link.text" = { fg = "blue" }
+"markup.quote" = { fg = "fg_muted", modifiers = ["italic"] }
+"markup.raw" = { fg = "green" }
+"markup.raw.inline" = { fg = "green" }
+"markup.raw.block" = { fg = "green" }
+"markup.normal" = { fg = "fg" }
+
+# --- diagnostics ------------------------------------------------------------
+"error" = { fg = "red" }
+"warning" = { fg = "orange" }
+"info" = { fg = "blue" }
+"hint" = { fg = "fg_muted" }
+
+"diagnostic" = { underline = { color = "fg_muted", style = "curl" } }
+"diagnostic.error" = { underline = { color = "red", style = "curl" } }
+"diagnostic.warning" = { underline = { color = "orange", style = "curl" } }
+"diagnostic.info" = { underline = { color = "blue", style = "curl" } }
+"diagnostic.hint" = { underline = { color = "teal", style = "curl" } }
+"diagnostic.unnecessary" = { modifiers = ["dim"] }
+"diagnostic.deprecated" = { modifiers = ["crossed_out"] }
+
+# --- version control --------------------------------------------------------
+"diff.plus" = { fg = "green" }
+"diff.plus.gutter" = { fg = "green" }
+"diff.minus" = { fg = "red" }
+"diff.minus.gutter" = { fg = "red" }
+"diff.delta" = { fg = "yellow" }
+"diff.delta.moved" = { fg = "blue" }
+"diff.delta.gutter" = { fg = "yellow" }
+
+# ============================================================================
+# Palette
+# ============================================================================
+# Must come last — Helix merges [palette] over the default 16 terminal colors,
+# and the docs require it after the normal theme options.
+[palette]
+# surfaces (shared with the herdr config's [theme.custom])
+bg          = "#193549"  # editor background
+surface_dim = "#15232d"  # statusline / popups — Cobalt2's sidebar tone
+surface0    = "#1f4662"  # cursorline
+surface1    = "#234e6d"  # non-primary selection, one step brighter
+surface2    = "#2d5f85"  # borders, indent guides, rulers
+selection   = "#0050a4"  # primary selection — Cobalt2's own selection blue
+
+# text tiers
+fg          = "#ffffff"
+fg_dim      = "#bbbbbb"  # 11.9:1 on bg
+fg_muted    = "#9ab8cf"  # 6.1:1 on bg — punctuation, hints
+fg_faint    = "#5f92b3"  # whitespace/virtual only, never real text
+line_nr     = "#7592a8"
+
+# accents
+yellow      = "#ffc600"  # functions, the Cobalt2 accent
+orange      = "#ff9d00"  # keywords
+pink        = "#ff628c"  # variables
+magenta     = "#ff005d"  # macros, attributes
+green       = "#3ad900"  # strings
+teal        = "#9effff"  # types, tags — Cobalt2's cyan family
+blue        = "#4bb3fd"  # links, info, moved-hunks — a real blue, so it stays
+                         # distinguishable from teal; 5.4:1 on bg
+# Same value as `pink` on purpose — Cobalt2's palette has one red and it does
+# double duty for variables and invalid. Kept as a separate key so the scope
+# list stays semantic, and because errors also carry a curl underline + gutter.
+red         = "#ff628c"  # errors — the UI red, not ANSI #ff0000 (see header)
+comment     = "#0088ff"  # deliberately low-contrast; Cobalt2's signature
