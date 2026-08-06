@@ -34,7 +34,10 @@ Three constraints account for most of the surprising code in this repository:
    loaded too early usually still works, just slower or with a cache defeated.
    See [shell runtime](shell-runtime.md).
 3. Installers run repeatedly against machines in unknown states, so idempotence
-   is a contract rather than a nicety. See [installer](installer.md).
+   is a contract rather than a nicety. Two failure shapes recur: a skip guard
+   that checks whether something is present rather than whether it works, and a
+   single module's failure ending the whole run under `set -e`. Both look like
+   success from the outside. See [installer](installer.md).
 
 ## For agents working in this repo
 

@@ -72,12 +72,34 @@ sourced because it defines `install_npm_global_packages`.
 load-bearing.** Files the owning tool never rewrites are symlinked into the
 repository, so edits propagate both directions: `~/.zshrc`, `starship.toml`,
 `topgrade.toml`, `tmux.conf`, and Helix's `config.toml` plus its Cobalt2 theme.
-Files the owning tool rewrites at runtime are
-copied once and only when absent: Warp's `settings.toml`, atuin's `config.toml`,
-and herdr's `config.toml`. A tool that writes its config atomically replaces the
-file through a rename, which silently swaps a symlink for a regular file and
-detaches it from the repository without any error. Copy-if-absent also means an
-existing machine's local edits are never clobbered.
+Files the owning tool rewrites at runtime are copied once and only when absent:
+Warp's `settings.toml`, atuin's `config.toml`, and herdr's `config.toml`. A tool
+that writes its config atomically replaces the file through a rename, which
+silently swaps a symlink for a regular file and detaches it from the repository
+without any error. Copy-if-absent also means an existing machine's local edits
+are never clobbered. The test is not how important the file is, it is whether
+the owning tool ever writes it back.
+
+**A module failure must not end the run.** `install.sh` sets `set -e` and `main`
+calls every module bare, so any module returning non-zero terminates the whole
+install at that point. Everything after it is skipped silently, including the
+`~/.zshrc` symlink and the run summary, which makes an ordinary optional-tool
+failure look like a hard crash. Installer modules therefore return zero on
+failure and report through `track_failed`, which surfaces the problem in the
+summary without taking the run down. Reserve a non-zero return for a condition
+that genuinely invalidates everything after it.
+
+**Helix is installed differently per platform because no single route works.**
+macOS takes the Homebrew bottle through `BREW_PACKAGES`. Linux cannot: Helix is
+absent from the Ubuntu 22.04 and 24.04 and Raspberry Pi OS repositories, and
+`cargo install helix-term` deliberately omits the runtime directory, which
+leaves a binary with no grammars or queries. `install/helix.sh` therefore
+fetches the official release tarball, which ships `hx` and `runtime/` together,
+and lays it out as `/opt/helix/bin/hx` with `/opt/helix/runtime`. That layout is
+chosen so the exe-relative lookup resolves: on Linux `current_exe` reads
+`/proc/self/exe`, which is already symlink-resolved, so the `/usr/local/bin/hx`
+symlink on `PATH` does not break discovery and no environment variable is
+needed.
 
 **Root is a fork in the road, not an error.** Running as root outside a
 container starts an interactive new-user creation flow. Inside a container,
@@ -85,7 +107,7 @@ detected through `/.dockerenv` or the docker cgroup, the installer instead
 enables `YES_TO_ALL` and stubs `sudo` as a passthrough so the smoke test can run
 unattended.
 
-## Gotchas [coverage: medium, 4 sources]
+## Gotchas [coverage: high, 8 sources]
 
 A new installer module needs three edits, not one: the file itself, a `source`
 line in `core.sh`, and a call inside `main`. Miss the call and the module is
@@ -101,20 +123,45 @@ which is not necessarily on the installer's own `PATH` yet. `_mise_bin`
 resolves it; calling `mise` directly in a new module can work on your machine
 and fail on a fresh one.
 
-On Debian 12 and Raspberry Pi OS bookworm, the official mise installer produces
-a binary that exists but cannot execute, because it is a glibc build newer than
-the system libc. `_mise_works` therefore tests execution rather than presence,
-and falls back to the static musl build. An installed-but-dead binary must never
-satisfy a skip guard.
+**Presence is not health, and a guard that confuses the two is worse than no
+guard.** On Debian 12 and Raspberry Pi OS bookworm the official mise installer
+produces a binary that exists but cannot execute, because it is a glibc build
+newer than the system libc, so `_mise_works` tests execution rather than
+presence and falls back to the static musl build. A Homebrew `composer` whose
+phar signature no longer verifies behaves the same way: it satisfies
+`command_exists`, then dies with an uncaught `PharException` partway through the
+run, so `install_php_dev_tools` gates on `composer --version` actually
+succeeding. An installed-but-dead binary must never satisfy a skip guard.
 
 A Homebrew bottle can hardcode an absolute path that is wrong under a custom
 prefix. The `helix` bottle bakes in `/opt/homebrew/.../libexec/runtime`, so on a
-`$HOME/homebrew` prefix — which this repo explicitly supports — `hx` installs
-cleanly and then loses highlighting, indent and textobjects for every language,
-with no error anywhere except a column of ✘ in `hx --health`. `_link_helix_runtime`
-resolves the real directory through `brew --prefix` and links
-`~/.config/helix/runtime` at it. Prefix-relative paths belong in the installer,
-not in whatever the upstream package assumed.
+`$HOME/homebrew` prefix, which this repo explicitly supports, `hx` installs
+cleanly and then loses highlighting, indent and textobjects for every language.
+Nothing errors; the only symptom is a column of ✘ in `hx --health`.
+`_link_helix_runtime` resolves the real directory through `brew --prefix` and
+points `~/.config/helix/runtime`, Helix's highest-priority lookup, at it. It
+links the version-stable `opt/` path rather than the versioned Cellar path so a
+later `brew upgrade` does not strand it. Prefix-relative paths belong in the
+installer, not in whatever the upstream package assumed.
+
+Upstream package names drift, and a renamed package defeats both the install and
+the skip guard. Homebrew renamed the `tailscale` cask to `tailscale-app`, freeing
+the plain name for the CLI formula. Because that cask ships a `.pkg`, it leaves
+nothing under `/Applications` and puts no `tailscale` on `PATH` until the menu
+bar app is launched once, so neither the `command_exists` guard nor the
+`/Applications/Tailscale.app` guard saw an install that was already present.
+Ask the package manager directly with `brew list --cask` when the artifact
+itself is not reliably discoverable. That cask also needs sudo, which `main` has
+deliberately dropped through `sudo -k` before user-space installers run, so
+failing under `--yes` with no terminal is expected rather than broken.
+
+`getent` does not exist on macOS, and `cmd | cut ... || fallback` binds the
+`||` to the pipeline's exit status, which is `cut`'s and therefore almost always
+zero. `set_default_shell_zsh` combined both mistakes, so `current_shell` came
+back empty on macOS, the already-zsh check never matched, and every run re-ran
+`chsh` on a shell that was already correct. Look the shell up through `dscl` on
+macOS, and never rely on `||` to catch a failure from anywhere but the last
+command in a pipeline.
 
 `VERSION` is written by a pre-commit hook from the commit count. Editing it by
 hand produces a conflict on the next commit.
@@ -128,6 +175,8 @@ hand produces a conflict on the next commit.
 - [install/mise.sh](../../install/mise.sh)
 - [install/herdr.sh](../../install/herdr.sh)
 - [install/helix.sh](../../install/helix.sh)
+- [install/php-dev.sh](../../install/php-dev.sh)
+- [install/tailscale.sh](../../install/tailscale.sh)
 - [install/atuin.sh](../../install/atuin.sh)
 - [install/starship.sh](../../install/starship.sh)
 - [install/go.sh](../../install/go.sh)

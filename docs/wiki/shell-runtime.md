@@ -39,7 +39,7 @@ filenames load-bearing.
 over bare `source` in modules so an absent optional file cannot break shell
 startup.
 
-## Key Decisions [coverage: high, 4 sources]
+## Key Decisions [coverage: high, 5 sources]
 
 **The `zz_` prefix is a tail-init contract.** Four modules must load after
 everything else, each for a concrete reason:
@@ -72,6 +72,17 @@ a silent failure which is hard to trace back to its cause, and it is not worth
 list. This is how code is retired without being deleted, for example
 `#nvm.sh` and `modules/#deprecated/`. The same prefix excludes those files from
 the runtime shellcheck scope.
+
+**Environment defaults are guarded twice: on the tool existing, and on the user
+not having chosen already.** `preload_configs/common/env.sh` sets `EDITOR` and
+`VISUAL` to `hx`, but only when `hx` is actually on `PATH` and only when
+`EDITOR` is still empty. The first guard matters because not every machine gets
+Helix: armv7 Raspberry Pi images have no prebuilt binary, and pointing `EDITOR`
+at a missing command breaks `git commit`, `crontab -e`, and every other tool
+that shells out to it. The second guard is what makes the load order pay off,
+since `~/.env.sh` is sourced before this file and an `EDITOR` exported there
+therefore wins. A default that cannot be overridden locally is a setting, not a
+default.
 
 **Terminal type is normalised at the top of the loader.** Ghostty advertises
 `TERM=xterm-ghostty`, which most remote hosts and multiplexers do not have a
@@ -109,5 +120,6 @@ cleanly.
 - [modules/common/mise.sh](../../modules/common/mise.sh)
 - [modules/common/wsx.sh](../../modules/common/wsx.sh)
 - [preload_configs/common/path.sh](../../preload_configs/common/path.sh)
+- [preload_configs/common/env.sh](../../preload_configs/common/env.sh)
 - [CLAUDE.md](../../CLAUDE.md)
 - [AGENTS.md](../../AGENTS.md)

@@ -19,6 +19,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | System | btop, fastfetch, duf / dysk (disk), procs, dust, bandwhich |
 | Data & net | jq, yq, jnv (interactive JSON), xh (HTTP), ouch (archives), parsync (parallel sync) |
 | Docs | glow (markdown), tlrc (tldr) |
+| Editor | helix (`hx`, modal editor + Cobalt2 theme; becomes `$EDITOR`) |
 | Dev tools | git, gh (GitHub CLI), lazygit, jj (Jujutsu VCS), git-delta, llmfit (LLM hardware checker), herdr (AI agent workspace) |
 | Languages | mise (Node.js + runtimes), Rust/Cargo, uv + Python |
 | Services | Docker, Tailscale, Copyparty |
