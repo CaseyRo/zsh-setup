@@ -7,12 +7,19 @@ test layer here; correctness is defended by static analysis at two strictness
 levels, an end-to-end install that runs inside a container, and a version stamp
 nobody has to remember to update.
 
-## Architecture [coverage: high, 4 sources]
+## Architecture [coverage: high, 5 sources]
 
-Three layers, each with a different job:
+Four layers, each with a different job:
 
 **Locally, pre-commit** runs shellcheck against both scopes, markdownlint with
 `--fix`, and the version bump. Hooks are declared in `.pre-commit-config.yaml`.
+
+**In the editor**, on dev machines, the same shellcheck binary runs live.
+`bash-language-server` shells out to `shellcheck` whenever it is on `PATH`, so
+the installer scope's rules surface as diagnostics while typing rather than at
+commit or on push. Both binaries are installed by the dev arrays in
+`install/packages.sh` for that reason. This is the earliest of the layers and
+the only one that costs nothing to run.
 
 **In continuous integration, two workflows** run on push and pull request
 against `main`. `shellcheck.yml` first syntax-checks every `.sh` file with
@@ -62,7 +69,7 @@ Editing `VERSION` by hand only produces a conflict on the next commit.
 **Deploy is commit and push.** There is no build artifact and no separate
 deployment target. Pushing to `main` is the release.
 
-## Gotchas [coverage: medium, 3 sources]
+## Gotchas [coverage: high, 5 sources]
 
 markdownlint runs with `--fix`, so a commit touching markdown may quietly
 rewrite formatting in your working tree. Rules that cannot be auto-fixed still
@@ -78,7 +85,21 @@ shellcheck's scope filters and still fail `bash -n`.
 
 The smoke test only covers the `--light` path on Debian-family images. The macOS
 path, the `--dev` profile, and Homebrew are not exercised anywhere automatically
-and are verified by running the installer on a real machine.
+and are verified by running the installer on a real machine. That gap matters
+more since the Helix language servers landed, because everything they add sits
+behind `--dev` and therefore behind the part no workflow runs.
+
+Until recently `shellcheck` was in no package array at all, so the tool this
+repository's primary gate depends on was never installed by its own installer.
+Local pre-commit silently could not run, and the first real check was CI. When a
+gate depends on a binary, the installer has to provide it.
+
+A formatter is not automatically an improvement. Every formatter considered for
+`configs/helix/languages.toml` was diffed against this repository first, and
+three were rejected on the numbers: `shfmt` rewrites 1225 lines across the
+installer scripts, `taplo` collapses the aligned palette columns in the herdr
+and Helix configs, and `prettier` reindents the hand-maintained json. They are
+recorded as documented absences in that file rather than quietly left out.
 
 ## Sources [coverage: high]
 
@@ -89,5 +110,7 @@ and are verified by running the installer on a real machine.
 - [test/Dockerfile.ubuntu](../../test/Dockerfile.ubuntu)
 - [scripts/bump-version.sh](../../scripts/bump-version.sh)
 - [scripts/doctor.sh](../../scripts/doctor.sh)
+- [install/packages.sh](../../install/packages.sh)
+- [configs/helix/languages.toml](../../configs/helix/languages.toml)
 - [CLAUDE.md](../../CLAUDE.md)
 - [AGENTS.md](../../AGENTS.md)

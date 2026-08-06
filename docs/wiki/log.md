@@ -1,5 +1,26 @@
 # Compile log
 
+## 2026-08-06 (second pass)
+
+**Pages updated:** installer, quality-gates
+**New pages:** none
+**Concepts:** none
+**Sources scanned:** 136
+**Sources changed:** 6
+
+Notes:
+
+- Covers the Helix language server work: new `_DEV` package arrays,
+  `configs/helix/languages.toml`, and the npm skip-guard fix found while
+  landing it.
+- The npm `--depth=0` bug is the fourth instance of the presence-is-not-health
+  pattern, so it was merged into that paragraph in `installer.md` rather than
+  given its own gotcha. Concepts still stay empty for the reason recorded in
+  `schema.md`.
+- `quality-gates.md` gained a fourth layer: shellcheck now runs live in the
+  editor through bash-language-server. The same page records that shellcheck was
+  previously in no package array at all, so local pre-commit could not run.
+
 ## 2026-08-06
 
 **Pages updated:** installer, shell-runtime, quickstart

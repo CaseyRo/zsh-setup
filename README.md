@@ -20,6 +20,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | Data & net | jq, yq, jnv (interactive JSON), xh (HTTP), ouch (archives), parsync (parallel sync) |
 | Docs | glow (markdown), tlrc (tldr) |
 | Editor | helix (`hx`, modal editor + Cobalt2 theme; becomes `$EDITOR`) |
+| Editor tooling (`--dev`) | language servers for shell, TOML, YAML, JSON, Markdown, Python, TS/JS, Go, PHP, Docker; shellcheck runs inline while you type |
 | Dev tools | git, gh (GitHub CLI), lazygit, jj (Jujutsu VCS), git-delta, llmfit (LLM hardware checker), herdr (AI agent workspace) |
 | Languages | mise (Node.js + runtimes), Rust/Cargo, uv + Python |
 | Services | Docker, Tailscale, Copyparty |

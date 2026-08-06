@@ -30,6 +30,12 @@ modules. Arrays are grouped by package manager: `BREW_PACKAGES`,
 `MAS_APPS`. Adding a tool is an edit to one array; the installer module that
 consumes it does not change.
 
+Several arrays carry a profile suffix, and the suffix is the gate: `_MAC_DEV`
+and `_DEV` are only reached when the `--dev` profile is on, `_HOST` skips
+containers, `_DESKTOP` skips ARM. The flag behind the dev variants is
+`IS_MAC_DEV_MACHINE`, which despite the name is the repository-wide `--dev`
+switch and applies on Linux too.
+
 Platform detection is centralised in `install/utils.sh`: `is_macos`,
 `is_ubuntu`, `is_debian`, `is_raspberry_pi`, `is_arm`, `is_docker`,
 `should_use_apt`, `command_exists`. Modules call these rather than re-checking
@@ -89,6 +95,15 @@ failure and report through `track_failed`, which surfaces the problem in the
 summary without taking the run down. Reserve a non-zero return for a condition
 that genuinely invalidates everything after it.
 
+**Editor tooling is a dev-profile concern, and `languages.toml` follows the
+profile rather than sitting there stale.** Helix has no plugin system, so the
+useful investment is language servers, and every one of them is installed by a
+`_DEV` array. `deploy_helix_config` therefore links
+`configs/helix/languages.toml` only when the dev profile is on, and unlinks it
+again when the profile is off, so the file on disk never promises formatters the
+machine does not have. A server that is absent degrades quietly; a formatter
+that is absent fails on the keystroke.
+
 **Helix is installed differently per platform because no single route works.**
 macOS takes the Homebrew bottle through `BREW_PACKAGES`. Linux cannot: Helix is
 absent from the Ubuntu 22.04 and 24.04 and Raspberry Pi OS repositories, and
@@ -131,7 +146,14 @@ presence and falls back to the static musl build. A Homebrew `composer` whose
 phar signature no longer verifies behaves the same way: it satisfies
 `command_exists`, then dies with an uncaught `PharException` partway through the
 run, so `install_php_dev_tools` gates on `composer --version` actually
-succeeding. An installed-but-dead binary must never satisfy a skip guard.
+succeeding. The npm loop had the same shape from the other direction: `npm list
+-g <pkg>` searches the whole global dependency tree and exits zero when the
+package is merely a transitive dependency of another global, so it reported
+`typescript` and `prettier` as present when neither had a global binary, and
+both were logged as skipped while `:format` stayed broken. It now passes
+`--depth=0` so only true top-level globals match. An installed-but-dead binary
+must never satisfy a skip guard, and neither must a package that is only
+somebody else's dependency.
 
 A Homebrew bottle can hardcode an absolute path that is wrong under a custom
 prefix. The `helix` bottle bakes in `/opt/homebrew/.../libexec/runtime`, so on a
