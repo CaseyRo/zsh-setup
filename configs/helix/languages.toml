@@ -1,59 +1,67 @@
 # Helix language config, symlinked by install/helix.sh to
-# ~/.config/helix/languages.toml. Dev profile only: the language servers and
-# formatters referenced here are installed by the --dev arrays in
-# install/packages.sh, and this file is only deployed when they are.
+# ~/.config/helix/languages.toml. Dev profile only: every binary named here is
+# installed by a --dev array in install/packages.sh, and this file is only
+# deployed when that profile is on.
 #
-# Deliberately small. Helix already ships defaults naming bash-language-server,
-# taplo, marksman, yaml-language-server, gopls, intelephense, typescript-
-# language-server and the vscode-* servers, so installing those binaries is
-# enough to light them up. Overriding a default here would only pin us to a
-# name upstream might change. What is NOT covered by defaults is formatters,
-# which is most of what follows.
+# Deliberately small. Helix already knows bash-language-server, taplo, marksman,
+# yaml-language-server, gopls, intelephense, typescript-language-server and the
+# vscode-* servers by name, so installing the binary is the whole integration.
+# Restating a server here would only pin us to a name upstream might change, so
+# the only language-servers override below is python, where the default differs.
 #
-# auto-format stays off everywhere. Cursor runs without formatOnSave on this
-# setup, and turning it on here would mean the first save of any installer
-# script silently reflows a file this repo hand-formats. `:format` runs a
-# formatter on demand; `space-o` and the LSP still work either way.
+# Helix ships no formatter defaults at all (verified: every language reports
+# `None` with this file removed), so formatters are the real content here.
+#
+# auto-format stays off everywhere, matching Cursor, which runs without
+# formatOnSave on this setup. `:format`, or `+f` from the task mode in
+# config.toml, runs one on demand.
+#
+# Every formatter below was measured against this repo's own files before being
+# wired. The ones that would rewrite existing code are documented as absences
+# rather than silently omitted, so the decision is re-checkable.
 
 # ============================================================================
 # Shell
 # ============================================================================
 # bash-language-server shells out to shellcheck when it is on PATH, which puts
-# this repo's own quality gate inline as you type instead of at CI. Both are in
-# the dev arrays for exactly that reason.
+# this repo's own pre-commit and CI gate inline while editing. Both are in the
+# dev arrays for that reason.
 #
-# shfmt flags are chosen to match the existing code, not to impose a style:
-# 4-space indent, indented case branches, and binary operators left at end of
-# line because these scripts use trailing `&& \` continuations.
-[[language]]
-name = "bash"
-formatter = { command = "shfmt", args = ["--indent", "4", "--case-indent"] }
+# No formatter. shfmt's closest configuration (-i 4 -ci) rewrites 1225 lines
+# across install.sh, install/*.sh, bootstrap.sh and scripts/*.sh. It disagrees
+# on things it has no flag for: spacing inside `(( ))`, spacing around `|` in
+# case patterns, and collapsing aligned line continuations. Both -sr and -bn
+# made it worse. Bound to a keystroke that is a hundred-line diff unrelated to
+# the edit. shfmt is still installed; run it deliberately with `shfmt -w` on
+# new files.
 
 # ============================================================================
 # Config and data formats
 # ============================================================================
-[[language]]
-name = "toml"
-formatter = { command = "taplo", args = ["fmt", "-"] }
+# toml has no formatter for the same reason. taplo collapses the aligned key
+# columns in configs/herdr/config.toml and this directory's palettes into
+# single-space form, and align_entries=true disagrees with more files rather
+# than fewer. The taplo language server still runs, giving schema validation,
+# completion and hover.
+#
+# json has no formatter. prettier reindents configs/cursor/User/*.json from four
+# spaces to two and collapses the arrays in .wiki-compiler.json onto one line,
+# and no single prettier setting matches both the 2-space and 4-space json in
+# this repo.
 
+# yaml is the one case verified byte-clean: prettier already agrees with every
+# yaml file here, so wiring it changes nothing today and keeps new files
+# consistent.
 [[language]]
 name = "yaml"
 formatter = { command = "prettier", args = ["--parser", "yaml"] }
-
-[[language]]
-name = "json"
-formatter = { command = "prettier", args = ["--parser", "json"] }
-
-[[language]]
-name = "jsonc"
-formatter = { command = "prettier", args = ["--parser", "jsonc"] }
 
 # ============================================================================
 # Docs
 # ============================================================================
 # No formatter. markdownlint is the gate this repo actually enforces, and
-# prettier disagrees with it on list indentation and line wrapping, so running
-# prettier here would produce churn that pre-commit then fights.
+# prettier disagrees with it on list indentation and wrapping, so running it
+# here would produce churn that pre-commit then fights.
 [[language]]
 name = "markdown"
 text-width = 80
@@ -62,8 +70,8 @@ soft-wrap = { enable = true }
 # ============================================================================
 # Python
 # ============================================================================
-# Overrides the default (ty) because ruff covers lint and format in one fast
-# binary, and uv already puts Python tooling on these machines.
+# The one server override: Helix defaults to ty, and ruff covers lint, format
+# and LSP in a single fast binary that uv already puts on these machines.
 [language-server.ruff]
 command = "ruff"
 args = ["server"]
@@ -76,6 +84,10 @@ formatter = { command = "ruff", args = ["format", "-"] }
 # ============================================================================
 # Web
 # ============================================================================
+# prettier is kept here rather than dropped like it is for json: this repo holds
+# no typescript, javascript, css or html of its own, so there is nothing to
+# churn, and prettier is the ecosystem default those files are written against
+# in the projects that do have them.
 [[language]]
 name = "typescript"
 formatter = { command = "prettier", args = ["--parser", "typescript"] }
@@ -103,13 +115,8 @@ formatter = { command = "prettier", args = ["--parser", "html"] }
 # ============================================================================
 # PHP
 # ============================================================================
-# intelephense is the default server and works unlicensed; the paid key only
-# unlocks extras. Pairs with the PHPCS/WPCS setup in install/php-dev.sh.
-#
-# No formatter entry: stock prettier cannot parse PHP without
-# @prettier/plugin-php, and the repo already installs phpcbf through PHPCS,
-# which fixes to the WordPress standard rather than prettier's opinion. Run
-# that against files directly instead of through the buffer.
-[[language]]
-name = "php"
-language-servers = ["intelephense"]
+# intelephense is Helix's default server and works unlicensed; the paid key only
+# unlocks extras. No formatter: stock prettier cannot parse PHP without
+# @prettier/plugin-php, and install/php-dev.sh already provides phpcbf, which
+# fixes to the WordPress standard rather than prettier's opinion. Run that
+# against files directly.

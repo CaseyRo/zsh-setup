@@ -226,31 +226,31 @@
 # and the docs require it after the normal theme options.
 [palette]
 # surfaces (shared with the herdr config's [theme.custom])
-bg          = "#193549"  # editor background
-surface_dim = "#15232d"  # statusline / popups — Cobalt2's sidebar tone
-surface0    = "#1f4662"  # cursorline
-surface1    = "#234e6d"  # non-primary selection, one step brighter
-surface2    = "#2d5f85"  # borders, indent guides, rulers
-selection   = "#0050a4"  # primary selection — Cobalt2's own selection blue
+bg = "#193549"          # editor background
+surface_dim = "#15232d" # statusline / popups — Cobalt2's sidebar tone
+surface0 = "#1f4662"    # cursorline
+surface1 = "#234e6d"    # non-primary selection, one step brighter
+surface2 = "#2d5f85"    # borders, indent guides, rulers
+selection = "#0050a4"   # primary selection — Cobalt2's own selection blue
 
 # text tiers
-fg          = "#ffffff"
-fg_dim      = "#bbbbbb"  # 11.9:1 on bg
-fg_muted    = "#9ab8cf"  # 6.1:1 on bg — punctuation, hints
-fg_faint    = "#5f92b3"  # whitespace/virtual only, never real text
-line_nr     = "#7592a8"
+fg = "#ffffff"
+fg_dim = "#bbbbbb"   # 11.9:1 on bg
+fg_muted = "#9ab8cf" # 6.1:1 on bg — punctuation, hints
+fg_faint = "#5f92b3" # whitespace/virtual only, never real text
+line_nr = "#7592a8"
 
 # accents
-yellow      = "#ffc600"  # functions, the Cobalt2 accent
-orange      = "#ff9d00"  # keywords
-pink        = "#ff628c"  # variables
-magenta     = "#ff005d"  # macros, attributes
-green       = "#3ad900"  # strings
-teal        = "#9effff"  # types, tags — Cobalt2's cyan family
-blue        = "#4bb3fd"  # links, info, moved-hunks — a real blue, so it stays
-                         # distinguishable from teal; 5.4:1 on bg
+yellow = "#ffc600"  # functions, the Cobalt2 accent
+orange = "#ff9d00"  # keywords
+pink = "#ff628c"    # variables
+magenta = "#ff005d" # macros, attributes
+green = "#3ad900"   # strings
+teal = "#9effff"    # types, tags — Cobalt2's cyan family
+blue = "#4bb3fd"    # links, info, moved-hunks — a real blue, so it stays
+# distinguishable from teal; 5.4:1 on bg
 # Same value as `pink` on purpose — Cobalt2's palette has one red and it does
 # double duty for variables and invalid. Kept as a separate key so the scope
 # list stays semantic, and because errors also carry a curl underline + gutter.
-red         = "#ff628c"  # errors — the UI red, not ANSI #ff0000 (see header)
-comment     = "#0088ff"  # deliberately low-contrast; Cobalt2's signature
+red = "#ff628c"     # errors — the UI red, not ANSI #ff0000 (see header)
+comment = "#0088ff" # deliberately low-contrast; Cobalt2's signature
