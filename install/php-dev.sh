@@ -4,6 +4,11 @@
 # PHP Dev Tools (macOS dev machine only)
 # ============================================================================
 
+# PHPCS/WPCS is an optional convenience on dev machines. Every failure path
+# below returns 0: install.sh runs under `set -e` and main() calls this bare, so
+# a `return 1` here takes down the whole installer — including the ~/.zshrc
+# symlink and every config deploy that runs after it. Failures are still
+# surfaced through track_failed and land in the summary.
 install_php_dev_tools() {
     if [[ "$OSTYPE" != "darwin"* ]] || [[ "${IS_MAC_DEV_MACHINE:-false}" != true ]]; then
         return 0
@@ -14,7 +19,18 @@ install_php_dev_tools() {
     if ! command_exists composer; then
         print_error "composer not found, skipping PHPCS/WPCS setup"
         track_failed "PHPCS/WPCS (composer missing)"
-        return 1
+        return 0
+    fi
+
+    # Presence is not health. A Homebrew composer whose phar signature no longer
+    # verifies still passes command_exists, then dies mid-run with an uncaught
+    # PharException. Same rule as _mise_works: an installed-but-dead binary must
+    # never satisfy a guard.
+    if ! composer --version >/dev/null 2>&1; then
+        print_error "composer is installed but not executable, skipping PHPCS/WPCS"
+        print_info "Repair it with: brew reinstall composer"
+        track_failed "PHPCS/WPCS (composer broken)"
+        return 0
     fi
 
     local composer_home
@@ -45,7 +61,7 @@ install_php_dev_tools() {
         else
             print_error "Failed to install PHPCS + WPCS"
             track_failed "PHPCS + WPCS"
-            return 1
+            return 0
         fi
     else
         print_skip "PHPCS + WPCS"
@@ -65,14 +81,14 @@ install_php_dev_tools() {
     if ! command_exists "$phpcs_bin" && [[ ! -x "$phpcs_bin" ]]; then
         print_error "phpcs not found after Composer install"
         track_failed "phpcs configuration"
-        return 1
+        return 0
     fi
 
     local wpcs_path="$composer_home/vendor/wp-coding-standards/wpcs"
     if [[ ! -d "$wpcs_path" ]]; then
         print_error "WPCS path not found: $wpcs_path"
         track_failed "phpcs configuration"
-        return 1
+        return 0
     fi
 
     local current_paths
@@ -93,7 +109,7 @@ install_php_dev_tools() {
         else
             print_error "Failed to configure phpcs installed_paths"
             track_failed "phpcs installed_paths (WPCS)"
-            return 1
+            return 0
         fi
     fi
 }
