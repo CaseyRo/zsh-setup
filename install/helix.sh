@@ -123,6 +123,24 @@ deploy_helix_config() {
     _link_helix_file "$theme_source" "$themes_dir/cobalt2.toml" "helix cobalt2 theme"
     _link_helix_file "$config_source" "$config_dir/config.toml" "helix config"
     _link_helix_runtime "$config_dir"
+
+    # languages.toml is dev-only, because every formatter it names is installed
+    # by a --dev array. Deploying it on a server would leave `:format` pointing
+    # at commands that are not there. Un-linked rather than left stale when the
+    # profile flips off, so the file on disk always matches the profile.
+    local languages_source="$SCRIPT_DIR/configs/helix/languages.toml"
+    local languages_target="$config_dir/languages.toml"
+
+    if [[ "${IS_MAC_DEV_MACHINE:-false}" == true ]] && [[ -f "$languages_source" ]]; then
+        _link_helix_file "$languages_source" "$languages_target" "helix languages"
+    elif [[ -L "$languages_target" ]] && [[ "$(readlink "$languages_target")" == "$languages_source" ]]; then
+        rm -f "$languages_target"
+        print_step "Removed helix languages config (dev profile is off)"
+        track_skipped "helix languages (not a dev machine)"
+    else
+        print_skip "helix languages (not a dev machine)"
+        track_skipped "helix languages (not a dev machine)"
+    fi
 }
 
 # ----------------------------------------------------------------------------

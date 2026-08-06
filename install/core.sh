@@ -552,6 +552,7 @@ main() {
 
         if [[ "$LIGHT_MODE" != true ]]; then
             install_apt_packages_ubuntu
+            install_apt_packages_dev
         fi
 
         if [[ "$IS_DOCKER" != true ]]; then

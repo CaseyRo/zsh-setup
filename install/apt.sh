@@ -84,6 +84,33 @@ install_apt_packages() {
 
 }
 
+# Dev-profile apt packages: the Helix tooling that has an apt package.
+# Gated on the same IS_MAC_DEV_MACHINE flag `--dev` sets, which despite the name
+# is the repo-wide dev profile switch rather than a macOS-only one.
+install_apt_packages_dev() {
+    if [[ "${IS_MAC_DEV_MACHINE:-false}" != true ]] || [[ ${#APT_PACKAGES_DEV[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    print_section "Dev Packages (apt)"
+
+    for package in "${APT_PACKAGES_DEV[@]}"; do
+        if dpkg -s "$package" &>/dev/null; then
+            print_skip "$package"
+            track_skipped "$package"
+        else
+            print_package "$package"
+            if run_with_spinner "Installing $package" sudo apt-get install -y -qq "$package"; then
+                print_success "$package installed"
+                track_installed "$package"
+            else
+                print_error "Failed to install $package"
+                track_failed "$package"
+            fi
+        fi
+    done
+}
+
 install_apt_packages_ubuntu() {
     # Skip if not Ubuntu or no Ubuntu-specific packages
     if ! is_ubuntu || [[ ${#APT_PACKAGES_UBUNTU[@]} -eq 0 ]]; then

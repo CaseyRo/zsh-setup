@@ -65,6 +65,13 @@ BREW_PACKAGES_MAC_DEV=(
     "mutagen-io/mutagen/mutagen-compose" # docker compose integration
     "zellij"     # terminal multiplexer / workspace
     "moghtech/komodo/km"         # Komodo CLI for container/stack management
+    # --- Helix language servers + formatters (see configs/helix/languages.toml) ---
+    "shellcheck" # shell linter; bash-language-server surfaces it inline in Helix,
+                 # and it is this repo's own pre-commit and CI gate
+    "shfmt"      # shell formatter, invoked on demand by :format
+    "marksman"   # markdown language server
+    "taplo"      # TOML language server + formatter
+    "ruff"       # Python lint/format/LSP in one binary
 )
 
 # Homebrew casks (macOS GUI apps, skipped on Linux)
@@ -184,6 +191,21 @@ APT_PACKAGES_UBUNTU=(
     "cockpit"    # web-based server management UI
 )
 
+# APT packages for dev machines only (--dev / IS_DEV_MACHINE)
+# ----------------------------------------------------------------------------
+# The Helix tooling that has an apt package. shellcheck and shfmt are the two
+# that matter most here because this repo is mostly shell.
+#
+# marksman, taplo and ruff are deliberately absent: none of them ship an apt
+# package, so on a Linux dev box those three stay unavailable and the matching
+# `:format` calls in configs/helix/languages.toml will report a missing command.
+# Their language servers still work. Adding cargo or release-binary routes for
+# them is a follow-up, not a silent gap.
+APT_PACKAGES_DEV=(
+    "shellcheck" # shell linter; bash-language-server surfaces it inline
+    "shfmt"      # shell formatter
+)
+
 # ============================================================================
 # mise-managed tools (installed via `mise use -g`)
 # ============================================================================
@@ -199,6 +221,7 @@ MISE_TOOLS=(
 # ============================================================================
 GO_PACKAGES=(
     "github.com/osteele/mutagui@latest"  # TUI for managing Mutagen sync sessions
+    "golang.org/x/tools/gopls@latest"    # Go language server (Helix knows it by default)
 )
 
 # ============================================================================
@@ -217,6 +240,24 @@ NPM_GLOBAL_PACKAGES_HOST=(
 # npm packages only for macOS and Ubuntu/Debian (not ARM/Raspberry Pi)
 NPM_GLOBAL_PACKAGES_DESKTOP=(
     "vercel"       # Vercel CLI (deploy, dev, env management)
+)
+
+# npm packages for dev machines only (--dev / IS_DEV_MACHINE)
+# ----------------------------------------------------------------------------
+# Helix language servers. These are all names Helix already knows in its default
+# languages.toml, so installing the binary is the whole integration; only
+# formatters need an entry in configs/helix/languages.toml.
+# npm rather than brew because mise already guarantees Node on every machine,
+# which keeps one list working across macOS and Linux dev boxes alike.
+NPM_GLOBAL_PACKAGES_DEV=(
+    "bash-language-server"              # shell; shells out to shellcheck when present
+    "yaml-language-server"              # YAML
+    "vscode-langservers-extracted"      # json, html, css, eslint servers in one package
+    "typescript-language-server"        # TS/JS
+    "typescript"                        # tsserver, required by the above
+    "intelephense"                      # PHP
+    "dockerfile-language-server-nodejs" # Dockerfile
+    "prettier"                          # formatter for json, yaml, ts, js, css, html
 )
 
 # ============================================================================

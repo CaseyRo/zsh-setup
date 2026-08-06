@@ -1,0 +1,115 @@
+# Helix language config, symlinked by install/helix.sh to
+# ~/.config/helix/languages.toml. Dev profile only: the language servers and
+# formatters referenced here are installed by the --dev arrays in
+# install/packages.sh, and this file is only deployed when they are.
+#
+# Deliberately small. Helix already ships defaults naming bash-language-server,
+# taplo, marksman, yaml-language-server, gopls, intelephense, typescript-
+# language-server and the vscode-* servers, so installing those binaries is
+# enough to light them up. Overriding a default here would only pin us to a
+# name upstream might change. What is NOT covered by defaults is formatters,
+# which is most of what follows.
+#
+# auto-format stays off everywhere. Cursor runs without formatOnSave on this
+# setup, and turning it on here would mean the first save of any installer
+# script silently reflows a file this repo hand-formats. `:format` runs a
+# formatter on demand; `space-o` and the LSP still work either way.
+
+# ============================================================================
+# Shell
+# ============================================================================
+# bash-language-server shells out to shellcheck when it is on PATH, which puts
+# this repo's own quality gate inline as you type instead of at CI. Both are in
+# the dev arrays for exactly that reason.
+#
+# shfmt flags are chosen to match the existing code, not to impose a style:
+# 4-space indent, indented case branches, and binary operators left at end of
+# line because these scripts use trailing `&& \` continuations.
+[[language]]
+name = "bash"
+formatter = { command = "shfmt", args = ["--indent", "4", "--case-indent"] }
+
+# ============================================================================
+# Config and data formats
+# ============================================================================
+[[language]]
+name = "toml"
+formatter = { command = "taplo", args = ["fmt", "-"] }
+
+[[language]]
+name = "yaml"
+formatter = { command = "prettier", args = ["--parser", "yaml"] }
+
+[[language]]
+name = "json"
+formatter = { command = "prettier", args = ["--parser", "json"] }
+
+[[language]]
+name = "jsonc"
+formatter = { command = "prettier", args = ["--parser", "jsonc"] }
+
+# ============================================================================
+# Docs
+# ============================================================================
+# No formatter. markdownlint is the gate this repo actually enforces, and
+# prettier disagrees with it on list indentation and line wrapping, so running
+# prettier here would produce churn that pre-commit then fights.
+[[language]]
+name = "markdown"
+text-width = 80
+soft-wrap = { enable = true }
+
+# ============================================================================
+# Python
+# ============================================================================
+# Overrides the default (ty) because ruff covers lint and format in one fast
+# binary, and uv already puts Python tooling on these machines.
+[language-server.ruff]
+command = "ruff"
+args = ["server"]
+
+[[language]]
+name = "python"
+language-servers = ["ruff"]
+formatter = { command = "ruff", args = ["format", "-"] }
+
+# ============================================================================
+# Web
+# ============================================================================
+[[language]]
+name = "typescript"
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+
+[[language]]
+name = "tsx"
+formatter = { command = "prettier", args = ["--parser", "typescript"] }
+
+[[language]]
+name = "javascript"
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name = "jsx"
+formatter = { command = "prettier", args = ["--parser", "babel"] }
+
+[[language]]
+name = "css"
+formatter = { command = "prettier", args = ["--parser", "css"] }
+
+[[language]]
+name = "html"
+formatter = { command = "prettier", args = ["--parser", "html"] }
+
+# ============================================================================
+# PHP
+# ============================================================================
+# intelephense is the default server and works unlicensed; the paid key only
+# unlocks extras. Pairs with the PHPCS/WPCS setup in install/php-dev.sh.
+#
+# No formatter entry: stock prettier cannot parse PHP without
+# @prettier/plugin-php, and the repo already installs phpcbf through PHPCS,
+# which fixes to the WordPress standard rather than prettier's opinion. Run
+# that against files directly instead of through the buffer.
+[[language]]
+name = "php"
+language-servers = ["intelephense"]

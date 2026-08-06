@@ -49,6 +49,12 @@ install_npm_global_packages() {
         packages+=("${NPM_GLOBAL_PACKAGES_DESKTOP[@]}")
     fi
 
+    # Helix language servers, dev profile only. IS_MAC_DEV_MACHINE is the
+    # repo-wide `--dev` switch despite the name.
+    if [[ "${IS_MAC_DEV_MACHINE:-false}" == true ]] && [[ "$LIGHT_MODE" != true ]]; then
+        packages+=("${NPM_GLOBAL_PACKAGES_DEV[@]}")
+    fi
+
     if [[ ${#packages[@]} -eq 0 ]]; then
         return 0
     fi

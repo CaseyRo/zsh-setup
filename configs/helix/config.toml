@@ -51,3 +51,16 @@ nnbsp = "all"
 C-s = ":write"
 # Space-w / Space-q are Helix idiom already; these are the extras worth having.
 X = "extend_line_above"
+
+# `+` opens a task minor mode. Helix has no plugin system, so a custom minor
+# mode plus :sh is the supported way to bind project commands to keys. These
+# mirror the commands in CLAUDE.md so the editor and the docs cannot drift.
+# Only the shellcheck ones assume this repo; the rest are generic.
+[keys.normal."+"]
+c = ":sh shellcheck --severity=warning install.sh install/*.sh bootstrap.sh scripts/*.sh"
+C = ":sh shellcheck --shell=bash --severity=warning $(find modules preload_configs -type f -name '*.sh' ! -name '#*')"
+d = ":sh bash scripts/doctor.sh"
+p = ":sh pre-commit run --all-files"
+n = ":sh bash -n %{buffer_name}"
+f = ":format"
+g = ":sh git status --short"
