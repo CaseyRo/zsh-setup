@@ -75,16 +75,33 @@ install_tailscale() {
         return 0
     fi
 
+    # Homebrew renamed the cask `tailscale` → `tailscale-app` (the plain name is
+    # now the CLI formula). The app ships as a .pkg, so it lands in the Caskroom
+    # with nothing under /Applications and no `tailscale` on PATH until the menu
+    # bar app is launched once — neither guard above sees it. Ask brew directly,
+    # or every re-run tries to reinstall something already there.
+    if [[ "$OSTYPE" == "darwin"* ]] && brew list --cask tailscale-app &>/dev/null; then
+        print_skip "Tailscale (cask installed, enable CLI in menu bar)"
+        track_skipped "Tailscale"
+        return 0
+    fi
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS: Install via Homebrew cask
         print_step "Installing Tailscale (macOS app)"
-        if run_with_spinner "Installing Tailscale" brew install --cask tailscale; then
+        if run_with_spinner "Installing Tailscale" brew install --cask tailscale-app; then
             print_success "Tailscale installed"
             track_installed "Tailscale"
         else
+            # The .pkg needs sudo, and main() runs `sudo -k` before this point so
+            # user-space installers can't inherit root. In a -y run with no TTY
+            # there's nothing to prompt, so this is expected rather than broken.
+            # Non-fatal on purpose: install.sh is `set -e` and main() calls this
+            # bare, so returning 1 would skip every module after it.
             print_error "Failed to install Tailscale"
+            print_info "Install it interactively: brew install --cask tailscale-app"
             track_failed "Tailscale"
-            return 1
+            return 0
         fi
     else
         # Linux: Use official install script
@@ -100,7 +117,7 @@ install_tailscale() {
         else
             print_error "Failed to install Tailscale"
             track_failed "Tailscale"
-            return 1
+            return 0
         fi
     fi
 }
