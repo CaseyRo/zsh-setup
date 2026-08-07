@@ -4,9 +4,11 @@
 # Shared aliases for all systems
 
 # Command replacements
-alias ls="eza --icons"
-alias ll="eza -la --icons --git"
-alias lt="eza --tree --level=2 --icons"
+# --icons takes an OPTIONAL value, so a bare trailing --icons swallows the next
+# positional arg: `ls /tmp` ran as `eza --icons /tmp` -> "invalid value for --icons".
+alias ls="eza --icons=auto"
+alias ll="eza -la --icons=auto --git"
+alias lt="eza --tree --level=2 --icons=auto"
 # cd is handled by zoxide init --cmd cd in tools.sh (creates cd + cdi)
 
 # bat: on Debian/Ubuntu it's installed as 'batcat' due to naming conflict
