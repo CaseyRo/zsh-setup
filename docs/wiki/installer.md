@@ -55,7 +55,7 @@ already passwordless or cached, and otherwise returns false so the sudo steps
 are skipped while the user-space ones (mise and node, cargo, npm, fonts) still
 run.
 
-## Key Decisions [coverage: high, 8 sources]
+## Key Decisions [coverage: high, 9 sources]
 
 **Profiles are flags, not separate scripts.** `--light` (aliased `--server`,
 `--vps`) targets minimal servers: it skips Rust toolchain builds and prefers
@@ -126,6 +126,23 @@ chosen so the exe-relative lookup resolves: on Linux `current_exe` reads
 `/proc/self/exe`, which is already symlink-resolved, so the `/usr/local/bin/hx`
 symlink on `PATH` does not break discovery and no environment variable is
 needed.
+
+**The gate that checks this repository is installed by this repository, and
+deliberately not from apt.** `install/pre-commit.sh` provisions `pre-commit` and
+then runs `pre-commit install`, because the binary is not the gate: without
+`.git/hooks/pre-commit` a commit runs no checks at all and nothing says so. The
+routing is the interesting part. An apt package does exist, which is exactly why
+it is not used: this repository's config declares `stages: [pre-commit]`, a
+spelling only understood from pre-commit 3.2.0, while Ubuntu 22.04 ships 2.17.0
+and Raspberry Pi OS bookworm ships 3.0.4. Both install cleanly, satisfy every
+presence check, and then refuse to parse the config. macOS takes the Homebrew
+formula through `BREW_PACKAGES_MAC_DEV`; every other platform goes through uv,
+matching how `install/copyparty.sh` handles Python command line tools. The
+module also refuses to install the hook when the binary it found is below that
+floor, so a machine ends up with no gate rather than a broken one. It is gated
+on the dev profile for the same reason shellcheck is: the hooks shell out to
+shellcheck, so installing them where shellcheck is absent would make every
+commit fail rather than every commit pass.
 
 **Root is a fork in the road, not an error.** Running as root outside a
 container starts an interactive new-user creation flow. Inside a container,
@@ -214,6 +231,7 @@ rule and its failure mode live in [quality gates](quality-gates.md).
 - [install/atuin.sh](../../install/atuin.sh)
 - [install/starship.sh](../../install/starship.sh)
 - [install/go.sh](../../install/go.sh)
+- [install/pre-commit.sh](../../install/pre-commit.sh)
 - [install/prebuilt-bins.sh](../../install/prebuilt-bins.sh)
 - [bootstrap.sh](../../bootstrap.sh)
 - [CLAUDE.md](../../CLAUDE.md)

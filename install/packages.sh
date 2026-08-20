@@ -65,6 +65,8 @@ BREW_PACKAGES_MAC_DEV=(
     "mutagen-io/mutagen/mutagen-compose" # docker compose integration
     "zellij"     # terminal multiplexer / workspace
     "moghtech/komodo/km"         # Komodo CLI for container/stack management
+    "pre-commit" # runs this repo's own gates at commit time; install/pre-commit.sh
+                 # installs the git hook, which is the part that actually gates
     # --- Helix language servers + formatters (see configs/helix/languages.toml) ---
     "shellcheck" # shell linter; bash-language-server surfaces it inline in Helix,
                  # and it is this repo's own pre-commit and CI gate
@@ -201,6 +203,13 @@ APT_PACKAGES_UBUNTU=(
 # `:format` calls in configs/helix/languages.toml will report a missing command.
 # Their language servers still work. Adding cargo or release-binary routes for
 # them is a follow-up, not a silent gap.
+#
+# pre-commit is deliberately absent too, for the opposite reason: an apt package
+# does exist, and it is too old to use. This repo's .pre-commit-config.yaml uses
+# `stages: [pre-commit]`, understood only from pre-commit 3.2.0, while Ubuntu
+# 22.04 ships 2.17.0 and Raspberry Pi OS bookworm ships 3.0.4. Installing it
+# here would satisfy every presence check and then fail to parse the config.
+# install/pre-commit.sh routes Linux through uv instead.
 APT_PACKAGES_DEV=(
     "shellcheck" # shell linter; bash-language-server surfaces it inline
     "shfmt"      # shell formatter

@@ -69,3 +69,7 @@ Revisit if a fourth page lands and the pattern earns a home of its own.
   it stated that `VERSION` could not drift, which this compile disproved.
   `quickstart` grew a fourth constraint. Aliases extended on all three pages.
   Concepts re-evaluated and still none; reasoning recorded under Concepts above.
+- 2026-08-20 (later): No pages added or removed. `installer` gained a Key
+  Decision for `install/pre-commit.sh` and the reasoning behind not using the
+  apt package. `quality-gates` had its pre-commit gotcha corrected twice in one
+  day, first to record the drift and then to record the fix.

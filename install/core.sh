@@ -208,6 +208,7 @@ source "$INSTALL_DIR/mas.sh"
 source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/php-dev.sh"
 source "$INSTALL_DIR/cursor.sh"
+source "$INSTALL_DIR/pre-commit.sh"
 source "$INSTALL_DIR/warp.sh"
 source "$INSTALL_DIR/dev-repos.sh"
 source "$INSTALL_DIR/prebuilt-bins.sh"
@@ -661,6 +662,10 @@ main() {
         install_go_packages
 
         install_cursor_profile
+
+        # After brew/apt (binary on macOS) and after install_uv (binary
+        # everywhere else). Self-gates on the dev profile.
+        install_pre_commit
     fi
 
     install_starship

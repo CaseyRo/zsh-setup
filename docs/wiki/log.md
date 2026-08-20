@@ -47,6 +47,19 @@ Amended later the same day, after `pre-commit` was installed on this machine:
 - `quality-gates` Gotchas rewritten accordingly; it had described the README
   breakage as permanent.
 
+Third pass the same day, closing the installer gap:
+
+- `install/pre-commit.sh` added, plus the two other edits a new installer module
+  needs (a `source` line and a `main` call). It installs the binary and then the
+  hook, treating the hook as the deliverable.
+- Deliberately not routed through apt. The package exists on both Linux targets
+  and is too old to parse this repo's config: Ubuntu 22.04 ships 2.17.0 and
+  Raspberry Pi OS bookworm ships 3.0.4, against a floor of 3.2.0. Verified by
+  running 3.0.4, 3.1.1 and 3.2.0 against the config; 3.2.0 is the exact
+  boundary. Recorded as a Key Decision on `installer`.
+- `quality-gates` corrected again: it had said pre-commit still had the
+  uninstalled-gate shape, which stopped being true with this change.
+
 ## 2026-08-06 (second pass)
 
 **Pages updated:** installer, quality-gates

@@ -104,18 +104,23 @@ repository's primary gate depends on was never installed by its own installer.
 Local pre-commit silently could not run, and the first real check was CI. When a
 gate depends on a binary, the installer has to provide it.
 
-`pre-commit` itself still has that shape, and it is the worse case of the two.
-It appears in no package array, so a machine provisioned by `install.sh` gets
-neither the binary nor a `.git/hooks/pre-commit`. Commits made there run no
-hooks at all, and because the version bump is one of them, `VERSION` quietly
-stops tracking the commit count. On 2026-08-20 this repository's own primary
-machine was found sixteen commits adrift, stamped `2.0.190` against 206
-commits, having run without hooks for months. Nothing catches it: neither
-shellcheck scope reads `VERSION`, and no workflow compares it to history, so
-continuous integration is green throughout. Run `pre-commit install` after
-cloning, and read a `VERSION` that disagrees with `git rev-list --count HEAD`
-as evidence that the hooks are absent rather than as a stale file to correct by
-hand.
+`pre-commit` itself had the same shape until 2026-08-20, and it was the worse
+case of the two, because the binary is not the gate. What gates a commit is
+`.git/hooks/pre-commit`, which only exists once someone runs `pre-commit
+install`. A machine with neither runs no hooks at all, and since the version
+bump is one of them, `VERSION` quietly stops tracking the commit count. This
+repository's own primary machine was found sixteen commits adrift, stamped
+`2.0.190` against 206 commits, having committed without hooks for months.
+Nothing catches that: neither shellcheck scope reads `VERSION`, and no workflow
+compares it to history, so continuous integration stays green throughout.
+
+`install/pre-commit.sh` now provisions both halves on dev machines, with a
+version floor described in [installer](installer.md). Two things it cannot do
+for you. It is gated on the dev profile, so a machine set up without `--dev`
+still commits ungated. And it runs at install time, so a repository cloned
+afterwards needs `pre-commit install` of its own. Read a `VERSION` that
+disagrees with `git rev-list --count HEAD` as evidence that the hooks are
+missing rather than as a stale file to correct by hand.
 
 A formatter is not automatically an improvement. Every formatter considered for
 `configs/helix/languages.toml` was diffed against this repository first, and
