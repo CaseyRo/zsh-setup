@@ -51,6 +51,11 @@ Newer tools come with guarded aliases (defined in `modules/common/modern-cli.sh`
 
 ### What they look like
 
+<!-- markdownlint-disable MD033 MD045 -->
+<!-- The demo gallery below is a deliberate HTML table: markdown tables cannot
+     do the two-column image grid, and the images are upstream screenshots with
+     no useful alt text to add. Both rules stay on for the rest of the file. -->
+
 _Prompt & shell history_
 
 <table>
@@ -128,6 +133,8 @@ _Multiplexer, runtimes & HTTP_
     <td></td>
   </tr>
 </table>
+
+<!-- markdownlint-enable MD033 MD045 -->
 
 > Non-visual utilities (nothing meaningful to screenshot): `zoxide`, `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the table below for what each does.
 

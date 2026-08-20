@@ -18,3 +18,10 @@ MD029: false
 
 # Disable table column style - too strict
 MD060: false
+
+# Allow the same heading text under different parents, but not as siblings.
+# OpenSpec specs repeat scenario names (e.g. "Scenario: Non-interactive skip
+# via flag") across separate Requirement sections, which is meaningful rather
+# than accidental duplication.
+MD024:
+  siblings_only: true

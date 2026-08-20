@@ -76,9 +76,18 @@ markdownlint runs with `--fix`, so a commit touching markdown may quietly
 rewrite formatting in your working tree. Rules that cannot be auto-fixed still
 fail. `.markdownlint.yaml` disables the rules that fight this repository's
 style (line length, first-line heading, emphasis as heading, bare code fences,
-ordered list prefixes, table column style) but leaves inline HTML enabled, and
-`README.md` contains a deliberate HTML table of demo images. Expect that file to
-report violations when linted directly.
+ordered list prefixes, table column style), and relaxes `MD024` to
+`siblings_only` because OpenSpec specs repeat a scenario name under separate
+requirements, which is meaningful rather than accidental.
+
+Inline HTML and missing alt text stay enabled everywhere except the `README.md`
+demo gallery, which is a two-column image grid that markdown tables cannot
+express. That block carries a scoped `markdownlint-disable` comment naming only
+`MD033` and `MD045`, with a reason, so the rest of the file stays checked.
+Prefer that shape over widening the configuration: the narrow disable was worth
+finding, because until it landed `pre-commit run --all-files`, the command this
+repository documents as the way to run its own gates, could not pass on a clean
+checkout.
 
 The syntax check in continuous integration walks every `.sh` file in the
 repository, including files the shellcheck steps skip. A file can pass

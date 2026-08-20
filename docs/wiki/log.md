@@ -32,6 +32,21 @@ Notes:
 - Compiled inline rather than through parallel subagents; four affected pages
   did not justify the fan-out.
 
+Amended later the same day, after `pre-commit` was installed on this machine:
+
+- With the hook actually running, `pre-commit run --all-files` turned out not to
+  pass on a clean checkout, so the command CLAUDE.md documents as the way to run
+  the gates was broken. Two causes, both pre-existing. `README.md`'s demo gallery
+  tripped `MD033` and `MD045`, and `openspec/specs/setup-installer/spec.md`
+  tripped `MD024` on a scenario name repeated under a different requirement.
+- Fixed narrowly rather than by widening the configuration: a scoped
+  `markdownlint-disable` around the gallery naming just the two rules, and
+  `MD024: siblings_only` so duplicates are still caught between actual siblings.
+  Both were verified by probe, confirming the rules still fire outside the
+  narrowed scope.
+- `quality-gates` Gotchas rewritten accordingly; it had described the README
+  breakage as permanent.
+
 ## 2026-08-06 (second pass)
 
 **Pages updated:** installer, quality-gates
