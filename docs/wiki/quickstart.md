@@ -25,7 +25,7 @@ checks whether its target is already present and skips. See
 The code answers *what happens*. These pages answer *why it is shaped that
 way*, which is the part you cannot recover by reading a script.
 
-Three constraints account for most of the surprising code in this repository:
+Four constraints account for most of the surprising code in this repository:
 
 1. Shell startup time is a budget, and the loader is synchronous. One module in
    the wrong position cost roughly 700 milliseconds per shell. See
@@ -38,6 +38,11 @@ Three constraints account for most of the surprising code in this repository:
    that checks whether something is present rather than whether it works, and a
    single module's failure ending the whole run under `set -e`. Both look like
    success from the outside. See [installer](installer.md).
+4. Work detached to keep the prompt fast is still attached to the terminal it
+   came from, and when it stops there is no error anywhere. The daily
+   self-update spent twenty nine hours stopped, holding the lock that would
+   have let a later shell retry, while the repository went on reporting itself
+   up to date. See [shell runtime](shell-runtime.md).
 
 ## For agents working in this repo
 
@@ -58,9 +63,10 @@ this way" or "what breaks if I change it", the answer is here.
 - [quickstart](quickstart.md): this page. Entry point and map.
 - [installer](installer.md): provisioning. Entry point and profiles, persisted
   state, platform detection, package lists, the package-manager preference
-  ladder, runtime version management, and config seeding.
+  ladder, runtime version management, config seeding, and the unattended
+  re-provisioning path.
 - [shell runtime](shell-runtime.md): what every interactive shell loads. Loader
-  order, per-operating-system scoping, the `zz_` tail-init contract, and the
-  `#` opt-out convention.
+  order, per-operating-system scoping, the `zz_` tail-init contract, the `#`
+  opt-out convention, and the daily self-update.
 - [quality gates](quality-gates.md): the two shellcheck scopes, pre-commit
   hooks, automatic versioning, and the continuous integration smoke test.

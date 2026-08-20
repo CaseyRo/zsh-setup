@@ -63,13 +63,14 @@ file is excluded rather than papered over with disables.
 
 **Versioning is derived, never authored.** `scripts/bump-version.sh` writes
 `2.0.<commit-count + 1>` into `VERSION` and stages it, as an always-run
-pre-commit hook. The version therefore tracks history exactly and cannot drift.
-Editing `VERSION` by hand only produces a conflict on the next commit.
+pre-commit hook. Editing `VERSION` by hand only produces a conflict on the next
+commit. The derivation holds only on machines where the hook is actually
+installed, which is not all of them; see Gotchas.
 
 **Deploy is commit and push.** There is no build artifact and no separate
 deployment target. Pushing to `main` is the release.
 
-## Gotchas [coverage: high, 5 sources]
+## Gotchas [coverage: high, 6 sources]
 
 markdownlint runs with `--fix`, so a commit touching markdown may quietly
 rewrite formatting in your working tree. Rules that cannot be auto-fixed still
@@ -93,6 +94,19 @@ Until recently `shellcheck` was in no package array at all, so the tool this
 repository's primary gate depends on was never installed by its own installer.
 Local pre-commit silently could not run, and the first real check was CI. When a
 gate depends on a binary, the installer has to provide it.
+
+`pre-commit` itself still has that shape, and it is the worse case of the two.
+It appears in no package array, so a machine provisioned by `install.sh` gets
+neither the binary nor a `.git/hooks/pre-commit`. Commits made there run no
+hooks at all, and because the version bump is one of them, `VERSION` quietly
+stops tracking the commit count. On 2026-08-20 this repository's own primary
+machine was found sixteen commits adrift, stamped `2.0.190` against 206
+commits, having run without hooks for months. Nothing catches it: neither
+shellcheck scope reads `VERSION`, and no workflow compares it to history, so
+continuous integration is green throughout. Run `pre-commit install` after
+cloning, and read a `VERSION` that disagrees with `git rev-list --count HEAD`
+as evidence that the hooks are absent rather than as a stale file to correct by
+hand.
 
 A formatter is not automatically an improvement. Every formatter considered for
 `configs/helix/languages.toml` was diffed against this repository first, and

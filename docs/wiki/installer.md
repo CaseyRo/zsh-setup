@@ -11,7 +11,7 @@ already exists and skips rather than erroring, which is why the smoke test runs
 `install.sh` twice inside the same image and expects the second pass to be
 clean. A module that cannot be run twice is a bug, not a rough edge.
 
-## Architecture [coverage: high, 6 sources]
+## Architecture [coverage: high, 7 sources]
 
 `install.sh` is deliberately thin: it performs the root check, sources
 `install/core.sh`, and calls `main`. Everything else lives in `core.sh`, which
@@ -43,6 +43,17 @@ Platform detection is centralised in `install/utils.sh`: `is_macos`,
 
 Output goes through the `print_*` and `track_*` helpers, never bare `echo`, so
 every action lands in the run summary as installed, skipped, or failed.
+
+`install/upgrade.sh` is the re-provisioning path, not a fourth profile. It walks
+the same package arrays and installs only what is missing, which is how a
+machine picks up a tool added to `packages.sh` long after its last full install.
+Two callers reach it: `zsh-update` by hand, and the shell's daily self-update
+unattended, described in [shell runtime](shell-runtime.md). The unattended
+caller sets `UPGRADE_NONINTERACTIVE=1`, which does not forbid sudo outright,
+only prompting for it: `_upgrade_can_sudo` still returns true where sudo is
+already passwordless or cached, and otherwise returns false so the sudo steps
+are skipped while the user-space ones (mise and node, cargo, npm, fonts) still
+run.
 
 ## Key Decisions [coverage: high, 8 sources]
 
@@ -185,8 +196,8 @@ back empty on macOS, the already-zsh check never matched, and every run re-ran
 macOS, and never rely on `||` to catch a failure from anywhere but the last
 command in a pipeline.
 
-`VERSION` is written by a pre-commit hook from the commit count. Editing it by
-hand produces a conflict on the next commit.
+`VERSION` is generated, not authored, and it does not always keep up. Both the
+rule and its failure mode live in [quality gates](quality-gates.md).
 
 ## Sources [coverage: high]
 
@@ -194,6 +205,7 @@ hand produces a conflict on the next commit.
 - [install/core.sh](../../install/core.sh)
 - [install/utils.sh](../../install/utils.sh)
 - [install/packages.sh](../../install/packages.sh)
+- [install/upgrade.sh](../../install/upgrade.sh)
 - [install/mise.sh](../../install/mise.sh)
 - [install/herdr.sh](../../install/herdr.sh)
 - [install/helix.sh](../../install/helix.sh)

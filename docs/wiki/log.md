@@ -1,5 +1,37 @@
 # Compile log
 
+## 2026-08-20
+
+**Pages updated:** shell-runtime, installer, quality-gates, quickstart
+**New pages:** none
+**Concepts:** none (re-evaluated; see schema.md)
+**Sources scanned:** 105
+**Sources changed:** 4
+
+Notes:
+
+- Two mechanisms turned out to be entirely undocumented rather than merely
+  stale: the daily self-update in `modules/common/auto-update.sh`, and the
+  `install/upgrade.sh` re-provisioning path it drives. Split by canonical home,
+  the trigger to `shell-runtime` and the payload to `installer`, cross-linked
+  rather than restated.
+- `quality-gates` carried a claim that is now known to be false: that `VERSION`
+  tracks history exactly and cannot drift. It can, and on this machine it had,
+  by sixteen commits. Corrected in Key Decisions and explained in Gotchas, folded
+  into the existing gate-depends-on-an-uninstalled-binary paragraph rather than
+  added as a separate one.
+- `quickstart` went from three recurring constraints to four. The self-update
+  failure introduced a shape the other three do not cover: work detached to keep
+  the prompt fast is still attached to the terminal, and a stopped job holds its
+  lock with no error anywhere.
+- The `installer` gotcha about `VERSION` was re-pointed at `quality-gates`
+  instead of re-explaining the rule, per doctrine rule 4.
+- Source count fell from 136 to 105. The `.claude/` OpenSpec boilerplate was
+  deleted from the repository in 4918b3b; the remainder is a difference in how
+  the patterns were counted, not content that went missing.
+- Compiled inline rather than through parallel subagents; four affected pages
+  did not justify the fan-out.
+
 ## 2026-08-06 (second pass)
 
 **Pages updated:** installer, quality-gates

@@ -24,9 +24,9 @@ compiler's defaults where they conflict:
 | Page | Covers | Aliases |
 |------|--------|---------|
 | `quickstart` | Entry point, shortest path to running, Map | index, readme, getting started |
-| `installer` | Provisioning: entry point and profiles, persisted state, platform detection, package lists, package-manager ladder, runtime versions, config seeding, failure isolation | install.sh, core.sh, packages, mise, profiles, light, dev, idempotence, seeding, symlink, helix, composer, tailscale, brew prefix, set -e |
-| `shell-runtime` | Loader order, per-operating-system scoping, `zz_` tail-init contract, `#` opt-out convention, startup cost, guarded environment defaults | .zshrc, modules, preload_configs, load order, zz_, compinit, completions, zoxide, EDITOR, env.sh |
-| `quality-gates` | Two shellcheck scopes, pre-commit, versioning, continuous integration smoke test | shellcheck, pre-commit, markdownlint, VERSION, bump-version, docker, smoke test |
+| `installer` | Provisioning: entry point and profiles, persisted state, platform detection, package lists, package-manager ladder, runtime versions, config seeding, failure isolation, unattended re-provisioning | install.sh, core.sh, packages, mise, profiles, light, dev, idempotence, seeding, symlink, helix, composer, tailscale, brew prefix, set -e |
+| `shell-runtime` | Loader order, per-operating-system scoping, `zz_` tail-init contract, `#` opt-out convention, startup cost, guarded environment defaults, daily self-update | .zshrc, modules, preload_configs, load order, zz_, compinit, completions, zoxide, EDITOR, env.sh, auto-update, zsh-update, SIGTTIN, update lock, aliases, eza |
+| `quality-gates` | Two shellcheck scopes, pre-commit, versioning, continuous integration smoke test | shellcheck, pre-commit, markdownlint, VERSION, bump-version, docker, smoke test, version drift, hooks not installed |
 
 ## Concepts
 
@@ -45,6 +45,13 @@ page would mostly link back to three Gotchas sections, which is the duplication
 doctrine rule 4 forbids and the stub rule 3 forbids. The canonical home stays
 `quickstart.md`, now stated more concretely there.
 
+Re-evaluated again on 2026-08-20. The self-update failure is the strongest
+single instance of the pattern so far, and it added a genuinely new shape to it:
+not a guard that checks the wrong thing, but work detached from the terminal
+that the terminal then stopped. That shape was promoted into `quickstart.md` as
+a fourth constraint rather than into a concept page, on the same reasoning as
+before. Still no fourth page, so still no concept.
+
 Revisit if a fourth page lands and the pattern earns a home of its own.
 
 ## Evolution log
@@ -56,3 +63,9 @@ Revisit if a fourth page lands and the pattern earns a home of its own.
   `shell-runtime` to cover the Helix, failure-isolation, and guarded-default
   material added this compile. Concepts re-evaluated and still none; reasoning
   recorded under Concepts above.
+- 2026-08-20: No pages added or removed. `shell-runtime` gained the daily
+  self-update, previously undocumented; `installer` gained `install/upgrade.sh`,
+  also previously undocumented. `quality-gates` had a factual claim corrected:
+  it stated that `VERSION` could not drift, which this compile disproved.
+  `quickstart` grew a fourth constraint. Aliases extended on all three pages.
+  Concepts re-evaluated and still none; reasoning recorded under Concepts above.

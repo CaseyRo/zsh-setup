@@ -39,7 +39,7 @@ filenames load-bearing.
 over bare `source` in modules so an absent optional file cannot break shell
 startup.
 
-## Key Decisions [coverage: high, 5 sources]
+## Key Decisions [coverage: high, 6 sources]
 
 **The `zz_` prefix is a tail-init contract.** Four modules must load after
 everything else, each for a concrete reason:
@@ -84,12 +84,22 @@ since `~/.env.sh` is sourced before this file and an `EDITOR` exported there
 therefore wins. A default that cannot be overridden locally is a setting, not a
 default.
 
+**The configuration updates itself, and the update is deliberately detached
+from the shell that triggered it.** `modules/common/auto-update.sh` checks once
+per day; when the interval has elapsed it forks a background subshell that
+fetches, fast-forwards, and then runs `install/upgrade.sh` to pick up packages
+added since the last pull. See [installer](installer.md) for what that script
+does. Backgrounding is the point: the work is slow and network-bound, and no
+prompt should wait on it. A lock file serialises the check across tabs opening
+at once, and a failed fetch shortens the retry to an hour rather than burning
+the whole day. `ZSH_SETUP_DISABLE_AUTOUPDATE=1` opts out.
+
 **Terminal type is normalised at the top of the loader.** Ghostty advertises
 `TERM=xterm-ghostty`, which most remote hosts and multiplexers do not have a
 terminfo entry for, so the loader falls back to `xterm-256color` when the entry
 is missing locally.
 
-## Gotchas [coverage: high, 3 sources]
+## Gotchas [coverage: high, 5 sources]
 
 Ordering constraints live in filenames and fail quietly. A module that loads too
 early usually still appears to work; it is just slower, or a cache is defeated,
@@ -105,6 +115,29 @@ Known-good zsh idioms need a scoped inline disable with a one-line
 justification: dynamic `source` paths, zsh-magic variables such as `reply` and
 `SAVEHIST`, `fpath=(...)` array assignment, and git's `@{upstream}` syntax.
 
+**A backgrounded job still owns the terminal's input, and one that reads it
+stops forever.** The self-update worker was spawned as `&>/dev/null &`, which
+redirects output but leaves stdin on the terminal. `install/upgrade.sh` reaches
+`brew install --cask`, which shells out to sudo for a password, so the
+background job read the terminal, took a `SIGTTIN`, and stopped. A stopped
+process never runs its `EXIT` trap, so it kept the update lock. Nothing could
+reclaim it, because the lock recorded `$$`, which in zsh stays the interactive
+shell even inside a subshell: the stale-lock check was asking whether that
+terminal tab was still open, not whether an update was still running. The tab
+was open, so the self-update stayed silently dead for as long as it lived. On
+one machine that was twenty nine hours, with the repository still reporting
+itself up to date because the last completed pull had been clean. Redirect
+stdin from `/dev/null` on any background job, and when a lock is meant to
+outlive the shell that took it, record the worker's own pid through
+`sysparams[pid]` after `zmodload zsh/system`.
+
+An alias ending in a flag that takes an optional value swallows the next
+argument. `eza --icons` accepts an optional value, so `alias ls="eza --icons"`
+turned `ls /tmp` into `eza --icons /tmp` and failed on an invalid value for
+`--icons`. `ll` escaped only because `--git` happened to follow its `--icons`.
+All three listing aliases now pin `--icons=auto`, so flag order cannot
+reintroduce it.
+
 `.zshrc` itself is excluded from shellcheck entirely. It uses `fpath+=`, the
 `include` helper, and operating system branches that no shellcheck mode handles
 cleanly.
@@ -116,6 +149,8 @@ cleanly.
 - [modules/common/zz_zoxide.sh](../../modules/common/zz_zoxide.sh)
 - [modules/common/zz_atuin.sh](../../modules/common/zz_atuin.sh)
 - [modules/common/zz_abbr.sh](../../modules/common/zz_abbr.sh)
+- [modules/common/auto-update.sh](../../modules/common/auto-update.sh)
+- [modules/common/aliases.sh](../../modules/common/aliases.sh)
 - [modules/common/starship.sh](../../modules/common/starship.sh)
 - [modules/common/mise.sh](../../modules/common/mise.sh)
 - [modules/common/wsx.sh](../../modules/common/wsx.sh)
