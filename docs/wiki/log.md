@@ -60,6 +60,23 @@ Third pass the same day, closing the installer gap:
 - `quality-gates` corrected again: it had said pre-commit still had the
   uninstalled-gate shape, which stopped being true with this change.
 
+Fourth pass, closing the detection gap:
+
+- `shellcheck.yml` gained a `version-stamp` job comparing `VERSION` to the
+  commit count. It is a hook detector rather than a versioning check: the stamp
+  is the only locally generated artifact continuous integration can see, so a
+  mismatch is evidence the pre-commit hook did not run and the other gates did
+  not either.
+- Merge commits are exempt. Establishing that took a simulation rather than
+  reading history, because this repository's own history is polluted by the
+  drift being fixed. The finding was that `VERSION` conflicts on every merge,
+  since both sides bump it, so the stamp on a merge records a human's conflict
+  resolution rather than whether gates ran.
+- Verified against real commits: the drifted ones fail the job, the repaired
+  ones pass, the two merge commits skip.
+- `quality-gates` Architecture and Gotchas both updated; the page had said
+  nothing catches this, which was true when written that morning.
+
 ## 2026-08-06 (second pass)
 
 **Pages updated:** installer, quality-gates

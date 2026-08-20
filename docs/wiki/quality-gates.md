@@ -24,7 +24,13 @@ the only one that costs nothing to run.
 **In continuous integration, two workflows** run on push and pull request
 against `main`. `shellcheck.yml` first syntax-checks every `.sh` file with
 `bash -n`, then runs shellcheck over the installer scope and the runtime scope
-separately. `install-smoke.yml` builds a container image per distribution in a
+separately. It carries a second job, `version-stamp`, which compares `VERSION`
+against `git rev-list --count HEAD`. That job is really a hook detector: the
+stamp is the only locally generated artifact CI can see, so a mismatch is
+evidence that the pre-commit hook did not run and therefore that the other
+gates did not either. It needs `fetch-depth: 0`, since the default shallow
+checkout reports a commit count of one, and on a pull request it reads the
+branch head rather than the synthetic merge commit. `install-smoke.yml` builds a container image per distribution in a
 matrix of ubuntu and debian, and runs the image.
 
 **The smoke test is the only end-to-end check.** `test/Dockerfile.ubuntu`
@@ -111,8 +117,15 @@ install`. A machine with neither runs no hooks at all, and since the version
 bump is one of them, `VERSION` quietly stops tracking the commit count. This
 repository's own primary machine was found sixteen commits adrift, stamped
 `2.0.190` against 206 commits, having committed without hooks for months.
-Nothing catches that: neither shellcheck scope reads `VERSION`, and no workflow
-compares it to history, so continuous integration stays green throughout.
+That went uncaught for months because nothing looked: neither shellcheck scope
+reads `VERSION`, so continuous integration stayed green throughout. The
+`version-stamp` job now closes that, and it was checked against the drifted
+commits themselves, which fail it, and against the repaired ones, which pass.
+Merge commits are exempt, because hooks do not run on a merge and `VERSION`
+conflicts on every one of them: both sides bumped it, so the stamp on a merge
+reflects how somebody resolved a conflict rather than whether the gates ran.
+The next ordinary commit is checked normally, which is where sustained drift
+surfaces.
 
 `install/pre-commit.sh` now provisions both halves on dev machines, with a
 version floor described in [installer](installer.md). Two things it cannot do
