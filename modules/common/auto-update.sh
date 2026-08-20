@@ -108,6 +108,16 @@ _zsh_setup_check_update() {
     (
         trap '_zsh_setup_release_lock' EXIT INT TERM HUP
 
+        # Re-stamp the lock with *this* worker's PID. _zsh_setup_acquire_lock
+        # has to write $$ to claim the file atomically, but in zsh $$ stays the
+        # interactive shell even inside a subshell — so the stale-lock check
+        # was only ever asking "is that terminal tab still open?", not "is an
+        # update still running". Write it before any real work, so a killed
+        # worker leaves a dead PID the next shell can clear.
+        # shellcheck disable=SC2154  # sysparams is populated by zmodload zsh/system
+        zmodload zsh/system 2>/dev/null && \
+            echo "${sysparams[pid]}" > "$ZSH_SETUP_LOCK_FILE"
+
         cd "$ZSH_SETUP_FOLDER" || exit 1
 
         if ! _zsh_setup_fetch; then
@@ -147,7 +157,14 @@ _zsh_setup_check_update() {
             _new_sha=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
             _zsh_setup_log_event "${_old_sha:0:7} -> ${_new_sha:0:7} [pull-failed]"
         fi
-    ) &>/dev/null &
+    # </dev/null is load-bearing. &>/dev/null redirects only output, leaving
+    # stdin attached to the terminal — so anything upgrade.sh runs that reads
+    # the tty (a `brew install --cask` shelling out to sudo for a password, for
+    # one) earns this background job a SIGTTIN and stops it. A stopped process
+    # never runs its EXIT trap, so it holds the update lock forever and silently
+    # disables auto-update on the machine. EOF on stdin makes such prompts fail
+    # fast instead.
+    ) &>/dev/null </dev/null &
 }
 
 # Run check on shell startup
