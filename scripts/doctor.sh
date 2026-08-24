@@ -243,6 +243,34 @@ fi
 echo ""
 
 # ============================================================================
+# 7. Remote Sessions
+# ============================================================================
+echo "${CYAN}Remote Sessions${RESET}"
+
+for tool in et mosh; do
+    if command -v "$tool" &>/dev/null; then
+        check_pass "$tool"
+    else
+        check_warn "$tool not installed (transport for hh/hhm, see modules/common/et-helpers.sh)"
+    fi
+done
+
+# etserver only has to run on hosts you attach TO. A client-only machine not
+# running it is a perfectly normal state, so this is informational and is
+# deliberately kept out of the score -- it exists so the reminder shows up on
+# the box that actually needs it.
+if command -v et &>/dev/null; then
+    if pgrep -x etserver &>/dev/null; then
+        check_pass "etserver running (this host accepts ET connections)"
+    else
+        echo "  ${DIM}. etserver not running -- client-only host${RESET}"
+        echo "  ${DIM}  to accept hh connections here: sudo brew services start et${RESET}"
+    fi
+fi
+
+echo ""
+
+# ============================================================================
 # Score
 # ============================================================================
 echo "${BOLD}────────────────────────────────${RESET}"

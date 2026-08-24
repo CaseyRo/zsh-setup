@@ -252,9 +252,27 @@ On GUI-capable macOS machines the installer offers Warp as a standalone choice (
 
 This snapshots the parts of a "looks cool" Warp setup that Warp's own account sync doesn't reliably bootstrap on a fresh machine (custom theme files + a baseline `settings.toml` + local workflows). To re-capture after tweaking Warp's appearance, copy your live `~/.warp/settings.toml` back over `configs/warp/settings.toml`, restoring the `__HOME__` placeholder for the theme paths.
 
-For resilient/persistent SSH (Warp has no mosh integration), the package lists include [`mosh`](https://mosh.org) and [Eternal Terminal](https://eternalterminal.dev) (`et`) — sessions that survive roaming, sleep, and disconnects.
+For resilient/persistent SSH (Warp has no mosh integration), the package lists include [`mosh`](https://mosh.org) and [Eternal Terminal](https://eternalterminal.dev) (`et`) — sessions that survive roaming, sleep, and disconnects. See [Resilient remote sessions](#resilient-remote-sessions-et--herdr) below.
 
 Warp uses its own input editor and bypasses zsh's ZLE, so the zsh-abbr Claude shortcuts (`cl`, `clc`, …) don't expand there. `modules/common/warp.sh` mirrors them as plain aliases under `TERM_PROGRAM=WarpTerminal` so they work in Warp too.
+
+### Resilient remote sessions (ET + herdr)
+
+`herdr --remote <host>` runs a thin client locally and ships herdr's own protocol over SSH, so every keystroke is a full round-trip before anything renders and one lost packet head-of-line-blocks the whole UI. `modules/common/et-helpers.sh` inverts that: herdr's session server is already the persistence layer, so the client runs on the remote box over a unix socket and the network only carries the rendered pty.
+
+| Command | Transport | Use when |
+| --- | --- | --- |
+| `hh [host] [session]` | [Eternal Terminal](https://eternalterminal.dev) | Default. Raw pty byte stream, so herdr's inline images, graphics streams and OSC sequences survive the hop. TCP/2022, which also works on networks that block mosh's UDP range. |
+| `hhm [host] [session]` | [mosh](https://mosh.org) | Genuinely lossy or high-RTT links. Predictive local echo and no head-of-line blocking, but mosh emulates the terminal to sync screen state and drops what it cannot parse — no kitty graphics, and OSC 52 only with the `c;` selector. |
+
+Both run the remote command through `zsh -lc`, because herdr is mise-installed and its shim only reaches `PATH` via the zsh profile. `bash -lc` is not a substitute — it sources bash's startup files and never mise's zsh activation.
+
+Two environment variables, both optional:
+
+- `HERDR_REMOTE_HOST` — default host, so a bare `hh` attaches.
+- `HERDR_REMOTE_ETTERMINAL` — remote path to `etterminal`, passed as `--terminal-path`. Needed when the remote is a Mac with a custom Homebrew prefix: ET's own `--macserver` flag hardcodes `/usr/local/bin/etterminal`, which is wrong on this fleet's `~/homebrew` layout.
+
+Panes survive either transport dropping, so switching between the two costs nothing beyond re-attaching. ET needs `etserver` running on the host you attach _to_ (`sudo brew services start et`); mosh bootstraps per session and needs nothing pre-running. `scripts/doctor.sh` reports whether the current host is ET-attachable, so the reminder surfaces where it matters — a client-only machine not running the daemon is a normal state and is not counted against the score.
 
 ## Directory Structure
 
