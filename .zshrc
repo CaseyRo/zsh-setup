@@ -125,3 +125,5 @@ esac
 # pnpm end
 
 export PATH="$PATH:$HOME/.local/bin"
+# micro: enable 24-bit colour (needed for the *-tc colorschemes)
+export MICRO_TRUECOLOR=1
