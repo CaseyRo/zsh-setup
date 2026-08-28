@@ -2,16 +2,17 @@
 # Companion entrypoints (Claude Code Remote Control sessions)
 # ============================================================================
 # One shell function per companion in ~/dev/companion. Each opens a Remote
-# Control session with a deterministic name, <companion>@<host>, so a session
+# Control session with a deterministic name, <companion>-<host>, so a session
 # on another machine can find this one by name (ListAgents / SendMessage)
-# instead of by a hand-shared session link. The contract is declared in
+# instead of by a hand-shared session link. Separator is "-", not "@":
+# SendMessage parses "@" as a teammate address and refuses the name. The contract is declared in
 # ~/dev/companion/companions/<slug>/config.md → Hosts; this file only implements
 # it. Nothing here starts a companion on its own — no timer, watcher, or hook.
 #
-#   ccc    companion-casey      casey@<host>
-#   ccy    companion-yorizon    yorizon@<host>
-#   ccsk   companion-storykeep  storykeep@<host>
-#   ccben  companion-fitness    fitness@<host>   (Ben)
+#   ccc    companion-casey      casey-<host>
+#   ccy    companion-yorizon    yorizon-<host>
+#   ccsk   companion-storykeep  storykeep-<host>
+#   ccben  companion-fitness    fitness-<host>   (Ben)
 #
 # Functions, not zsh-abbr abbreviations: they need no ZLE, so they work in Warp
 # too without a mirror list in warp.sh. Extra arguments are passed to claude
@@ -28,7 +29,7 @@ _cc_companion() {
     # and `claude remote-control -c` reattaches) without moving the caller's cwd.
     (
         cd "$HOME/dev" || return 1
-        claude --remote-control "${slug}@${host}" -n "${slug}@${host}" \
+        claude --remote-control "${slug}-${host}" -n "${slug}-${host}" \
             --permission-mode auto "$@" "/companion-${slug}"
     )
 }
