@@ -67,6 +67,6 @@ this way" or "what breaks if I change it", the answer is here.
   re-provisioning path.
 - [shell runtime](shell-runtime.md): what every interactive shell loads. Loader
   order, per-operating-system scoping, the `zz_` tail-init contract, the `#`
-  opt-out convention, and the daily self-update.
+  opt-out convention, the daily self-update, and the companion entrypoints.
 - [quality gates](quality-gates.md): the two shellcheck scopes, pre-commit
   hooks, automatic versioning, and the continuous integration smoke test.
