@@ -1,5 +1,29 @@
 # Compile log
 
+## 2026-08-28
+
+**Pages updated:** shell-runtime, quickstart, schema
+**New pages:** none
+**Concepts:** none
+**Sources scanned:** 107
+**Sources changed:** 2
+
+Notes:
+
+- Incremental compile for 5b46d64 (PR #9). `modules/common/companions.sh`
+  was not covered anywhere; it landed in `shell-runtime` Key Decisions as one
+  paragraph plus the separator history, not as its own page. It is one module
+  with four one-line functions, and the contract it implements lives in the
+  companion repo, so a page here would restate that.
+- The `@` to `-` change is recorded with its date and cause: `SendMessage`
+  parses `@` as a teammate address and refuses the name, while `ListAgents`
+  shows it, so the failure was visible and silent at once.
+- Not compiled this run: `modules/common/et-helpers.sh` (`hh` / `hhm`, ET and
+  mosh transports for remote herdr sessions, 252f54e on 2026-08-24) and the
+  `scripts/doctor.sh` ET check that came with it. Both are undocumented in the
+  wiki; the README covers them. Deferred to a compile scoped to that change.
+- Compiled inline rather than through parallel subagents; one affected page.
+
 ## 2026-08-20
 
 **Pages updated:** shell-runtime, installer, quality-gates, quickstart

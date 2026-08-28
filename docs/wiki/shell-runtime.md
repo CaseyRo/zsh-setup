@@ -1,6 +1,6 @@
 # Shell runtime
 
-## Purpose [coverage: high, 7 sources]
+## Purpose [coverage: high, 8 sources]
 
 Everything an interactive shell loads at startup: environment, aliases,
 functions, completions, and tool initialisation. `~/.zshrc` is a symlink into
@@ -39,7 +39,7 @@ filenames load-bearing.
 over bare `source` in modules so an absent optional file cannot break shell
 startup.
 
-## Key Decisions [coverage: high, 6 sources]
+## Key Decisions [coverage: high, 7 sources]
 
 **The `zz_` prefix is a tail-init contract.** Four modules must load after
 everything else, each for a concrete reason:
@@ -93,6 +93,26 @@ does. Backgrounding is the point: the work is slow and network-bound, and no
 prompt should wait on it. A lock file serialises the check across tabs opening
 at once, and a failed fetch shortens the retry to an hour rather than burning
 the whole day. `ZSH_SETUP_DISABLE_AUTOUPDATE=1` opts out.
+
+**Companion entrypoints are plain functions that open a session with a
+deterministic name.** `modules/common/companions.sh` defines `ccc`, `ccy`,
+`ccsk`, and `ccben`, one per companion in `~/dev/companion`. Each opens a
+Claude Code Remote Control session named `<companion>-<host>`, with the host
+label taken from `LocalHostName` on macOS and `hostname -s` elsewhere, so a
+session on another machine can find this one by name through `ListAgents` and
+`SendMessage` instead of a hand-shared link. The contract is declared in the
+companion repo under each `companions/<slug>/config.md` Hosts section; this
+module only implements it, and nothing here starts a companion on its own.
+They are functions rather than zsh-abbr abbreviations because functions need no
+ZLE and therefore work in Warp without a mirror entry in `warp.sh`. The session
+runs in a subshell that has changed into `~/dev`, where the companion skills
+resolve, without moving the caller's working directory.
+
+The separator is `-`, not `@`. The first version (2026-08-27) named sessions
+`<companion>@<host>`; `ListAgents` listed them fine, but `SendMessage` parses
+`@` as a teammate address and refused the name outright, so every companion
+session was visible and unaddressable at the same time. Renamed on 2026-08-28,
+with the same change made to the declared contract in the companion repo.
 
 **Terminal type is normalised at the top of the loader.** Ghostty advertises
 `TERM=xterm-ghostty`, which most remote hosts and multiplexers do not have a
@@ -150,6 +170,7 @@ cleanly.
 - [modules/common/zz_atuin.sh](../../modules/common/zz_atuin.sh)
 - [modules/common/zz_abbr.sh](../../modules/common/zz_abbr.sh)
 - [modules/common/auto-update.sh](../../modules/common/auto-update.sh)
+- [modules/common/companions.sh](../../modules/common/companions.sh)
 - [modules/common/aliases.sh](../../modules/common/aliases.sh)
 - [modules/common/starship.sh](../../modules/common/starship.sh)
 - [modules/common/mise.sh](../../modules/common/mise.sh)

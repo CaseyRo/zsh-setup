@@ -25,7 +25,7 @@ compiler's defaults where they conflict:
 |------|--------|---------|
 | `quickstart` | Entry point, shortest path to running, Map | index, readme, getting started |
 | `installer` | Provisioning: entry point and profiles, persisted state, platform detection, package lists, package-manager ladder, runtime versions, config seeding, failure isolation, unattended re-provisioning | install.sh, core.sh, packages, mise, profiles, light, dev, idempotence, seeding, symlink, helix, composer, tailscale, brew prefix, set -e |
-| `shell-runtime` | Loader order, per-operating-system scoping, `zz_` tail-init contract, `#` opt-out convention, startup cost, guarded environment defaults, daily self-update | .zshrc, modules, preload_configs, load order, zz_, compinit, completions, zoxide, EDITOR, env.sh, auto-update, zsh-update, SIGTTIN, update lock, aliases, eza |
+| `shell-runtime` | Loader order, per-operating-system scoping, `zz_` tail-init contract, `#` opt-out convention, startup cost, guarded environment defaults, daily self-update, companion entrypoints | .zshrc, modules, preload_configs, load order, zz_, compinit, completions, zoxide, EDITOR, env.sh, auto-update, zsh-update, SIGTTIN, update lock, aliases, eza, companions, ccc, ccy, ccsk, ccben, remote control, session name, SendMessage |
 | `quality-gates` | Two shellcheck scopes, pre-commit, versioning, continuous integration smoke test | shellcheck, pre-commit, markdownlint, VERSION, bump-version, docker, smoke test, version drift, hooks not installed |
 
 ## Concepts
@@ -73,3 +73,7 @@ Revisit if a fourth page lands and the pattern earns a home of its own.
   Decision for `install/pre-commit.sh` and the reasoning behind not using the
   apt package. `quality-gates` had its pre-commit gotcha corrected twice in one
   day, first to record the drift and then to record the fix.
+- 2026-08-28: No pages added or removed. `shell-runtime` gained a Key Decision
+  for `modules/common/companions.sh`, a module small enough that a page of its
+  own would be a stub (rule 3), and the 2026-08-28 separator change from `@` to
+  `-`. Aliases extended on `shell-runtime`.
