@@ -91,6 +91,15 @@ _Viewing & search_
   </tr>
 </table>
 
+_Editor_
+
+<table>
+  <tr>
+    <td align="center"><b>helix</b> — modal editor (hx)<br><img src="https://raw.githubusercontent.com/helix-editor/helix/master/screenshot.png" width="380"></td>
+    <td></td>
+  </tr>
+</table>
+
 _Git & dev_
 
 <table>
@@ -171,6 +180,12 @@ Want to dig into any of these? Each links to its source repo.
 | [jq](https://github.com/jqlang/jq) | Command-line JSON processor |
 | [yq](https://github.com/mikefarah/yq) | `jq` for YAML |
 | [jnv](https://github.com/ynqa/jnv) | Interactive JSON viewer/filter (live `jq`) |
+
+**Editor**
+
+| Tool | What it does |
+|------|--------------|
+| [helix](https://github.com/helix-editor/helix) | Post-modern modal editor (`hx`), built-in LSP + tree-sitter, no plugins needed |
 
 **Git & dev**
 
