@@ -18,13 +18,45 @@
 # too without a mirror list in warp.sh. Extra arguments are passed to claude
 # before the prompt, e.g. `ccc --effort max`.
 #
+# Model: pass `--model <name>` (or `-m`) to pick it up front, e.g.
+# `ccc --model opus`. Left out, the function asks, offering a per-companion
+# default matched to that companion's job:
+#
+#   casey      fable   cross-engagement judgment, prioritising, saying no
+#   yorizon    opus    PO work — OKRs, planning prose, stakeholder writing
+#   storykeep  sonnet  retrieval and continuity over Linear/SiYuan/mail
+#   fitness    haiku   short daily readiness call, log a session
+#
+# These are aliases, never pinned ids, so they keep resolving to the latest
+# model in each family — there is no `claude models` to poll for a live list.
+#
 # The host label mirrors /host-inventory: LocalHostName on macOS (cc1,
 # caseys-air, NB-Romkes-1-A), `hostname -s` elsewhere.
 
 _cc_companion() {
-    local slug="$1" host
+    local slug="$1" host choice default
     shift
     host=$(scutil --get LocalHostName 2>/dev/null || hostname -s)
+    case "$slug" in
+        casey)     default=fable ;;
+        storykeep) default=sonnet ;;
+        fitness)   default=haiku ;;
+        *)         default=opus ;;
+    esac
+    if [[ " $* " != *" --model "* && " $* " != *" -m "* ]]; then
+        printf 'Model for %s — [Enter] %s · [o]pus [s]onnet [h]aiku [f]able · [c]onfig default: ' \
+            "$slug" "$default"
+        read -r choice
+        case "$choice" in
+            '') set -- --model "$default" "$@" ;;
+            o|opus)   set -- --model opus "$@" ;;
+            s|sonnet) set -- --model sonnet "$@" ;;
+            h|haiku)  set -- --model haiku "$@" ;;
+            f|fable)  set -- --model fable "$@" ;;
+            c|config) ;;
+            *)        set -- --model "$choice" "$@" ;;
+        esac
+    fi
     # Subshell: the session runs in ~/dev (where the companion skills resolve
     # and `claude remote-control -c` reattaches) without moving the caller's cwd.
     (
