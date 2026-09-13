@@ -12,7 +12,7 @@
 #   ccc    companion-casey      casey-<host>
 #   ccy    companion-yorizon    yorizon-<host>
 #   ccsk   companion-storykeep  storykeep-<host>
-#   ccben  companion-fitness    fitness-<host>   (Ben)
+#   ccben  companion-ben        ben-<host>
 #
 # Functions, not zsh-abbr abbreviations: they need no ZLE, so they work in Warp
 # too without a mirror list in warp.sh. Extra arguments are passed to claude
@@ -25,7 +25,7 @@
 #   casey      fable   cross-engagement judgment, prioritising, saying no
 #   yorizon    opus    PO work — OKRs, planning prose, stakeholder writing
 #   storykeep  sonnet  retrieval and continuity over Linear/SiYuan/mail
-#   fitness    haiku   short daily readiness call, log a session
+#   ben        haiku   short daily readiness call, log a session
 #
 # These are aliases, never pinned ids, so they keep resolving to the latest
 # model in each family — there is no `claude models` to poll for a live list.
@@ -40,7 +40,7 @@ _cc_companion() {
     case "$slug" in
         casey)     default=fable ;;
         storykeep) default=sonnet ;;
-        fitness)   default=haiku ;;
+        ben)       default=haiku ;;
         *)         default=opus ;;
     esac
     if [[ " $* " != *" --model "* && " $* " != *" -m "* ]]; then
@@ -70,5 +70,5 @@ if command -v claude >/dev/null 2>&1; then
     ccc()   { _cc_companion casey "$@"; }
     ccy()   { _cc_companion yorizon "$@"; }
     ccsk()  { _cc_companion storykeep "$@"; }
-    ccben() { _cc_companion fitness "$@"; }
+    ccben() { _cc_companion ben "$@"; }
 fi
