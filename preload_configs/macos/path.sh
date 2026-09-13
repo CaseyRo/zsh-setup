@@ -4,7 +4,7 @@
 
 # Guarantee the current zsh's standard functions dir is on fpath.
 # `brew shellenv` (run in .zshenv) does `export FPATH`, so fpath leaks into
-# every child process — incl. the long-lived cmux server. zsh's compiled-in
+# every child process — incl. the long-lived herdr server. zsh's compiled-in
 # fpath holds a *version-specific* Cellar/zsh/<ver>/share/zsh/functions, so
 # when that server was started before a Homebrew zsh patch bump (e.g.
 # 5.9 -> 5.9.1) it froze the old path; after the bump that dir is gone and

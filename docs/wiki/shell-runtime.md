@@ -174,7 +174,6 @@ cleanly.
 - [modules/common/aliases.sh](../../modules/common/aliases.sh)
 - [modules/common/starship.sh](../../modules/common/starship.sh)
 - [modules/common/mise.sh](../../modules/common/mise.sh)
-- [modules/common/wsx.sh](../../modules/common/wsx.sh)
 - [preload_configs/common/path.sh](../../preload_configs/common/path.sh)
 - [preload_configs/common/env.sh](../../preload_configs/common/env.sh)
 - [CLAUDE.md](../../CLAUDE.md)
