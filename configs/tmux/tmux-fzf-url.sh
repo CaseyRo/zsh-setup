@@ -4,7 +4,7 @@
 # Bound to `prefix + u` in configs/tmux.conf; runs inside tmux `display-popup -E`.
 # Self-contained: needs only fzf + tmux (no plugin, no python). Copies via tmux's
 # OSC 52 bridge (`set-clipboard on`), so the URL lands on the Mac clipboard across
-# the ssh hop — works over cmux's ssh transport (mosh filters OSC 52).
+# the ssh hop — works over ssh and through herdr (mosh filters OSC 52).
 #
 # The fix: `capture-pane -J` rejoins tmux's display-wrapped lines first, so a URL
 # split across two rows is reconstructed whole before it's matched — exactly the

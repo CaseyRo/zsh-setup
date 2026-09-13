@@ -63,3 +63,7 @@ fi
 
 # YouTube downloader
 alias ytdlp="yt-dlp -f 'best[ext=mp4]' -o '%(title).100s.%(ext)s'"
+
+# tmux: attach to a named session, creating it if absent.
+# shellcheck disable=SC2139
+alias txa='tmux new-session -A -s'
