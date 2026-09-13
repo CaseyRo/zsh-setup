@@ -129,8 +129,10 @@ enabled = true
 # Warp offers to install a per-user remote server under the remote's $HOME
 # (no root). Requires the remote to have glibc >= 2.31 and a bash/zsh default
 # shell — set "never_install" per host via ssh_hosts_denylist if it misbehaves.
-# cc1 is denylisted: wsx drives durable tmux/mosh panes over ssh to cc1, and
-# Warpification is incompatible with tmux/RemoteCommand (the panes would hang).
+# cc1 is denylisted: it runs the herdr server, and Warpification is incompatible
+# with a full-screen TUI over RemoteCommand (the session would hang). Day-to-day
+# you reach cc1 as a herdr machine rather than over ssh, so this only covers a
+# manual `ssh cc1` — cheap to keep, and the hang it prevents is not.
 # Denylisting cc1 keeps it plain ssh there while every other host stays warpified.
 enable_ssh_warpification = true
 ssh_extension_install_mode = "always_ask"
