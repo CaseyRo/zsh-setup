@@ -6,6 +6,22 @@
 # Warp-shaped navigation: Cmd chords never reach a TUI (Warp consumes them and
 # has no send-keys action), so every Warp binding below is transposed to ctrl/alt.
 
+# Toasts default to "off", which silently makes `notification show` a no-op
+# (shown:false, reason:disabled) — a walk-away watcher then has nothing to land
+# in, and reports success. "herdr" renders in-app, which is the safe default on
+# any host: it follows the client you are actually looking at. Switch to
+# "terminal" to have the host terminal raise it outside the TUI, or "system" for
+# a desktop notification — with machine mode the client is local, so "system"
+# lands on the machine you are sitting at rather than the one running the server.
+[ui.toast]
+delivery = "herdr"
+
+[ui.toast.herdr]
+position = "bottom-right"
+
+[ui.sound]
+enabled = false
+
 [keys]
 # Warp Cmd+1..9 — jump straight to a tab. Replaces the default prefix+1..9.
 switch_tab = "ctrl+1..9"
