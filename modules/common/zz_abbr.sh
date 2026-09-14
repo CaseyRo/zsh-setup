@@ -22,7 +22,9 @@
 if (( ${+functions[abbr]} )); then
     # -S = session-scoped (defined per shell startup, no persistent file)
     # -q = quiet (don't warn on re-definition when the shell reloads)
-    abbr -S -q add cl="claude" >/dev/null
+    # cl names the session after the current folder. Single quotes keep
+    # ${PWD:t} unexpanded until the command runs, so it's the folder you're in.
+    abbr -S -q add cl='claude -n "${PWD:t}"' >/dev/null
     abbr -S -q add clc="claude -c" >/dev/null
     abbr -S -q add clr="claude --resume" >/dev/null
 

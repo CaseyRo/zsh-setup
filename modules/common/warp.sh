@@ -14,7 +14,7 @@
 # ============================================================================
 
 if [[ "$TERM_PROGRAM" == "WarpTerminal" ]] && command -v claude >/dev/null 2>&1; then
-    alias cl="claude"
+    alias cl='claude -n "${PWD:t}"'  # single quotes: expand at run time, not at shell startup
     alias clc="claude -c"
     alias clr="claude --resume"
 
