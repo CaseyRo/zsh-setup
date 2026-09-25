@@ -96,7 +96,7 @@ the whole day. `ZSH_SETUP_DISABLE_AUTOUPDATE=1` opts out.
 
 **Companion entrypoints are plain functions that open a session with a
 deterministic name.** `modules/common/companions.sh` defines `ccc`, `ccy`,
-`ccsk`, and `ccben`, one per companion in `~/dev/companion`. Each opens a
+`ccsk`, and `ccben`, one per companion in `~/dev/casey-claude-setup/companion`. Each opens a
 Claude Code Remote Control session named `<companion>-<host>`, with the host
 label taken from `LocalHostName` on macOS and `hostname -s` elsewhere, so a
 session on another machine can find this one by name through `ListAgents` and

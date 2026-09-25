@@ -1,12 +1,12 @@
 # ============================================================================
 # Companion entrypoints (Claude Code Remote Control sessions)
 # ============================================================================
-# One shell function per companion in ~/dev/companion. Each opens a Remote
+# One shell function per companion in ~/dev/casey-claude-setup/companion. Each opens a Remote
 # Control session with a deterministic name, <companion>-<host>, so a session
 # on another machine can find this one by name (ListAgents / SendMessage)
 # instead of by a hand-shared session link. Separator is "-", not "@":
 # SendMessage parses "@" as a teammate address and refuses the name. The contract is declared in
-# ~/dev/companion/companions/<slug>/config.md → Hosts; this file only implements
+# ~/dev/casey-claude-setup/companion/companions/<slug>/config.md → Hosts; this file only implements
 # it. Nothing here starts a companion on its own — no timer, watcher, or hook.
 #
 #   ccc    companion-casey      casey-<host>

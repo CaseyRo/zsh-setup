@@ -247,6 +247,10 @@ cd ~/.zsh-setup
 ./install.sh --no-mac-dev-machine  # Disable macOS dev machine profile
 ./install.sh --skip-mac-networked  # Skip macOS networked services
 ./install.sh --allow-low-battery   # Allow install below 25% battery
+./install.sh --dev                 # Shorthand for --mac-dev-machine
+./install.sh --light               # Server/VPS profile (aliases: --server, --vps; implies --skip-splash)
+./install.sh --skip-splash         # No splash screen
+./install.sh --fix-home-ownership  # Repair \$HOME ownership before installing
 ```
 
 ### Notes (macOS)
@@ -310,9 +314,9 @@ modules/
 │   ├── aliases.sh         # Shared aliases
 │   └── functions.sh       # Shared functions
 ├── linux/
-│   └── linux_aliases.sh
+│   └── <name>.sh
 └── macos/
-    └── macos_shortcuts.sh
+    └── <name>.sh
 ```
 
 Modules in each folder load in lexicographic order. The `zz_` prefix is **reserved** for tail-init modules that must run last — currently `zz_abbr.sh` (needs the zsh-abbr plugin), `zz_atuin.sh` (overrides fzf's Ctrl+R), `zz_completions.sh` (lets zsh-autocomplete own `compinit`), and `zz_zoxide.sh` (must be strictly last to override `cd`). Don't prefix your own modules with `zz_`.
