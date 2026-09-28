@@ -1,6 +1,6 @@
 {
   "_note": "Last-documented major versions for the zsh-setup toolkit. Written by the weekly docs-sync agent. Tool versions that could not be fetched (GitHub API rate-limited) are omitted — they will be populated on the next run.",
-  "_updated": "2026-09-07",
+  "_updated": "2026-09-28",
   "atuin": "18.21.0",
   "bandwhich": "0.23.1",
   "bat": "0.26.1",
@@ -31,7 +31,7 @@
   "sd": "1.1.0",
   "starship": "1.26.0",
   "tlrc": "1.13.1",
-  "tokei": "14.0.0",
+  "tokei": "15.0.0",
   "topgrade": "17.9.0",
   "xh": "0.26.2",
   "yazi": "26.5.6",
