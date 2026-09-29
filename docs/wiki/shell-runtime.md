@@ -94,6 +94,13 @@ prompt should wait on it. A lock file serialises the check across tabs opening
 at once, and a failed fetch shortens the retry to an hour rather than burning
 the whole day. `ZSH_SETUP_DISABLE_AUTOUPDATE=1` opts out.
 
+**The fleet's Claude Code config syncs the same way.** `modules/common/claude-setup-sync.sh` checks
+`~/dev/casey-claude-setup` once a day and, only when it is behind origin, runs its `setup.sh` in the
+background (skills, agents, retired-asset prunes). It never stashes local edits: `setup.sh`'s own
+fast-forward pull refuses over conflicting changes. A failed or degraded run prints one line on every
+new shell until a run succeeds, because a silent background failure would let a host drift unnoticed.
+Log: `~/.local/state/zsh-setup/claude-setup-sync.log`. `CLAUDE_SETUP_DISABLE_AUTOSYNC=1` opts out.
+
 **Companion entrypoints are plain functions that open a session with a
 deterministic name.** `modules/common/companions.sh` defines `ccc`, `ccy`,
 `ccsk`, and `ccben`, one per companion in `~/dev/casey-claude-setup/companion`. Each opens a
@@ -170,6 +177,7 @@ cleanly.
 - [modules/common/zz_atuin.sh](../../modules/common/zz_atuin.sh)
 - [modules/common/zz_abbr.sh](../../modules/common/zz_abbr.sh)
 - [modules/common/auto-update.sh](../../modules/common/auto-update.sh)
+- [modules/common/claude-setup-sync.sh](../../modules/common/claude-setup-sync.sh)
 - [modules/common/companions.sh](../../modules/common/companions.sh)
 - [modules/common/aliases.sh](../../modules/common/aliases.sh)
 - [modules/common/starship.sh](../../modules/common/starship.sh)
