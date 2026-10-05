@@ -35,6 +35,8 @@ display_time = true
 # Commands to run before upgrades
 [pre_commands]
 # "Backup configs" = "echo 'Starting upgrades...'"
+# Warn about casks whose .app was deleted outside brew (e.g. via Mole) — topgrade would reinstall them
+"Orphaned casks" = "for c in $(ls /opt/homebrew/Caskroom); do brew info --cask --json=v2 $c 2>/dev/null | jq -r '.casks[0].artifacts[].app[]? | strings' | while read a; do [ -e \"/Applications/$a\" ] || echo \"⚠ $c: $a missing — brew uninstall --cask --force $c\"; done; done; true"
 
 # Commands to run after upgrades
 [post_commands]
