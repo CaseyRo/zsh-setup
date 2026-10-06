@@ -117,7 +117,11 @@ done
 #   modules/common/zz_zoxide.sh     — zoxide (strictly last; overrides cd)
 
 # pnpm
-export PNPM_HOME="/Users/cornelis.romkes/Library/pnpm"
+if [[ "$OSTYPE" == darwin* ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+fi
 case ":$PATH:" in
   *":$PNPM_HOME/bin:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;

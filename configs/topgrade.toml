@@ -18,6 +18,9 @@ cleanup = true
 # Don't ask to retry failed steps
 no_retry = true
 
+# mas 7 needs sudo for `mas upgrade` and hangs on the password prompt; update App Store apps in the App Store
+disable = ["mas"]
+
 # Skip sending a notification when done (we're running this manually anyway)
 skip_notify = true
 
