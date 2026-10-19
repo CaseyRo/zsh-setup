@@ -82,9 +82,12 @@ install_hausputz() {
     elif command_exists op; then
         local tok
         if tok=$(op read "$HAUSPUTZ_OP_ITEM/$machine" 2>/dev/null) && [[ -n "$tok" ]]; then
-            security add-generic-password -U -s hausputz -a "$machine" -w "$tok" >/dev/null
+            if security add-generic-password -U -s hausputz -a "$machine" -w "$tok" >/dev/null 2>&1; then
+                print_success "machine token stored in Keychain"
+            else
+                print_info "Keychain not writable here (SSH session): the agent reads its token with op at run time"
+            fi
             unset tok
-            print_success "machine token stored in Keychain"
         else
             print_warning "no 1Password field '$machine' in item Hausputz: agent runs offline until it exists"
         fi
@@ -99,7 +102,7 @@ install_hausputz() {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>de.cdit.hausputz</string>
-  <key>ProgramArguments</key><array><string>$bin</string><string>run</string></array>
+  <key>ProgramArguments</key><array><string>/bin/zsh</string><string>-c</string><string>source ~/.env.sh 2&gt;/dev/null; PATH=/opt/homebrew/bin:\$PATH exec "$bin" run</string></array>
   <key>StartCalendarInterval</key><dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
   <key>StandardOutPath</key><string>$state/launchd.log</string>
   <key>StandardErrorPath</key><string>$state/launchd.log</string>
@@ -128,9 +131,12 @@ install_hausputz_server() {
     if ! security find-generic-password -s hausputz-jev >/dev/null 2>&1; then
         local key
         if key=$(op read "op://terminal access/hausputz jev api key/credential" 2>/dev/null) && [[ -n "$key" ]]; then
-            security add-generic-password -U -s hausputz-jev -a hausputz -w "$key" >/dev/null
+            if security add-generic-password -U -s hausputz-jev -a hausputz -w "$key" >/dev/null 2>&1; then
+                print_success "Jev key stored in Keychain"
+            else
+                print_info "Keychain not writable here (SSH session): the service reads the Jev key with op at run time"
+            fi
             unset key
-            print_success "Jev key stored in Keychain"
         else
             print_warning "Jev key not readable from 1Password: every item waits"
         fi
@@ -157,10 +163,8 @@ install_hausputz_server() {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>de.cdit.hausputz-server</string>
-  <key>ProgramArguments</key><array><string>$bin</string>
-    <string>-listen</string><string>127.0.0.1:8787</string>
-    <string>-rules</string><string>$HAUSPUTZ_REPO/rules/seed.json</string>
-    <string>-login</string><string>$HAUSPUTZ_UI_LOGIN</string></array>
+  <key>ProgramArguments</key><array><string>/bin/zsh</string><string>-c</string>
+    <string>source ~/.env.sh 2&gt;/dev/null; PATH=/opt/homebrew/bin:\$PATH exec "$bin" -listen 127.0.0.1:8787 -rules "$HAUSPUTZ_REPO/rules/seed.json" -login "$HAUSPUTZ_UI_LOGIN"</string></array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>StandardOutPath</key><string>$state/server.log</string>
