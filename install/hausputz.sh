@@ -62,7 +62,14 @@ install_hausputz() {
     plist="$HOME/Library/LaunchAgents/de.cdit.hausputz.plist"
 
     print_step "Installing hausputz agent ($machine)"
-    hausputz_go_install hausputz || { print_warning "hausputz build failed"; return 0; }
+    if ! hausputz_go_install hausputz; then
+        if [[ -x "$bin" ]]; then
+            print_info "build failed (no GitHub access here?): keeping the installed hausputz"
+        else
+            print_warning "hausputz build failed and no binary installed"
+            return 0
+        fi
+    fi
 
     mkdir -p "$cfg_dir" "$state"
     if [[ -f "$cfg" ]]; then
