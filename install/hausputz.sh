@@ -71,6 +71,11 @@ install_hausputz() {
         fi
     fi
 
+    # Clickable notifications (an AppleScript one would open Script Editor).
+    if ! command_exists terminal-notifier && command_exists brew; then
+        run_cmd brew install terminal-notifier && print_success "terminal-notifier installed"
+    fi
+
     mkdir -p "$cfg_dir" "$state"
     if [[ -f "$cfg" ]]; then
         print_skip "config (kept, mode unchanged)"
