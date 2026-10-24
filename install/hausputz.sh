@@ -7,7 +7,8 @@
 # the login Keychain (from 1Password, never a file), and loads a launchd user
 # agent that runs every Friday 09:00. A newly enrolled Mac starts in dry-run;
 # re-running never changes the mode. On cc1 it also installs the service.
-# Spec: ~/dev/hausputz/openspec/changes/hausputz-v0-1-desktop-downloads
+# The agent is signed with one shared identity (1Password), so macOS folder
+# grants survive rebuilds on every Mac. Spec: ~/dev/hausputz/openspec/specs
 # Opt out: ZSH_SETUP_SKIP_HAUSPUTZ=1
 # ============================================================================
 
@@ -16,6 +17,8 @@ HAUSPUTZ_MODULE="github.com/CaseyRo/hausputz"
 HAUSPUTZ_SERVER_URL="${HAUSPUTZ_SERVER_URL:-https://cc1.onca-blenny.ts.net}"
 HAUSPUTZ_UI_LOGIN="${HAUSPUTZ_UI_LOGIN:-hw4vzdv7gm@privaterelay.appleid.com}"
 HAUSPUTZ_OP_ITEM="op://terminal access/Hausputz"
+HAUSPUTZ_SIGN_ID="Hausputz Local Signing"
+HAUSPUTZ_SIGN_DOC="Hausputz signing identity"  # p12 in vault "terminal access"
 
 # Machine id: cc1 and caseys-air by name, otherwise the short host name.
 hausputz_machine_id() {
@@ -29,6 +32,7 @@ hausputz_machine_id() {
 }
 
 # Build from the local checkout when there is one, else from GitHub.
+# GOBIN lets the agent build land in a temp dir to be signed first.
 hausputz_go_install() {
     local cmd="$1"
     if [[ -f "$HAUSPUTZ_REPO/go.mod" ]]; then
@@ -36,6 +40,29 @@ hausputz_go_install() {
     else
         GOPRIVATE="github.com/CaseyRo" run_cmd go install "$HAUSPUTZ_MODULE/cmd/$cmd@latest"
     fi
+}
+
+# Import the shared identity once (needs the GUI session: an SSH Keychain is
+# read-only), then sign. The p12 passphrase is not a secret: 1Password guards it.
+hausputz_sign() {
+    local bin="$1" d
+    if ! security find-certificate -c "$HAUSPUTZ_SIGN_ID" >/dev/null 2>&1 && command_exists op; then
+        d=$(mktemp -d)
+        # A locked Keychain refuses the import ("User interaction is not allowed").
+        print_info "Keychain: your login password unlocks it for the Hausputz key"
+        if op document get "$HAUSPUTZ_SIGN_DOC" --vault "terminal access" --out-file "$d/id.p12" >/dev/null 2>&1 &&
+            security unlock-keychain "$HOME/Library/Keychains/login.keychain-db" &&
+            security import "$d/id.p12" -k "$HOME/Library/Keychains/login.keychain-db" -P hausputz -T /usr/bin/codesign >/dev/null 2>&1; then
+            # Let codesign use the key without a Keychain dialog (which can open
+            # off-screen and block).
+            print_info "Keychain: your login password again, so codesign can use the key"
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -l "$HAUSPUTZ_SIGN_ID" \
+                "$HOME/Library/Keychains/login.keychain-db" >/dev/null
+            print_success "signing identity imported"
+        fi
+        rm -rf "$d"
+    fi
+    codesign -f -s "$HAUSPUTZ_SIGN_ID" -i de.cdit.hausputz "$bin" 2>/dev/null
 }
 
 hausputz_load_agent() {
@@ -62,19 +89,27 @@ install_hausputz() {
     plist="$HOME/Library/LaunchAgents/de.cdit.hausputz.plist"
 
     print_step "Installing hausputz agent ($machine)"
-    if ! hausputz_go_install hausputz; then
+    # An unsigned build is a new app to macOS: it would ask for folder access
+    # again. So a build only replaces an installed binary once it is signed.
+    local build
+    build=$(mktemp -d)
+    if ! GOBIN="$build" hausputz_go_install hausputz; then
         if [[ -x "$bin" ]]; then
             print_info "build failed (no GitHub access here?): keeping the installed hausputz"
         else
             print_warning "hausputz build failed and no binary installed"
+            rm -rf "$build"
             return 0
         fi
+    elif hausputz_sign "$build/hausputz"; then
+        mv "$build/hausputz" "$bin" && print_success "hausputz signed and installed"
+    elif [[ -x "$bin" ]]; then
+        print_info "could not sign here (SSH session?): keeping the installed hausputz"
+    else
+        mv "$build/hausputz" "$bin"
+        print_warning "hausputz installed unsigned: macOS asks for folder access after every rebuild"
     fi
-
-    # Clickable notifications (an AppleScript one would open Script Editor).
-    if ! command_exists terminal-notifier && command_exists brew; then
-        run_cmd brew install terminal-notifier && print_success "terminal-notifier installed"
-    fi
+    rm -rf "$build"
 
     mkdir -p "$cfg_dir" "$state"
     if [[ -f "$cfg" ]]; then
@@ -83,8 +118,8 @@ install_hausputz() {
         # The iCloud Desktop is shared: only cc1 owns it.
         local owned='"downloads":"~/Downloads"'
         [[ "$machine" == "cc1" ]] && owned='"desktop":"~/Desktop","downloads":"~/Downloads"'
-        printf '{\n  "machine_id": "%s",\n  "server": "%s",\n  "owned": {%s},\n  "mode": "dry-run",\n  "trial": true,\n  "queue_url": "%s/"\n}\n' \
-            "$machine" "$HAUSPUTZ_SERVER_URL" "$owned" "$HAUSPUTZ_SERVER_URL" > "$cfg"
+        printf '{\n  "machine_id": "%s",\n  "server": "%s",\n  "owned": {%s},\n  "mode": "dry-run",\n  "trial": true\n}\n' \
+            "$machine" "$HAUSPUTZ_SERVER_URL" "$owned" > "$cfg"
         chmod 600 "$cfg"
         print_success "config written (dry-run)"
     fi
