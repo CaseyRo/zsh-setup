@@ -74,15 +74,8 @@ run), `glow` (1), `rg` (53 by Claude, 0 typed).
 | hyperfine, tokei, fastfetch, tldr | drop candidate | never run |
 | parsync | drop candidate | never run |
 
-## Open questions for Casey
+## Outcome (2026-11-03)
 
-Interactive Q&A, because the history cannot answer these:
-
-1. **lazygit / jj / yazi:** is there a workflow you want that you have not started, or
-   do we drop all three?
-2. **fastfetch:** wanted for the login splash, or just a default?
-3. **parsync:** was there a specific big-transfer job in mind?
-4. **yq, xh, ouch:** do any of these replace something you still do by hand?
-
-Nothing was removed from `install/packages.sh`. Answer the questions and the drop
-candidates become one small PR.
+Casey answered the triage page. Dropped: tlrc, zellij, glow, lazygit, jj, yazi, xh, ouch,
+jnv, yq, sd, dust, duf, dysk, procs, bandwhich, tokei, llmfit, parsync. Kept: fastfetch.
+Undecided: hyperfine (kept for now). Everything not on the page stays.

@@ -103,54 +103,6 @@ install_eza_prebuilt() {
     rm -rf "$tmp_dir"
 }
 
-install_glow_prebuilt() {
-    print_section "Glow (prebuilt)"
-
-    if command_exists glow; then
-        print_skip "glow"
-        track_skipped "glow"
-        return 0
-    fi
-
-    print_package "glow"
-
-    local arch
-    case "$(uname -m)" in
-        x86_64)        arch="x86_64" ;;
-        aarch64)       arch="arm64" ;;
-        armv7l|armv6l) arch="arm" ;;
-        *)
-            print_warning "No prebuilt glow binary for $(uname -m), skipping"
-            track_skipped "glow (no prebuilt for $(uname -m))"
-            return 0
-            ;;
-    esac
-
-    local version
-    version=$(github_latest_version "charmbracelet/glow")
-    if [[ -z "$version" ]]; then
-        print_error "Failed to fetch latest glow version"
-        track_failed "glow"
-        return 0
-    fi
-
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-    local url="https://github.com/charmbracelet/glow/releases/download/v${version}/glow_${version}_Linux_${arch}.tar.gz"
-
-    if run_with_spinner "Downloading glow v${version}" curl -fsSL "$url" -o "${tmp_dir}/glow.tar.gz" && \
-       tar xzf "${tmp_dir}/glow.tar.gz" -C "$tmp_dir" && \
-       sudo install "$(find "$tmp_dir" -type f -name glow | head -n1)" /usr/local/bin/glow; then
-        print_success "glow v${version} installed"
-        track_installed "glow"
-    else
-        print_error "Failed to install glow"
-        track_failed "glow"
-    fi
-
-    rm -rf "$tmp_dir"
-}
-
 install_carapace_prebuilt() {
     print_section "Carapace (prebuilt)"
 
@@ -199,10 +151,9 @@ install_carapace_prebuilt() {
     rm -rf "$tmp_dir"
 }
 
-# glow + carapace are Go binaries with no apt/cargo package — fetch prebuilt
+# carapace is a Go binary with no apt/cargo package — fetch prebuilt
 # release binaries on apt systems (macOS gets them via Homebrew).
 install_charm_prebuilt_bins() {
-    install_glow_prebuilt
     install_carapace_prebuilt
 }
 

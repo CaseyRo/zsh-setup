@@ -32,23 +32,13 @@ BREW_PACKAGES=(
     "cmatrix"    # Matrix rain effect for splash screen
     "toilet"     # ASCII art text generator
     "jq"         # JSON processor
-    "yq"         # YAML processor (like jq for YAML)
     "wget"       # file downloader
     "tree"       # directory tree viewer
-    "tlrc"       # tldr pages client (Rust, fast)
     "yt-dlp"     # YouTube downloader
     "atuin"      # shell history sync & search
     "helix"      # modal editor (hx). Linux has no usable package — see
                  # install/helix.sh, which also repairs the runtime dir the
                  # bottle hardcodes to /opt/homebrew (wrong on a custom prefix)
-    # --- modern CLI additions (prebuilt via brew; fast install on macOS) ---
-    "yazi"       # blazing-fast terminal file manager (Rust)
-    "glow"       # render markdown in the terminal
-    "jj"         # Jujutsu: Git-compatible VCS
-    "xh"         # friendly, fast HTTP client (HTTPie in Rust)
-    "ouch"       # painless compress/decompress for any archive format
-    "jnv"        # interactive JSON viewer/filter (live jq)
-    "duf"        # friendly disk usage / df replacement
     "carapace"   # multi-shell completion engine
 )
 
@@ -63,7 +53,6 @@ BREW_PACKAGES_MAC_DEV=(
     "marcus/tap/sidecar"                 # TUI for git, AI agents, tasks, file browsing
     "mutagen-io/mutagen/mutagen"         # file sync for remote/container dev
     "mutagen-io/mutagen/mutagen-compose" # docker compose integration
-    "zellij"     # terminal multiplexer / workspace
     "moghtech/komodo/km"         # Komodo CLI for container/stack management
     "pre-commit" # runs this repo's own gates at commit time; install/pre-commit.sh
                  # installs the git hook, which is the part that actually gates
@@ -116,14 +105,7 @@ CARGO_PACKAGES=(
     "topgrade"   # system updater
     "cargo-cache" # manage cargo cache disk usage
     "git-delta"  # better git diffs (syntax highlighting, side-by-side)
-    "du-dust"    # better disk usage viewer (dust)
     "hyperfine"  # command benchmarking tool
-    "procs"      # modern ps replacement
-    "sd"         # intuitive sed alternative
-    "tokei"      # code line counter by language
-    "bandwhich"  # bandwidth usage by process
-    "llmfit"     # LLM toolkit CLI
-    "parsync"    # parallel rsync replacement (drop-in, faster)
 )
 
 # ============================================================================
@@ -155,7 +137,6 @@ APT_PACKAGES=(
     "jq"         # JSON processor
     "wget"       # file downloader
     "tree"       # directory tree viewer
-    "duf"        # friendly disk usage / df replacement
     "htop"       # interactive process viewer
     "procps"     # ps, top, etc. (missing in slim Docker images)
     "locales"    # locale generation (UTF-8 support in containers)
@@ -166,26 +147,14 @@ CARGO_PACKAGES_APT=(
     "zoxide"     # smarter cd (not in apt)
     "eza"        # modern ls (not in apt)
     "cargo-cache" # manage cargo cache disk usage (not in apt)
-    "parsync"    # parallel rsync replacement (drop-in, faster)
-    # --- modern CLI additions (lightweight Rust crates) ---
-    "xh"         # friendly, fast HTTP client (HTTPie in Rust)
-    "ouch"       # compress/decompress any archive format
-    "jnv"        # interactive JSON viewer/filter (live jq)
-    "dysk"       # fast filesystem usage table (Linux)
 )
 
 # Additional cargo packages for APT host machines (not Docker)
-# NOTE: glow + carapace are Go binaries (not on crates.io / apt). They install
+# NOTE: carapace is a Go binary (not on crates.io / apt). It installs
 # via Homebrew on macOS and as prebuilt GitHub-release binaries on apt systems
 # (install_charm_prebuilt_bins in install/prebuilt-bins.sh).
 CARGO_PACKAGES_APT_HOST=(
     "topgrade"   # system updater (not in apt)
-    "zellij"     # terminal multiplexer / workspace (not in apt)
-    "llmfit"     # LLM toolkit CLI
-    # --- modern CLI additions (heavier compiles; host machines only) ---
-    "yazi-fm"    # terminal file manager (Rust)
-    "yazi-cli"   # yazi companion CLI (provides `ya`)
-    "jj-cli"     # Jujutsu: Git-compatible VCS
 )
 
 # APT packages only for Ubuntu (not Raspberry Pi)
