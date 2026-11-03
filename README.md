@@ -211,7 +211,7 @@ cd ~/.zsh-setup
 
 - If sudo is unavailable, Homebrew installs to `~/homebrew` and the setup adds that path automatically.
 - macOS app installs (casks/MAS) and networked services are opt-in during install.
-- macOS dev profile installs: OrbStack, UTM, Cursor, PHP/Composer/WP-CLI, PHPCS+WPCS, and Cursor settings/extensions seeding.
+- macOS dev profile installs: OrbStack, UTM, PHP/Composer/WP-CLI, PHPCS+WPCS.
 
 ### Warp terminal (macOS, opt-in)
 

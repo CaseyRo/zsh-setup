@@ -12,7 +12,7 @@ CI (`.github/workflows/install-smoke.yml`) runs them on every push/PR.
 ## Not covered
 
 - **macOS** — needs a macOS runner; Homebrew path isn't exercised here.
-- **`--dev` profile** — pulls GUI apps (Cursor, OrbStack); not installable in Docker.
+- **`--dev` profile** — pulls GUI apps (OrbStack); not installable in Docker.
 - **Docker-in-Docker** — `install/apt.sh` already skips Docker repo setup when
   running inside a container, so no behavior to test.
 - **ARM / Raspberry Pi** — optional matrix leg via `platform: linux/arm64`; add

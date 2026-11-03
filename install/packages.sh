@@ -32,6 +32,7 @@ BREW_PACKAGES=(
     "cmatrix"    # Matrix rain effect for splash screen
     "toilet"     # ASCII art text generator
     "jq"         # JSON processor
+    "mole"       # Mac cleaner and app uninstaller (mo)
     "wget"       # file downloader
     "tree"       # directory tree viewer
     "yt-dlp"     # YouTube downloader
@@ -68,14 +69,12 @@ BREW_PACKAGES_MAC_DEV=(
 # Homebrew casks (macOS GUI apps, skipped on Linux)
 BREW_CASKS=(
     "raycast"    # spotlight replacement & productivity launcher
-    "setapp"     # app subscription service
 )
 
 # Homebrew casks for macOS dev machines only
 BREW_CASKS_MAC_DEV=(
     "orbstack"   # Docker replacement for macOS
     "utm"        # VM manager
-    "cursor"     # IDE
 )
 
 # Warp terminal — installed via a standalone opt-in (install/warp.sh), NOT the
@@ -249,9 +248,7 @@ NPM_GLOBAL_PACKAGES_DEV=(
 MAS_APPS=(
     "1569813296"  # 1Password for Safari
     "1160435653"  # AutoMounter
-    "1102004240"  # iHosts
     "904280696"   # Things
-    "1490879410"  # TrashMe 3
 )
 
 # ============================================================================
