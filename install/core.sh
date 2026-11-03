@@ -207,7 +207,6 @@ source "$INSTALL_DIR/mas.sh"
 source "$INSTALL_DIR/go.sh"
 source "$INSTALL_DIR/hausputz.sh"
 source "$INSTALL_DIR/php-dev.sh"
-source "$INSTALL_DIR/cursor.sh"
 source "$INSTALL_DIR/pre-commit.sh"
 source "$INSTALL_DIR/warp.sh"
 source "$INSTALL_DIR/dev-repos.sh"
@@ -659,8 +658,6 @@ main() {
 
         # Weekly Desktop/Downloads tidy-up (macOS; dry-run on first enrol).
         install_hausputz
-
-        install_cursor_profile
 
         # After brew/apt (binary on macOS) and after install_uv (binary
         # everywhere else). Self-gates on the dev profile.

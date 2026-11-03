@@ -44,7 +44,7 @@
 # than fewer. The taplo language server still runs, giving schema validation,
 # completion and hover.
 #
-# json has no formatter. prettier reindents configs/cursor/User/*.json from four
+# json has no formatter. prettier reindents four-space JSON configs from four
 # spaces to two and collapses the arrays in .wiki-compiler.json onto one line,
 # and no single prettier setting matches both the 2-space and 4-space json in
 # this repo.

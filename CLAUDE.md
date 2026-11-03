@@ -14,7 +14,7 @@ Cross-platform dotfiles and machine bootstrap for macOS, Ubuntu, and Raspberry P
 ./install.sh                 # Full install (idempotent; re-run is safe)
 ./install.sh -y              # Non-interactive (answer yes to all)
 ./install.sh --light         # Minimal server/VPS (no Rust, prefers prebuilt bins)
-./install.sh --dev           # macOS dev machine profile (OrbStack, Cursor, PHP/WP-CLI, etc.)
+./install.sh --dev           # macOS dev machine profile (OrbStack, PHP/WP-CLI, etc.)
 bash scripts/doctor.sh       # Health-check an existing install (alias: `zsh-doctor`)
 ./run-to-simlink.sh          # Just (re)create the ~/.zshrc symlink
 
