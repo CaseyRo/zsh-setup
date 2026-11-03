@@ -37,7 +37,6 @@ clbeta() { claude --betas "$@"; }
 
 alias top="btop"
 alias docker-compose="docker compose"
-alias lzg="lazygit"
 
 # moltbot/clawdbot aliases (future-proofed for rename)
 if command -v moltbot >/dev/null 2>&1; then

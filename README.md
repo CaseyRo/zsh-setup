@@ -15,13 +15,12 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | Category | Tools |
 |----------|-------|
 | Shell | ZSH, Starship prompt, carapace (completions), atuin (history) |
-| File & search | eza, bat, fd, ripgrep, fzf, zoxide, yazi (file manager) |
-| System | btop, fastfetch, duf / dysk (disk), procs, dust, bandwhich |
-| Data & net | jq, yq, jnv (interactive JSON), xh (HTTP), ouch (archives), parsync (parallel sync) |
-| Docs | glow (markdown), tlrc (tldr) |
+| File & search | eza, bat, fd, ripgrep, fzf, zoxide |
+| System | btop, fastfetch |
+| Data | jq |
 | Editor | helix (`hx`, modal editor + Cobalt2 theme; becomes `$EDITOR`) |
 | Editor tooling (`--dev`) | language servers for shell, TOML, YAML, JSON, Markdown, Python, TS/JS, Go, PHP, Docker; shellcheck runs inline while you type |
-| Dev tools | git, gh (GitHub CLI), lazygit, jj (Jujutsu VCS), git-delta, llmfit (LLM hardware checker), herdr (AI agent workspace) |
+| Dev tools | git, gh (GitHub CLI), git-delta, herdr (AI agent workspace), topgrade (updater) |
 | Languages | mise (Node.js + runtimes), Rust/Cargo, uv + Python |
 | Services | Docker, Tailscale, Copyparty |
 | Fonts | Nerd Fonts (FiraMono, JetBrainsMono, Meslo) - desktop only |
@@ -32,20 +31,6 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 |----------|----------------|-------|
 | macOS | Homebrew + Cargo | No Docker |
 | Raspberry Pi / ARM Linux | APT + Cargo | Docker via APT, pre-built packages where available |
-
-### Modern CLI tools & shortcuts
-
-Newer tools come with guarded aliases (defined in `modules/common/modern-cli.sh`; each only activates if the tool is installed):
-
-| Shortcut | Expands to | Tool |
-|----------|-----------|------|
-| `y` | open file manager, `cd` to where you quit | yazi |
-| `md <file>` / `readme` | render markdown in the terminal | glow |
-| `pack` / `unpack` | compress / extract any archive format | ouch |
-| `http` / `https` | HTTPie-style HTTP client | xh |
-| `jqi <file>` | interactive/live JSON filtering | jnv |
-| `df` | richer disk-usage table | dysk (Linux) / duf |
-| `jjs` / `jjl` / `jjd` | `jj status` / `log` / `diff` | jj (Jujutsu) |
 
 **Node & other runtimes** are managed by [mise](https://mise.jdx.dev) (replaces NVM): versions auto-switch per directory from `mise.toml` / `.tool-versions` / `.node-version`. **carapace** adds argument-aware completions for hundreds of CLIs.
 
@@ -73,7 +58,7 @@ _Files & navigation_
     <td align="center"><b>fzf</b> — fuzzy finder<br><img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-preview.png" width="380"></td>
   </tr>
   <tr>
-    <td align="center"><b>yazi</b> — file manager<br><br><a href="https://yazi-rs.github.io/">▶ live demo &amp; screenshots →</a></td>
+    <td align="center"><b>fd</b> — fast find<br><img src="docs/gifs/fd.gif" width="380"></td>
     <td></td>
   </tr>
 </table>
@@ -86,8 +71,8 @@ _Viewing & search_
     <td align="center"><b>ripgrep</b> — fast grep<br><img src="https://burntsushi.net/stuff/ripgrep1.png" width="380"></td>
   </tr>
   <tr>
-    <td align="center"><b>glow</b> — markdown reader<br><img src="https://raw.githubusercontent.com/charmbracelet/glow/master/example.png" width="380"></td>
-    <td align="center"><b>jnv</b> — interactive JSON<br><img src="https://raw.githubusercontent.com/ynqa/ynqa/master/demo/jnv.gif" width="380"></td>
+    <td align="center"><b>jq</b> — JSON processor<br><img src="docs/gifs/jq.gif" width="380"></td>
+    <td></td>
   </tr>
 </table>
 
@@ -104,8 +89,12 @@ _Git & dev_
 
 <table>
   <tr>
-    <td align="center"><b>lazygit</b> — Git TUI<br><img src="https://raw.githubusercontent.com/jesseduffield/lazygit/assets/viewing-commit-diffs.png" width="380"></td>
     <td align="center"><b>git-delta</b> — better diffs<br><img src="https://user-images.githubusercontent.com/52205/81058545-a5725f80-8e9c-11ea-912e-d21954586a44.png" width="380"></td>
+    <td align="center"><b>herdr</b> — agent workspace<br><img src="docs/gifs/herdr.gif" width="380"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>topgrade</b> — update everything<br><img src="docs/gifs/topgrade.gif" width="380"></td>
+    <td></td>
   </tr>
 </table>
 
@@ -116,36 +105,20 @@ _System & monitoring_
     <td align="center"><b>btop</b> — system monitor<br><img src="https://raw.githubusercontent.com/aristocratos/btop/main/Img/normal.png" width="380"></td>
     <td align="center"><b>fastfetch</b> — system info<br><img src="https://raw.githubusercontent.com/fastfetch-cli/fastfetch/dev/screenshots/example1.png" width="380"></td>
   </tr>
-  <tr>
-    <td align="center"><b>procs</b> — modern ps<br><img src="https://user-images.githubusercontent.com/4331004/55446625-5e5fce00-55fb-11e9-8914-69e8640d89d7.png" width="380"></td>
-    <td align="center"><b>bandwhich</b> — network usage<br><img src="https://raw.githubusercontent.com/imsnif/bandwhich/main/res/demo.gif" width="380"></td>
-  </tr>
-  <tr>
-    <td align="center"><b>dust</b> — disk usage tree<br><img src="https://raw.githubusercontent.com/bootandy/dust/master/media/snap.png" width="380"></td>
-    <td align="center"><b>duf</b> — disk usage / df<br><img src="https://raw.githubusercontent.com/muesli/duf/master/duf.png" width="380"></td>
-  </tr>
-  <tr>
-    <td align="center"><b>dysk</b> — filesystem table<br><img src="https://raw.githubusercontent.com/Canop/dysk/main/website/src/img/dysk.png" width="380"></td>
-    <td></td>
-  </tr>
 </table>
 
 _Multiplexer, runtimes & HTTP_
 
 <table>
   <tr>
-    <td align="center"><b>zellij</b> — terminal workspace<br><img src="https://raw.githubusercontent.com/zellij-org/zellij/main/assets/demo.gif" width="380"></td>
     <td align="center"><b>mise</b> — version manager<br><img src="https://raw.githubusercontent.com/jdx/mise/main/docs/tapes/demo.gif" width="380"></td>
-  </tr>
-  <tr>
-    <td align="center"><b>xh</b> — HTTP client<br><img src="https://raw.githubusercontent.com/ducaale/xh/master/assets/xh-demo.gif" width="380"></td>
     <td></td>
   </tr>
 </table>
 
 <!-- markdownlint-enable MD033 MD045 -->
 
-> Non-visual utilities (nothing meaningful to screenshot): `zoxide`, `jj`, `carapace`, `fd`, `jq`/`yq`, `ouch`, `tlrc`, `sd`, `tokei`, `hyperfine`. See the table below for what each does.
+> Non-visual utilities (nothing meaningful to screenshot): `zoxide`, `carapace`.
 
 ### Tool reference & links
 
@@ -165,7 +138,6 @@ Want to dig into any of these? Each links to its source repo.
 |------|--------------|
 | [eza](https://github.com/eza-community/eza) | Modern `ls` with icons & git status |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` that learns your habits |
-| [yazi](https://github.com/sxyazi/yazi) | Blazing-fast terminal file manager |
 | [fzf](https://github.com/junegunn/fzf) | General-purpose fuzzy finder |
 | [fd](https://github.com/sharkdp/fd) | Fast, friendly `find` |
 
@@ -175,11 +147,7 @@ Want to dig into any of these? Each links to its source repo.
 |------|--------------|
 | [bat](https://github.com/sharkdp/bat) | `cat` with syntax highlighting & git integration |
 | [ripgrep](https://github.com/BurntSushi/ripgrep) | Extremely fast recursive `grep` (`rg`) |
-| [glow](https://github.com/charmbracelet/glow) | Render markdown in the terminal |
-| [sd](https://github.com/chmln/sd) | Intuitive find-and-replace (`sed` alternative) |
 | [jq](https://github.com/jqlang/jq) | Command-line JSON processor |
-| [yq](https://github.com/mikefarah/yq) | `jq` for YAML |
-| [jnv](https://github.com/ynqa/jnv) | Interactive JSON viewer/filter (live `jq`) |
 
 **Editor**
 
@@ -191,14 +159,10 @@ Want to dig into any of these? Each links to its source repo.
 
 | Tool | What it does |
 |------|--------------|
-| [lazygit](https://github.com/jesseduffield/lazygit) | Full-featured Git TUI |
 | [git-delta](https://github.com/dandavison/delta) | Syntax-highlighted git diffs & pager |
-| [jj](https://github.com/jj-vcs/jj) | Jujutsu — Git-compatible next-gen VCS |
 | [mise](https://github.com/jdx/mise) | Runtime/version manager (Node, Python, …) |
 | [herdr](https://herdr.dev) | Terminal workspace manager for AI coding agents |
-| [tokei](https://github.com/XAMPPRocky/tokei) | Count lines of code by language |
 | [hyperfine](https://github.com/sharkdp/hyperfine) | Command-line benchmarking |
-| [llmfit](https://github.com/AlexsJones/llmfit) | Find which LLM models fit your hardware (RAM/CPU/GPU) |
 
 **System & monitoring**
 
@@ -206,23 +170,13 @@ Want to dig into any of these? Each links to its source repo.
 |------|--------------|
 | [btop](https://github.com/aristocratos/btop) | Resource monitor (CPU/mem/net/disk) |
 | [fastfetch](https://github.com/fastfetch-cli/fastfetch) | Fast system info (neofetch successor) |
-| [procs](https://github.com/dalance/procs) | Modern `ps` replacement |
-| [bandwhich](https://github.com/imsnif/bandwhich) | Per-process network usage |
-| [dust](https://github.com/bootandy/dust) | Intuitive `du` (disk usage tree) |
-| [duf](https://github.com/muesli/duf) | Friendly `df` (disk usage) |
-| [dysk](https://github.com/Canop/dysk) | Filesystem usage table (Linux) |
 
 **Multiplexer, HTTP & misc**
 
 | Tool | What it does |
 |------|--------------|
-| [zellij](https://github.com/zellij-org/zellij) | Terminal multiplexer / workspace |
-| [xh](https://github.com/ducaale/xh) | Fast HTTPie-style HTTP client |
-| [ouch](https://github.com/ouch-org/ouch) | Compress/decompress any archive format |
-| [tlrc](https://github.com/tldr-pages/tlrc) | `tldr` client — simplified, example-driven man pages |
 | [topgrade](https://github.com/topgrade-rs/topgrade) | One command to update everything |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | Media downloader |
-| [parsync](https://github.com/AlpinDale/parsync) | High-throughput parallel file sync over SSH (rsync alternative) |
 
 ## Manual Installation
 

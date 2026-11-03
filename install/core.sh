@@ -201,7 +201,6 @@ source "$INSTALL_DIR/oh-my-zsh.sh"
 source "$INSTALL_DIR/starship.sh"
 source "$INSTALL_DIR/tailscale.sh"
 source "$INSTALL_DIR/copyparty.sh"
-source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/mas.sh"
@@ -565,8 +564,6 @@ main() {
             track_skipped "Docker (container)"
         fi
 
-        install_lazygit
-
         if [[ "$IS_DOCKER" != true ]]; then
             install_lazydocker
         fi
@@ -585,8 +582,6 @@ main() {
 
         install_brew_packages
         install_brew_packages_mac_dev
-
-        install_lazygit
 
         install_lazydocker
 
@@ -624,7 +619,7 @@ main() {
             install_cargo_packages
         fi
 
-        # glow + carapace ship no apt/cargo package; grab prebuilt binaries on
+        # carapace ships no apt/cargo package; grab a prebuilt binary on
         # apt systems (light mode already does this via install_prebuilt_bins).
         if [[ "$USE_APT" == true ]]; then
             install_charm_prebuilt_bins

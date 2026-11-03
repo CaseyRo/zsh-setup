@@ -14,7 +14,6 @@ INSTALL_DIR="$SCRIPT_DIR"
 source "$INSTALL_DIR/utils.sh"
 source "$INSTALL_DIR/packages.sh"
 source "$INSTALL_DIR/nerd-fonts.sh"
-source "$INSTALL_DIR/lazygit.sh"
 source "$INSTALL_DIR/git-confirmer.sh"
 source "$INSTALL_DIR/prebuilt-bins.sh"
 
@@ -72,15 +71,6 @@ upgrade_brew_packages() {
             fi
         done
     fi
-}
-
-upgrade_lazygit() {
-    if command_exists lazygit; then
-        return 0
-    fi
-
-    INSTALLED_SOMETHING=true
-    install_lazygit
 }
 
 upgrade_apt_packages() {
@@ -174,16 +164,12 @@ upgrade_mise() {
     export PATH="$HOME/.local/share/mise/shims:$PATH"
 }
 
-# glow + carapace have no apt/cargo package — fetch prebuilt binaries on apt
+# carapace has no apt/cargo package — fetch prebuilt binaries on apt
 # systems. Needs sudo (installs to /usr/local/bin), so it runs in run_upgrade's
 # sudo branch. macOS gets these via Homebrew (upgrade_brew_packages).
 upgrade_charm_bins() {
     if ! should_use_apt; then
         return 0
-    fi
-    if ! command_exists glow; then
-        INSTALLED_SOMETHING=true
-        install_glow_prebuilt
     fi
     if ! command_exists carapace; then
         INSTALLED_SOMETHING=true
@@ -298,16 +284,14 @@ run_upgrade() {
     if should_use_apt; then
         if [[ "$can_sudo" == true ]]; then
             upgrade_apt_packages
-            upgrade_lazygit
             upgrade_tailscale
             upgrade_charm_bins
         else
-            echo -e "${SYMBOL_PACKAGE} Skipping apt/lazygit/tailscale/glow/carapace (no sudo); run ${BOLD}zsh-update${RESET} to install them."
+            echo -e "${SYMBOL_PACKAGE} Skipping apt/tailscale/carapace (no sudo); run ${BOLD}zsh-update${RESET} to install them."
         fi
     else
         upgrade_brew_taps
         upgrade_brew_packages
-        upgrade_lazygit
         upgrade_tailscale
     fi
 
