@@ -13,8 +13,10 @@ command_timeout = 1000
 # Newline between prompts
 add_newline = true
 
-# Use the tokyo_night palette
-palette = 'tokyo_night'
+# The terminal palette names ANSI colours, so the prompt follows whatever
+# theme the terminal runs (Warp's Cobalt2, Herdr's day/dusk/night) and stays
+# readable on light backgrounds. 'tokyo_night' below is the old fixed-hex look.
+palette = 'terminal'
 
 # --- Left Prompt ---
 format = """
@@ -163,7 +165,7 @@ discharging_symbol = " "
 [localip]
 disabled = false
 ssh_only = false
-style = "dimmed fg:overlay1"
+style = "fg:overlay1"
 format = "[󰩟 $localipv4]($style) "
 
 [memory_usage]
@@ -176,7 +178,7 @@ format = "$symbol[${ram}]($style) "
 [time]
 disabled = false
 time_format = "%R"
-style = "dimmed fg:overlay1"
+style = "fg:overlay1"
 format = "[ $time]($style)"
 
 [cmd_duration]
@@ -191,6 +193,24 @@ style = "bold blue"
 # ==========================================================================
 # Tokyo Night Palette
 # ==========================================================================
+
+[palettes.terminal]
+red = "red"
+orange = "bright-red"
+yellow = "yellow"
+green = "green"
+cyan = "cyan"
+blue = "blue"
+purple = "purple"
+magenta = "purple"
+peach = "bright-red"
+lavender = "bright-blue"
+text = "white"
+overlay1 = "white"  # IP, clock: muted but 4.5:1 text
+overlay0 = "bright-black"
+surface1 = "black"
+surface0 = "black"
+base = "black"
 
 [palettes.tokyo_night]
 # Base colors
