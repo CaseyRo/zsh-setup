@@ -28,29 +28,38 @@ export default class Tabs extends View {
       : 10;
     const stop = (_e, cx) => cx.stop_propagation();
     const points = agents().filter(a => a.status === "blocked").map((a, k) =>
-      div().id(`horizon-${a.address}`).absolute().top(5).left(left + k * 16)
+      div().id(`horizon-${a.address}`).absolute().top(9).left(left + k * 16)
         .size(9).rounded(5).bg(t.blocked).border(1).border_color(PINE).cursor_pointer()
         .tooltip(`${a.space_name}: needs you`)
         .on_mouse_down("left", stop).on_click(() => run("agent.focus", { terminal: a.address })));
     return div().relative().size_full().bg(t.canvas)
-      .child(div().absolute().left(0).right(0).top(9).h(1).bg(t.accent))
+      .child(div().absolute().left(0).right(0).top(13).h(1).bg(t.accent))
       .children(points)
       .when(Boolean(shared("claude.status")?.week), el => el.child(this.week(shared("claude.status").week, t)));
   }
 
+  // The week as an instrument on the horizon: the bar rides the line, a tick
+  // crosses it where an even split of the week would be now, and the figure
+  // and reset day sit after it. Red only when more than 15 points ahead.
   week(w, t) {
     const used = Math.min(100, Math.max(0, w.used_percentage));
-    const elapsed = Math.min(1, Math.max(0, 1 - (w.resets_at - Date.now() / 1000) / 604800));
-    const ahead = used - elapsed * 100 > 15;
-    const tone = ahead ? t.ansi1 : t.muted;
-    const W = 80;
-    // Sits on the horizon in the canvas colour, so the line breaks around it.
-    return h_flex().absolute().right(12).top(0).h(19).px(8).gap(7).items_center().bg(t.canvas)
-      .text_size(11.5).text_color(tone)
-      .child("7d")
-      .child(div().relative().w(W).h(5).rounded(3).bg(t.border)
-        .child(div().absolute().left(0).top(0).h(5).rounded(3).w(Math.round(W * used / 100)).bg(tone))
-        .child(div().absolute().top(-2).h(9).w(1).left(Math.round(W * elapsed)).bg(t.foreground)))
-      .child(`${Math.round(used)}%`);
+    const left = w.resets_at - Date.now() / 1000;
+    const elapsed = Math.min(1, Math.max(0, 1 - left / 604800));
+    const pace = Math.round(elapsed * 100);
+    const ahead = used - pace > 15;
+    const fill = ahead ? t.ansi1 : t.accent;
+    const W = 140;
+    const resets = new Date(w.resets_at * 1000);
+    // Herdr's JS ignores Intl weekday options, so name the day by hand.
+    const hhmm = resets.toTimeString().slice(0, 5);
+    const name = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][resets.getDay()];
+    const day = left < 86400 ? hhmm : name;
+    return h_flex().id("week").absolute().right(14).top(4).h(19).px(10).gap(9).items_center().bg(t.canvas)
+      .tooltip(`${Math.round(used)}% of the 7-day limit used; an even pace would be ${pace}% by now. Resets ${name} ${hhmm}.`)
+      .child(div().relative().w(W).h(6).rounded(3).bg(t.border)
+        .child(div().absolute().left(0).top(0).h(6).rounded(3).w(Math.max(6, Math.round(W * used / 100))).bg(fill))
+        .child(div().absolute().top(-4).h(14).w(2).rounded(1).left(Math.round(W * elapsed) - 1).bg(t.foreground)))
+      .child(div().text_size(13).font_semibold().text_color(ahead ? t.ansi1 : t.foreground).child(`${Math.round(used)}%`))
+      .child(div().text_size(11.5).text_color(t.muted).child(`resets ${day}`));
   }
 }
