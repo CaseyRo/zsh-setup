@@ -33,3 +33,41 @@ deploy_herdr_config() {
     print_success "herdr config deployed to $config_file"
     track_installed "herdr config"
 }
+
+# ============================================================================
+# Herdr desktop (herdr-app) cockpit
+# ============================================================================
+# The cockpit layout, its two mods, the moss day / Cobalt evening themes and
+# keys.json, copied into ~/.config/herdr-app when missing or changed: the repo
+# is the source of truth, as for the Warp themes. Copied, not symlinked, for
+# the same write-then-rename reason as above. Herdr writes the rest of that
+# folder itself. keychron-q11's bin/herdr-daylight switches the two themes.
+# PRODUCT.md is the brief behind it and stays in the repo.
+# ============================================================================
+
+deploy_herdr_app_config() {
+    local app_dir="$HOME/.config/herdr-app"
+    local source_dir="$SCRIPT_DIR/configs/herdr-app"
+    [[ -d "$source_dir" ]] || return 0
+
+    # Herdr makes the folder on its first start; before that there is nothing to theme.
+    if [[ ! -d "$app_dir" ]]; then
+        print_skip "Herdr desktop config (open Herdr once, then re-run)"
+        track_skipped "Herdr desktop config"
+        return 0
+    fi
+
+    local src rel target
+    while IFS= read -r -d '' src; do
+        rel="${src#"$source_dir"/}"
+        [[ "$rel" == PRODUCT.md ]] && continue
+        target="$app_dir/$rel"
+        if [[ -f "$target" ]] && cmp -s "$src" "$target"; then
+            continue
+        fi
+        mkdir -p "$(dirname "$target")"
+        cp "$src" "$target"
+        print_success "Herdr desktop: $rel"
+        track_installed "Herdr desktop $rel"
+    done < <(find "$source_dir" -type f -print0)
+}

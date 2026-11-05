@@ -643,6 +643,7 @@ main() {
         mise_install_tools
 
         deploy_herdr_config
+        deploy_herdr_app_config
     fi
 
     install_npm_global_packages
