@@ -39,8 +39,9 @@ export default class Tabs extends View {
   }
 
   // The week as an instrument on the horizon: the bar rides the line, a tick
-  // crosses it where an even split of the week would be now, and the figure
-  // and reset day sit after it. Red only when more than 15 points ahead.
+  // crosses it where an even split of the week would be now (so the rest of the
+  // bar is the week left), and the figure follows. Red only when more than 15
+  // points ahead. The exact reset time is in the tooltip.
   week(w, t) {
     const used = Math.min(100, Math.max(0, w.used_percentage));
     const left = w.resets_at - Date.now() / 1000;
@@ -53,13 +54,11 @@ export default class Tabs extends View {
     // Herdr's JS ignores Intl weekday options, so name the day by hand.
     const hhmm = resets.toTimeString().slice(0, 5);
     const name = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][resets.getDay()];
-    const day = left < 86400 ? hhmm : name;
     return h_flex().id("week").absolute().right(14).top(4).h(19).px(10).gap(9).items_center().bg(t.canvas)
       .tooltip(`${Math.round(used)}% of the 7-day limit used; an even pace would be ${pace}% by now. Resets ${name} ${hhmm}.`)
       .child(div().relative().w(W).h(6).rounded(3).bg(t.border)
         .child(div().absolute().left(0).top(0).h(6).rounded(3).w(Math.max(6, Math.round(W * used / 100))).bg(fill))
         .child(div().absolute().top(-4).h(14).w(2).rounded(1).left(Math.round(W * elapsed) - 1).bg(t.foreground)))
-      .child(div().text_size(13).font_semibold().text_color(ahead ? t.ansi1 : t.foreground).child(`${Math.round(used)}%`))
-      .child(div().text_size(11.5).text_color(t.muted).child(`resets ${day}`));
+      .child(div().text_size(13).font_semibold().text_color(ahead ? t.ansi1 : t.foreground).child(`${Math.round(used)}%`));
   }
 }
