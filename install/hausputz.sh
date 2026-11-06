@@ -1,7 +1,7 @@
 #!/bin/bash
 # shellcheck shell=bash
 # ============================================================================
-# Hausputz — weekly Desktop/Downloads tidy-up (macOS only)
+# Hausputz — weekly Desktop/Downloads tidy-up (macOS only), on any number of Macs
 # ============================================================================
 # Installs the `hausputz` agent, writes its config, puts the machine token in
 # the login Keychain (from 1Password, never a file), and loads a launchd user
@@ -128,6 +128,17 @@ install_hausputz() {
         print_skip "machine token (in Keychain)"
     elif command_exists op; then
         local tok
+        # A new Mac makes its own token: one field named after it in the item
+        # Hausputz. The service picks it up on the Mac's first request.
+        if ! op read "$HAUSPUTZ_OP_ITEM/$machine" >/dev/null 2>&1; then
+            tok=$(openssl rand -hex 32)
+            if op item edit Hausputz --vault "terminal access" "${machine}[password]=$tok" >/dev/null 2>&1; then
+                print_success "machine token for $machine created in 1Password"
+            else
+                print_warning "could not add field '$machine' to 1Password item Hausputz"
+            fi
+            unset tok
+        fi
         if tok=$(op read "$HAUSPUTZ_OP_ITEM/$machine" 2>/dev/null) && [[ -n "$tok" ]]; then
             if security add-generic-password -U -s hausputz -a "$machine" -w "$tok" >/dev/null 2>&1; then
                 print_success "machine token stored in Keychain"
@@ -157,6 +168,22 @@ install_hausputz() {
 </dict></plist>
 PLIST
     hausputz_load_agent de.cdit.hausputz "$plist" && print_success "launchd agent loaded (Fridays 09:00)"
+
+    # Decisions made in the queue are carried out within 10 minutes.
+    local apply_plist="$HOME/Library/LaunchAgents/de.cdit.hausputz-apply.plist"
+    cat > "$apply_plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>de.cdit.hausputz-apply</string>
+  <key>ProgramArguments</key><array><string>/bin/zsh</string><string>-c</string><string>source ~/.env.sh 2&gt;/dev/null; PATH=/opt/homebrew/bin:\$PATH exec "$bin" apply</string></array>
+  <key>StartInterval</key><integer>600</integer>
+  <key>StandardOutPath</key><string>$state/launchd.log</string>
+  <key>StandardErrorPath</key><string>$state/launchd.log</string>
+  <key>ProcessType</key><string>Background</string>
+</dict></plist>
+PLIST
+    hausputz_load_agent de.cdit.hausputz-apply "$apply_plist" && print_success "decision pass loaded (every 10 minutes)"
 
     [[ "$machine" == "cc1" ]] && install_hausputz_server
     "$bin" status 2>/dev/null || true
@@ -190,10 +217,14 @@ install_hausputz_server() {
     fi
 
     # Token hashes only; the tokens themselves stay in 1Password and Keychains.
-    local m t first=1
+    # Every machine field in the item counts; the service also reloads them
+    # itself when a newly enrolled Mac calls in.
+    local m t first=1 machines
+    machines=$(op item get Hausputz --vault "terminal access" --format json 2>/dev/null |
+        jq -r '.fields[] | select(.type == "CONCEALED" and .purpose == null) | .label')
     {
         printf '{'
-        for m in cc1 caseys-air; do
+        for m in $machines; do
             if t=$(op read "$HAUSPUTZ_OP_ITEM/$m" 2>/dev/null) && [[ -n "$t" ]]; then
                 [[ $first == 1 ]] || printf ','
                 printf '"%s":"%s"' "$m" "$(printf %s "$t" | shasum -a 256 | cut -d' ' -f1)"
