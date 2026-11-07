@@ -28,7 +28,12 @@ function place(s, ps) {
   const tabs = new Set((s.tabs ?? []).map((c) => c.id));
   return ps.find((p) => tabs.has(p.tab) && p.cwd)?.cwd || s.folder;
 }
-const rowHeight = ({ tree }) => (tree ? 28 : 30);
+// The list is three fixed columns, so every line starts on the same x and the
+// eye runs straight down: the key that jumps here, a 12px mark, then the words.
+const PAD = 14;   // a band's left inset; bands run edge to edge, so rows pad themselves
+const KEY = 22;   // the M-key column
+const NEST = 10;  // how far an agent sits inside its space
+const ROW = 26;
 const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
 const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 // Changes made outside Herdr (an editor's save, a commit in another app): looked
@@ -39,16 +44,25 @@ const FALLBACK = 60000;
 // that draws space avatars): one strong color per hue, light and dark alike.
 const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
 
-// A space speaks up only when something in it needs you.
-export function glyph(status) {
-  return status === "blocked" || status === "done" ? "●" : "·";
+// Which key jumps here. The Q11's M1-M5 send `space.select --index 1-5`
+// (~/dev/keychron-q11), and `i` is that index, so only the first five spaces
+// have a key to name — the sixth gets no label rather than a wrong one.
+const mKey = (i) => (i < 5 ? `M${i + 1}` : null);
+
+const slot = (child) => h_flex().w(12).flex_none().items_center().justify_center().child(child);
+
+// One status mark, drawn rather than typed, in that fixed column. Colour lives
+// here and nowhere else in a row, so the words stay in the readable tones on
+// every background: a spinner while it works, a check when it finished, a
+// quiet dot when it has nothing to say. Blocked rows are ochre all over.
+function marker(status, t, ink) {
+  if (status === "blocked") return slot(div().size(7).rounded(4).bg(ink));
+  if (status === "working") return slot(svg("mods/workspace-chrome/spinner.svg").size(11).text_color(t.working).spin(900));
+  if (status === "done") return slot(svg("mods/workspace-chrome/check.svg").size(11).text_color(t.done));
+  return slot(div().size(4).rounded(2).bg(t.idle));
 }
 
-export function tone(t, status) {
-  return t[status] ?? t.unknown;
-}
-
-const PINE = "#283128"; // brand ink: text on the ochre fill, edge on ochre dots
+const PINE = "#283128"; // brand ink: text and marks on the ochre fill
 const clean = (s) => (s ?? "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
 const WORD = { blocked: "needs you", working: "working", done: "done", idle: "idle" };
 
@@ -75,14 +89,16 @@ function agentName(a, tab, ps) {
   return cwd.replace(/\/+$/, "") === home().replace(/\/+$/, "") ? "~" : base(cwd);
 }
 
-// The line under the name: what it is doing, from the title the agent sets.
-function agentLine(a, name, cwd) {
+// The session's own name. `claude -n <name>` reaches Herdr as the terminal
+// title, so this is the name Casey gave the work. Only a title that cannot be
+// a name is dropped - a path, an address, or the program announcing itself -
+// because the row's job is to say which session this is; the mark beside it
+// already says how it is doing. A title that repeats its folder is kept: that
+// is a session named after where it works, not a title saying nothing.
+function sessionName(a) {
   const live = clean(a.title);
-  // A title that only repeats the folder or the program says nothing new.
-  const folder = cwd ? base(cwd) : null;
-  const telling = live && live !== a.program?.name && live !== name && live !== folder
-    && !/^[~/]/.test(live) && !live.includes("@");
-  return telling ? live : null;
+  const useless = !live || live === a.program?.name || /^[~/]/.test(live) || live.includes("@");
+  return useless ? null : live;
 }
 
 export default class Spaces extends View {
@@ -101,6 +117,7 @@ export default class Spaces extends View {
     this.born = {};
     this.pressed = null;
     this.over = null;
+    this.hovered = null; // the machine header under the pointer, for its New space
     this.machines = [];
     this.reconnecting = JSON.parse(localStorage.getItem("machines.reconnecting") ?? "{}");
     for (const state of Object.values(this.reconnecting)) state.busy = false;
@@ -347,11 +364,11 @@ export default class Spaces extends View {
     const rows = this.ordered();
     const all = agents(), ps = panes();
     const order = [];
-    const draw = (r) => {
+    const draw = (r, n) => {
       if (collapsed) return this.compact(r, t);
       const mine = all.filter((a) => a.space === r.w.id);
       order.push(...mine.map((a) => a.address));
-      return [this.row(r, t), ...mine.map((a) => this.agentRow(a, r.w, t, ps))];
+      return [this.row(r, t, n === 0), ...mine.map((a) => this.agentRow(a, r.w, t, ps))];
     };
     // agent.next / agent.prev walk the agents in sidebar order.
     this.order = order;
@@ -361,7 +378,7 @@ export default class Spaces extends View {
       return layout === "loading" || (!layout && this.machines.some(k => k.name === m && k.state === "connected"))
         || spaces().some(s => (s.machine ?? null) === m && !this.shown.has(s.id));
     };
-    const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
+    const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(26).flex_none().px(PAD).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
     if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : rows.flatMap(draw);
     const machineNames = [null, ...remote];
     return machineNames.flatMap((m) => {
@@ -371,14 +388,24 @@ export default class Spaces extends View {
       const connected = !m || machine?.state === "connected";
       const rebuilt = this.rebuilt(machine) || !!repair;
       const folded = this.folded.has(m);
-      const head = h_flex().id(`machine-${m ?? "local"}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(11).text_color(t.dim)
+      // A machine is a label, not a control panel: at rest it says its name and
+      // only what isn't normal. A connected machine needs no green dot to say
+      // so, the chevron is worth drawing only where something is folded away,
+      // and New space comes out when the pointer is on the row.
+      const over = this.hovered === (m ?? "local");
+      const waiting = agents().filter(a => a.status === "blocked" && (spaces().find(s => s.id === a.space)?.machine ?? null) === m).length;
+      const head = h_flex().id(`machine-${m ?? "local"}`).h(24).flex_none().mt(12).px(collapsed ? 2 : PAD).gap(7).items_center().text_size(10.5).text_color(t.dim)
         .cursor_pointer().hover(s => s.bg(t.hover))
+        .on_hover((on, cx) => {
+          const now = on ? (m ?? "local") : this.hovered === (m ?? "local") ? null : this.hovered;
+          if (this.hovered !== now) { this.hovered = now; cx.notify(); }
+        })
         .on_click((_e, cx) => {
           folded ? this.folded.delete(m) : this.folded.add(m);
           localStorage.setItem("machines.folded", JSON.stringify([...this.folded]));
           cx.notify();
         })
-        .child(svg(`mods/workspace-chrome/${m ? "server" : "monitor"}.svg`).size(13).flex_none())
+        .child(svg(`mods/workspace-chrome/${m ? "server" : "monitor"}.svg`).size(collapsed ? 13 : 11).flex_none())
         .when(!collapsed, el => el.child(div().flex_1().truncate().child(m ?? "This computer"))
           .when(!connected && !rebuilt, el => el.child(div().flex_none().child((machine?.state ?? "asleep").replace(/_/g, " "))))
           .when(rebuilt, el => el.child(h_flex().flex_none().gap(3).items_center()
@@ -388,15 +415,17 @@ export default class Spaces extends View {
               .tooltip(repair?.error || "This machine was rebuilt or replaced. Click to connect to the new one.")
               .on_click((_e, cx) => { cx.stop_propagation(); this.reconnect(machine, cx); })
               .child(repair?.busy ? "Connecting…" : "Connect"))))
-          .when(connected, el => el.child(div().id(`machine-add-${m ?? "local"}`).flex_none().px(4).rounded(4).hover(s => s.bg(t.hover).text_color(t.foreground))
-            .on_click((_e, cx) => { cx.stop_propagation(); run("space.new", { machine: m ?? "" }); }).child("+")))
-          .when(folded && !collapsed, el => {
-            const waiting = agents().filter(a => a.status === "blocked" && (spaces().find(s => s.id === a.space)?.machine ?? null) === m).length;
-            return el.when(waiting > 0, el => el.child(div().flex_none().px(5).rounded(4).bg(t.blocked).text_color(PINE).font_semibold().child(`${waiting} waiting`)));
-          })
-          .child(div().size(6).rounded(3).flex_none().bg(connected ? t.ansi2 : t.dim))
-          .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
-      const empty = h_flex().id(`machine-new-${m ?? "local"}`).h(28).flex_none().px(8).gap(7).items_center().rounded(7)
+          // Folded away is the one state that can hide an agent needing Casey.
+          .when(folded && waiting > 0, el => el.child(div().flex_none().px(5).rounded(4).bg(t.blocked).text_color(PINE).font_semibold().child(`${waiting} waiting`)))
+          .when(folded, el => el.child(svg("mods/workspace-chrome/chevron-right.svg").size(11).flex_none()))
+          // On hover the row says what it can do; at rest it says nothing.
+          .when(over && !folded, el => el.child(svg("mods/workspace-chrome/chevron-down.svg").size(11).flex_none()))
+          .when(connected && over, el => el.child(div().id(`machine-add-${m ?? "local"}`).flex_none().flex().items_center()
+            .hover(s => s.text_color(t.foreground))
+            .tooltip(`New space on ${m ?? "this computer"}`)
+            .on_click((_e, cx) => { cx.stop_propagation(); run("space.new", { machine: m ?? "" }); })
+            .child(svg("mods/workspace-chrome/plus.svg").size(11)))));
+      const empty = h_flex().id(`machine-new-${m ?? "local"}`).h(26).flex_none().px(PAD).gap(7).items_center()
         .text_size(12).text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
         .on_click(() => run("space.new", { machine: m ?? "" }))
         .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
@@ -427,7 +456,7 @@ export default class Spaces extends View {
       .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)));
   }
 
-  row({ w, i, g, tree }, t) {
+  row({ w, i, g, tree }, t, first) {
     const on = w.active;
     const colors = shared("space.colors") ?? {};
     const color = colors[w.id] ?? "ansi6";
@@ -435,11 +464,11 @@ export default class Spaces extends View {
     return v_flex()
       .relative()
       .id(`space-${w.id}`)
-      .px(8)
-      .h(rowHeight({ tree }))
+      .pl(PAD).pr(12)
+      .mt(first ? 2 : 8)
+      .h(ROW)
       .flex_none()
       .justify_center()
-      .rounded(8)
       .when(on, (el) => el.bg(t.selected))
       .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
       .when(this.pressed === i && this.over !== i, (el) => el.opacity(0.5))
@@ -472,12 +501,18 @@ export default class Spaces extends View {
       .on_mouse_down("right", () => this.menu(w))
       .child(
         h_flex()
-          .gap(9)
           .items_center()
-          .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).text_color(t.dim)))
-          .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child([...w.name][0]?.toUpperCase() ?? "?")))
-          .child(div().flex_shrink(0).max_w(150).truncate().text_color(t.foreground).child(w.name))
-          .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1()),
+          // The key is a margin note: same place on every row, never louder
+          // than the name it labels.
+          .child(div().w(KEY).flex_none().text_size(10.5).text_color(t.dim).child(mKey(i) ?? ""))
+          .child(h_flex().flex_1().min_w(0).gap(8).items_center()
+            .when(Boolean(tree), el => el.pl(NEST))
+            .child(tree
+              ? slot(svg("mods/workspace-chrome/branch.svg").size(12).text_color(t.dim))
+              : slot(div().size(7).rounded(4).bg(fill)))
+            .child(div().flex_shrink(0).max_w(150).truncate().text_size(12.5).font_semibold()
+              .text_color(on ? t.foreground : t.muted).child(w.name))
+            .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1())),
       );
   }
 
@@ -485,30 +520,46 @@ export default class Spaces extends View {
     const tab = w.tabs?.find((x) => x.id === a.tab);
     const need = a.status === "blocked";
     const name = agentName(a, tab, ps);
-    const line = agentLine(a, name, ps.find((p) => p.pane === a.pane)?.cwd);
-    const ink = need ? PINE : t.muted;
+    const ink = need ? PINE : t.dim;
     const ctx = (shared("claude.status")?.agents ?? {})[a.address]?.ctx;
+    // How long it has been in this state, or the minute it finished.
     const when = a.status === "working" && tab?.working_since ? since(tab.working_since)
       : need && tab?.changed_at ? since(tab.changed_at)
+      : a.status === "done" && tab?.changed_at ? clock(tab.changed_at)
       : null;
+    // An unnamed tab is called after its folder, which is what its space is
+    // called: printing that name under itself is the list's loudest noise. Say
+    // it once, and give the agent one line for the session it is running. A
+    // named tab ("fix login") earns the second line back, and then the session
+    // name is worth a word only when it differs from that name.
+    const bare = name === w.name;
+    const session = sessionName(a);
+    // A session called after its space was already said one line up, so the
+    // time stands alone there; only a name that adds one is printed. With
+    // neither to show, the state word steps back in rather than a mute row.
+    const said = session === w.name || session === name;
+    const lead = (said ? null : session)
+      ?? (need ? "waiting for an answer" : null)
+      ?? (when ? null : WORD[a.status]);
+    const says = h_flex().flex_1().min_w(0).gap(5).items_center().text_size(11).text_color(ink)
+      .when(Boolean(lead), (el) => el.child(div().min_w(0).truncate().font_semibold().child(lead)))
+      .when(Boolean(when), (el) => el.child(div().flex_none().child(lead ? `· ${when}` : when)));
     return v_flex()
       .id(`agent-${a.address}`)
-      .ml(26).px(8).py(5).gap(1).flex_none().rounded(7)
+      .pl(PAD + KEY + NEST).pr(12).py(4).gap(1).flex_none()
       .when(need, (el) => el.bg(t.blocked))
-      .when(!need && a.focused, (el) => el.bg(t.selected))
+      // `raised`, not `selected`: the space band owns that tone, and every
+      // text colour still clears 4.5:1 on it in both themes.
+      .when(!need && a.focused, (el) => el.bg(t.raised))
       .when(!need && !a.focused, (el) => el.hover((s) => s.bg(t.hover)))
       .on_click(() => run("agent.focus", { terminal: a.address }))
       .child(h_flex().gap(8).items_center()
-        .child(div().flex_1().min_w(0).truncate().text_color(need ? PINE : t.foreground).child(name))
-        .when(a.status === "done", (el) => el.child(div().flex_none().px(4).rounded(4).border(1).border_color(t.done).text_color(t.done).text_size(11).font_semibold()
-          .child(tab?.changed_at ? `done ${clock(tab.changed_at)}` : "done")))
-        .when(a.status === "working", (el) => el.child(svg("mods/workspace-chrome/spinner.svg").size(11).flex_none().text_color(t.working).spin(900)))
+        .child(marker(a.status, t, ink))
+        .child(bare ? says : div().flex_1().min_w(0).truncate().text_color(need ? PINE : t.foreground).child(name))
         // Context left, red once under a fifth, as in the terminal's status line.
-        .when(typeof ctx === "number", (el) => el.child(div().flex_none().text_size(11.5)
-          .text_color(ctx < 20 && !need ? t.ansi1 : ink).child(`ctx ${Math.round(ctx)}%`)))
-        .when(Boolean(when), (el) => el.child(div().flex_none().text_size(11.5).text_color(ink).child(when))))
-      .child(div().truncate().text_size(12).text_color(ink)
-        .child(line && (a.status === "working" || need) ? `${WORD[a.status]} · ${line}` : need ? "needs you · waiting for an answer" : line ?? WORD[a.status]));
+        .when(typeof ctx === "number", (el) => el.child(div().flex_none().text_size(10.5)
+          .text_color(ctx < 20 && !need ? t.ansi1 : ink).child(`ctx ${Math.round(ctx)}%`))))
+      .when(!bare, (el) => el.child(h_flex().pl(20).child(says)));
   }
 
   compact({ w, i }, t) {
@@ -518,13 +569,13 @@ export default class Spaces extends View {
       .flex_none()
       .justify_center()
       .gap(4)
-      .when(w.active, (el) => el.bg(t.raised))
+      .when(w.active, (el) => el.bg(t.selected))
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("space.select", { id: w.id }))
-      .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
+      .child(div().text_size(11).text_color(w.active ? t.foreground : t.dim).child(mKey(i) ?? String(i + 1)))
       .child(w.status === "blocked"
-        ? div().size(8).rounded(4).bg(t.blocked).border(1).border_color(PINE)
-        : div().text_color(tone(t, w.status)).child(glyph(w.status)));
+        ? div().size(7).rounded(4).bg(t.blocked)
+        : marker(w.status, t, PINE));
   }
 
   render() {
@@ -546,11 +597,11 @@ export default class Spaces extends View {
     // agent.next / agent.prev walk the agents in sidebar order (expanded only).
     if (!collapsed) setAgentOrder(this.order ?? []);
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
-      .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
+      .child(h_flex().h(31).pl(PAD).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child("Spaces"))
         .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
           .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14))))
-      .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
+      .child(v_flex().flex_1().min_h(0).pb(14).overflow_y_scrollbar().mode("always")
         .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
         .children(rows));
   }
