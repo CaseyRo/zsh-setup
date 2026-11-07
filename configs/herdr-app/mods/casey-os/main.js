@@ -72,11 +72,10 @@ const RUNS_FROM = ["Candidate", "Ready"];
 
 // Every session started from a card runs on cc1, never on a laptop (Casey, 7 Nov 2026): cc1 is awake
 // around the clock, so the work is not cut off when this machine sleeps, and the headless runner is
-// there too. hc reaches it as a machine (`hc machine ls`), the terminal is addressed `cc1/t7`, and
-// the space opened here attaches to that terminal, so the station still stands in the bar.
+// there too. A space carries its machine (`hc machine ls`), so the space is cc1's while its station
+// still stands in this bar; RUN_CWD is read on cc1, where the cards' repo lives.
 const RUN_HOST = "cc1";
 const RUN_CWD = "/Users/caseyromkes/dev/casey-os";
-const HC = "/Users/caseyromkes/.local/bin/hc"; // the app's PATH need not hold ~/.local/bin
 
 const ICON = (name) => `mods/workspace-chrome/${name}.svg`;
 
@@ -237,9 +236,9 @@ export default class CaseyOS extends View {
   }
 
   // Neither finished nor handed to a headless run: a session of its own, with
-  // the card already in front of it. It runs on RUN_HOST like every other session
-  // a card starts; the space here is a window onto it, so it stands in the bar as
-  // a station beside the board rather than renaming the board's.
+  // the card already in front of it. Its space is RUN_HOST's, like every other
+  // session a card starts, and stands in the bar as a station beside the board
+  // rather than renaming the board's.
   talk(i, cx) {
     const head = [i.status, i.gate, i.project, i.at ? `updated ${since(i.at)} ago` : null].filter(Boolean).join(" · ");
     const comments = Array.isArray(this.comments[i.id]) ? this.comments[i.id] : [];
@@ -255,44 +254,9 @@ export default class CaseyOS extends View {
         : null,
       "\nI have read this on the Casey OS board and want to think it through with you, not hand it to a run.",
     ].filter((x) => x !== null).join("\n");
-    this.busy = i.id;
+    this.open = null;
     cx.notify();
-    cx.spawn(async (cx) => {
-      try {
-        const addr = await this.startOnRunHost(i, task);
-        run("space.new", { name: i.id, argv: [HC, "attach", addr] });
-        this.open = null;
-      } catch (e) {
-        notify({ title: `Couldn't start a session for ${i.id} on ${RUN_HOST}`, body: String(e?.message ?? e), level: "warn" });
-      }
-      this.busy = null;
-      cx.notify();
-    });
-  }
-
-  // Start claude on RUN_HOST and put the card in front of it. Returns the terminal's
-  // address there. A prompt sent before claude is up would land in the shell, so the
-  // card text waits for `hc wait`; if that part fails the terminal is still there to
-  // attach to, with the card a paste away, so it says so rather than throwing.
-  async startOnRunHost(i, task) {
-    const hc = async (...args) => {
-      const r = await exec(HC, args);
-      if (r.code !== 0) throw new Error((r.stderr ?? "").trim().split("\n")[0] || `hc ${args[0]} failed`);
-      return (r.stdout ?? "").trim();
-    };
-    // zsh -lic: `claude` is Casey's shell function, as when typed into a pane there.
-    const started = JSON.parse(await hc("run", "--on", RUN_HOST, "--bg", "--json", "--no-parent",
-      "--cwd", RUN_CWD, "--label", `ctx=${i.id}`, "zsh", "-lic", "claude"));
-    const addr = started?.address;
-    if (!addr) throw new Error(`hc started it on ${RUN_HOST} but did not name the terminal.`);
-    try {
-      const up = JSON.parse(await hc("wait", addr, "--json"));
-      if (up?.status !== "idle" && up?.status !== "done") throw new Error(`it is ${up?.status ?? "not up"}`);
-      await hc("send", addr, task);
-    } catch (e) {
-      notify({ title: `${i.id} runs on ${RUN_HOST}, without the card`, body: `Paste it in: ${String(e?.message ?? e)}`, level: "warn" });
-    }
-    return addr;
+    run("space.new", { name: i.id, machine: RUN_HOST, folder: RUN_CWD, argv: ["claude"], task });
   }
 
   // Both groups are single-select in Linear, so the chosen label replaces its
@@ -417,8 +381,7 @@ export default class CaseyOS extends View {
     }
     // What you do once you have read it: leave, end it, or sit down with it.
     // `writes` says whether it needs the Linear key. Talking does not — it opens
-    // a session on RUN_HOST and a window onto it — so a snapshot board still does
-    // it. One that
+    // a session on RUN_HOST — so a snapshot board still does it. One that
     // does need the key goes grey and says why, rather than looking alive and
     // swallowing the click.
     const action = (key, label, ink, writes, go) => {
