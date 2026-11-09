@@ -6,7 +6,7 @@
 install_atuin() {
     print_section "Atuin"
 
-    if command_exists atuin; then
+    if command_exists atuin || [[ -x "$HOME/.atuin/bin/atuin" ]]; then
         print_skip "Atuin"
         track_skipped "Atuin"
         # The end-of-install ensure_install_dirs_executable sweep covers
@@ -15,7 +15,12 @@ install_atuin() {
     fi
 
     print_step "Installing Atuin (shell history sync & search)"
-    if curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh; then
+    # The binary installer, not setup.atuin.sh: that wrapper exits silently under
+    # sh when there is no tty (cloud-init, CI), and appends `atuin init` to
+    # ~/.zshrc, which is a symlink into this repo. zz_atuin.sh puts ~/.atuin/bin
+    # on PATH and runs the init instead.
+    if curl --proto '=https' --tlsv1.2 -LsSf https://github.com/atuinsh/atuin/releases/latest/download/atuin-installer.sh \
+        | ATUIN_NO_MODIFY_PATH=1 sh; then
         print_success "Atuin installed"
         track_installed "Atuin"
     else

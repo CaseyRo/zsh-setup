@@ -747,8 +747,10 @@ is_raspberry_pi() {
 
 # Detect if running inside a Docker container
 is_docker() {
+    # Check only the root mount (field 5 == "/"): a Docker *host* lists docker
+    # paths elsewhere in mountinfo (overlay2, volumes) and is not a container.
     [[ -f /.dockerenv ]] || grep -qw docker /proc/1/cgroup 2>/dev/null || \
-        grep -qw docker /proc/self/mountinfo 2>/dev/null
+        awk '$5 == "/"' /proc/self/mountinfo 2>/dev/null | grep -qw docker
 }
 
 # Detect if running on Debian-based system (Ubuntu, Raspbian, etc.)
