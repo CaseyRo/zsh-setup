@@ -236,7 +236,7 @@ get_battery_percent() {
     local percent=""
 
     if [[ "$OSTYPE" == "darwin"* ]] && command_exists pmset; then
-        percent=$(pmset -g batt 2>/dev/null | awk -F';' 'NR==2 {gsub(/[^0-9]/,"",$1); print $1}')
+        percent=$(pmset -g batt 2>/dev/null | grep -oE '[0-9]+%' | head -1 | tr -d '%')
     elif [[ -d /sys/class/power_supply ]]; then
         local capacity_file
         capacity_file=$(ls /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)
