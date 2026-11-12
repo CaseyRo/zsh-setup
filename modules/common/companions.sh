@@ -61,12 +61,15 @@ _cc_companion() {
     # and `claude remote-control -c` reattaches) without moving the caller's cwd.
     # Each companion gets its own auto-memory folder: ~/dev is one memory bucket,
     # so without this every companion loaded every other engagement's notes
-    # (companion-core invariants §5, COS-130, 2026-11-12).
+    # (companion-core invariants §5, COS-130, 2026-11-12). Only once the folder
+    # exists: a host whose ~/dev memory has not been split yet keeps it loaded.
+    local mem=()
+    [[ -d "$HOME/.claude/companion-memory/${slug}" ]] &&
+        mem=(--settings "{\"autoMemoryDirectory\":\"~/.claude/companion-memory/${slug}\"}")
     (
         cd "$HOME/dev" || return 1
         claude --remote-control "${slug}-${host}" -n "${slug}-${host}" \
-            --settings "{\"autoMemoryDirectory\":\"~/.claude/companion-memory/${slug}\"}" \
-            --permission-mode auto "$@" "/companion-${slug}"
+            "${mem[@]}" --permission-mode auto "$@" "/companion-${slug}"
     )
 }
 
