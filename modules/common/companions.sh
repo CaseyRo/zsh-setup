@@ -59,9 +59,13 @@ _cc_companion() {
     fi
     # Subshell: the session runs in ~/dev (where the companion skills resolve
     # and `claude remote-control -c` reattaches) without moving the caller's cwd.
+    # Each companion gets its own auto-memory folder: ~/dev is one memory bucket,
+    # so without this every companion loaded every other engagement's notes
+    # (companion-core invariants §5, COS-130, 2026-11-12).
     (
         cd "$HOME/dev" || return 1
         claude --remote-control "${slug}-${host}" -n "${slug}-${host}" \
+            --settings "{\"autoMemoryDirectory\":\"~/.claude/companion-memory/${slug}\"}" \
             --permission-mode auto "$@" "/companion-${slug}"
     )
 }
