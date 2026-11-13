@@ -2,7 +2,7 @@
 # ============================================================================
 # herdr config
 # ============================================================================
-# herdr itself is installed by mise_install_tools (MISE_TOOLS in packages.sh).
+# herdr itself is a Homebrew package (BREW_PACKAGES in packages.sh, since df7d277).
 # This only seeds the config: Warp-shaped keybindings, the Cobalt2 theme, and
 # the sidebar agent-row style.
 #

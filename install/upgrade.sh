@@ -183,7 +183,9 @@ upgrade_npm_packages() {
     fi
 
     for package in "${NPM_GLOBAL_PACKAGES[@]}"; do
-        if ! npm list -g "$package" &>/dev/null 2>&1; then
+        # --depth=0: without it a package that is only a transitive dependency of
+        # another global counts as installed (see the same guard in install/nvm.sh).
+        if ! npm list -g --depth=0 "$package" &>/dev/null; then
             INSTALLED_SOMETHING=true
             echo -e "${SYMBOL_PACKAGE} Installing new npm package: ${BOLD}$package${RESET}"
             npm install -g "$package" &>/dev/null && \
