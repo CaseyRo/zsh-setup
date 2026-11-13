@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Read [`docs/wiki/quickstart.md`](docs/wiki/quickstart.md) before exploring source.** The wiki is the canonical home for *why* this repo is shaped the way it is — installer profiles and idempotence, the loader's ordering contract, the two shellcheck scopes. It carries a Map of every page. Regenerate it with `/wiki-compile`; structure rules live in `docs/wiki/schema.md`.
-
 ## Project
 
 Cross-platform dotfiles and machine bootstrap for macOS, Ubuntu, and Raspberry Pi (ARM Linux). The repo *is* the deliverable — `~/.zshrc` is symlinked to this repo's `.zshrc`, and `install.sh` is the single entry point for provisioning a machine.
@@ -18,7 +16,7 @@ Cross-platform dotfiles and machine bootstrap for macOS, Ubuntu, and Raspberry P
 bash scripts/doctor.sh       # Health-check an existing install (alias: `zsh-doctor`)
 ./run-to-simlink.sh          # Just (re)create the ~/.zshrc symlink
 
-pre-commit run --all-files   # Runs shellcheck (both scopes) + markdownlint + version bump
+pre-commit run --all-files   # Runs shellcheck (both scopes) + markdownlint --fix (rewrites files) + version bump
 shellcheck --severity=warning install.sh install/*.sh bootstrap.sh scripts/*.sh
 shellcheck --shell=bash --severity=warning $(find modules preload_configs -type f -name '*.sh' ! -name '#*')
 bash -n <file>.sh            # Syntax check a single script
@@ -33,7 +31,7 @@ docker build -f test/Dockerfile.ubuntu -t zsh-smoke .    # Run install smoke tes
 
 `.zshrc` itself is not shellchecked — it has zsh-specific syntax (`fpath+=`, `include` helper, OS-detection branches) that no shellcheck mode handles cleanly.
 
-`VERSION` is auto-bumped by `scripts/bump-version.sh` (pre-commit hook) to `2.0.<commit-count>`. Don't edit it by hand.
+`VERSION` is auto-bumped by `scripts/bump-version.sh` (pre-commit hook) to `2.0.<commit-count>`. Don't edit it by hand. If it disagrees with `git rev-list --count HEAD`, the hooks are not installed on the machine that committed (run `pre-commit install`), so shellcheck and markdownlint did not run either.
 
 ## Architecture
 
@@ -80,10 +78,15 @@ Node (and other runtimes) are managed by [`mise`](https://mise.jdx.dev), not NVM
 
 - `.install-state` (gitignored) persists user choices between runs (dev machine profile, networked services opt-in). Legacy `.prompt-choice` is auto-migrated.
 - Every installer module must be re-runnable — check if the target is already installed and skip, don't error. The installer's value proposition is "safe to re-run."
+- A skip guard tests that the tool works (`--version` succeeds), not that it exists. A dead binary (glibc mise on bookworm, a composer with a broken phar) or a package that is only a transitive dependency (`npm list -g` without `--depth=0`) must never count as installed.
+- A failing module returns 0 and reports through `track_failed`. `install.sh` runs under `set -e` and `main` calls modules bare, so a non-zero return silently skips the rest of the run, the `~/.zshrc` symlink and the summary included.
+- A new installer module takes three edits: the file, a `source` line in `install/core.sh`, and a call in `main`. Where the call sits decides which machines run it (`LIGHT_MODE`, containers that already ship Node).
+- Symlink a config into the repo only if its tool never writes it back. A tool that rewrites its config does so by rename, which silently swaps the symlink for a plain file. Those configs (Warp, atuin, herdr) are copied once, only when absent.
 - Running `install.sh` as root outside Docker triggers an interactive new-user creation flow; inside Docker (`/.dockerenv` or `docker` cgroup) it auto-enables `YES_TO_ALL` and stubs `sudo` as passthrough.
 
 ## Conventions
 
+- 2026-11-13: No repo wiki (COS-130). A headless eval found it cost 7 to 9% more input tokens than this file plus code plus git history, at equal correctness. Rules go here; the why goes in commit bodies and code comments.
 - Deploy = `git add -A && git commit && git push`. This repo has no Vercel/Docker target — pushing to `main` *is* the deploy.
 - Installer env-var prefix: `ZSH_SETUP_*`. The old `ZSH_MANAGER_*` aliases have been fully retired — don't re-introduce them.
 - `include "$path"` (defined in `.zshrc`) sources a file only if it exists — prefer this over raw `source` in modules so missing optional files don't break shell startup.

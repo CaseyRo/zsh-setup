@@ -44,10 +44,11 @@
 # than fewer. The taplo language server still runs, giving schema validation,
 # completion and hover.
 #
-# json has no formatter. prettier reindents four-space JSON configs from four
-# spaces to two and collapses the arrays in .wiki-compiler.json onto one line,
-# and no single prettier setting matches both the 2-space and 4-space json in
-# this repo.
+# json has no formatter. When this was decided, prettier reindented the one
+# four-space JSON config (.wiki-compiler.json, removed 2026-11-13) to two spaces
+# and collapsed its arrays onto one line, and no single prettier setting matched
+# both the 2-space and 4-space json here. Every json file left is two-space, so
+# re-diff before wiring prettier.
 
 # yaml is the one case verified byte-clean: prettier already agrees with every
 # yaml file here, so wiring it changes nothing today and keeps new files
