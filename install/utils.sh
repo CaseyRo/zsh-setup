@@ -749,8 +749,12 @@ is_raspberry_pi() {
 is_docker() {
     # Check only the root mount (field 5 == "/"): a Docker *host* lists docker
     # paths elsewhere in mountinfo (overlay2, volumes) and is not a container.
+    # A container's root is an overlay; with the containerd image store (CI
+    # runners, docker build) its paths carry no "docker", so test the fs type.
+    # shortcut: an overlayroot host (read-only Pi) also counts as a container.
     [[ -f /.dockerenv ]] || grep -qw docker /proc/1/cgroup 2>/dev/null || \
-        awk '$5 == "/"' /proc/self/mountinfo 2>/dev/null | grep -qw docker
+        awk '$5 == "/" { for (i = 7; i < NF; i++) if ($i == "-") { print $(i + 1); exit } }' \
+            /proc/self/mountinfo 2>/dev/null | grep -qx overlay
 }
 
 # Detect if running on Debian-based system (Ubuntu, Raspbian, etc.)
