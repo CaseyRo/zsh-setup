@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Cross-platform dotfiles and machine bootstrap for macOS, Ubuntu, and Raspberry Pi (ARM Linux). The repo *is* the deliverable — `~/.zshrc` is symlinked to this repo's `.zshrc`, and `install.sh` is the single entry point for provisioning a machine.
 
+Two clones of this repo sit on a dev machine: `~/.zsh-setup` is the live one (`~/.zshrc` links to it, and `modules/common/auto-update.sh` pulls into it) and `~/dev/zsh-setup` is the working copy. An edit in the working copy does nothing to a running shell until it is pushed and pulled into `~/.zsh-setup` (auto-update within 24h, or `zsh-update`). So an A/B startup benchmark that toggles files in `~/dev/zsh-setup` measures the same code twice. `ZDOTDIR` alone does not help either: `.zshrc` sets `ZSH_SETUP_FOLDER` from `realpath ~/.zshrc`. Copy the repo and `sed` that line to point at the copy, and measure with a real prompt (`script -q /dev/null zsh -i <<< exit`): `zsh -i -c exit` never fires `precmd`, where deferred `compinit` work lands.
+
 ## Commands
 
 ```bash
