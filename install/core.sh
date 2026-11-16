@@ -643,7 +643,7 @@ main() {
 
         mise_install_tools
 
-        deploy_herdr_config
+        install_herdr
         deploy_herdr_app_config
     fi
 

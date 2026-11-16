@@ -1,37 +1,48 @@
 #!/bin/bash
 # ============================================================================
-# herdr config
+# Herdr: desktop app + herdr-core (`hc`)
 # ============================================================================
-# herdr itself is a Homebrew package (BREW_PACKAGES in packages.sh, since df7d277).
-# This only seeds the config: Warp-shaped keybindings, the Cobalt2 theme, and
-# the sidebar agent-row style.
-#
-# Copied, not symlinked. herdr rewrites config.toml at runtime (a keybinding
-# migration leaves a config.toml.bak-keybind-v2-* behind), and an atomic
-# write-then-rename would silently replace a symlink with a regular file —
-# the same reason configs/warp/settings.toml is seeded rather than linked.
+# Replaces the Herdr TUI (brew `herdr`, ~/.config/herdr): the two don't share
+# agents, and the cockpit lives in Herdr desktop now. A Mac dev machine gets
+# the app, whose installer brings herdr-core with it; every other host (cc1,
+# servers) gets herdr-core alone, so the desktop can reach it as a machine.
+# Both self-update after the first install, so a re-run only checks presence.
 # ============================================================================
 
-deploy_herdr_config() {
-    local config_dir="$HOME/.config/herdr"
-    local config_file="$config_dir/config.toml"
-    local template="$SCRIPT_DIR/configs/herdr/config.toml"
+install_herdr() {
+    print_section "Herdr"
+    local releases="https://releases.herdr.dev"
 
-    if [[ -f "$config_file" ]]; then
-        print_skip "herdr config (already exists)"
-        track_skipped "herdr config"
+    if [[ "$IS_MAC_DEV_MACHINE" == true ]]; then
+        if [[ -d "$HOME/Applications/Herdr.app" || -d /Applications/Herdr.app ]]; then
+            print_skip "Herdr desktop (already installed; it updates itself)"
+            track_skipped "Herdr desktop"
+            return 0
+        fi
+        print_step "Installing Herdr desktop + herdr-core"
+        if curl -fsSL "$releases/app/install.sh" | sh; then
+            track_installed "Herdr desktop"
+        else
+            print_error "Herdr desktop install failed"
+            track_failed "Herdr desktop"
+        fi
         return 0
     fi
 
-    if [[ ! -f "$template" ]]; then
+    # A working core, not just a file: a dead symlink must not count as installed.
+    if "$HOME/.local/bin/herdr-core" --version >/dev/null 2>&1 || herdr-core --version >/dev/null 2>&1; then
+        print_skip "herdr-core (already installed; it updates itself)"
+        track_skipped "herdr-core"
         return 0
     fi
-
-    print_step "Deploying herdr config template"
-    mkdir -p "$config_dir"
-    cp "$template" "$config_file"
-    print_success "herdr config deployed to $config_file"
-    track_installed "herdr config"
+    print_step "Installing herdr-core (hc)"
+    if curl -fsSL "$releases/core/install.sh" | sh; then
+        track_installed "herdr-core"
+    else
+        print_error "herdr-core install failed"
+        track_failed "herdr-core"
+    fi
+    return 0
 }
 
 # ============================================================================

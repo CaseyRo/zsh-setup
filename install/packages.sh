@@ -25,7 +25,6 @@ BREW_PACKAGES=(
     "tmux"       # terminal multiplexer
     "byobu"      # tmux wrapper with extras
     "mosh"       # roaming, resilient SSH (survives Wi-Fi/sleep/IP changes)
-    "herdr"      # terminal workspace manager for AI coding agents (homebrew/core)
     "fastfetch"  # fast system info (faster alternative to hyfetch)
     "btop"       # modern system monitor (successor to bashtop)
     "figlet"     # ASCII art text banners
@@ -190,10 +189,11 @@ APT_PACKAGES_DEV=(
 # Node is NOT listed here: mise_install_node handles it separately because
 # install_npm_global_packages needs its shims on PATH straight after.
 #
-# Deliberately empty. herdr used to live here and is now a BREW_PACKAGE:
-# herdr self-updates in place, so a second package manager owning the same
-# binary silently drifts — a stale mise shim shadowing a newer self-updated
-# herdr is what broke remote attach on cc1 (2026-09-12). One owner only.
+# Deliberately empty. herdr used to live here: it self-updates in place, so a
+# second package manager owning the same binary silently drifts — a stale mise
+# shim shadowing a newer self-updated herdr broke remote attach on cc1
+# (2026-09-12). One owner only; Herdr desktop + herdr-core now come from their
+# own installer (install/herdr.sh) for the same reason.
 MISE_TOOLS=(
 )
 

@@ -83,7 +83,7 @@ Node (and other runtimes) are managed by [`mise`](https://mise.jdx.dev), not NVM
 - A skip guard tests that the tool works (`--version` succeeds), not that it exists. A dead binary (glibc mise on bookworm, a composer with a broken phar) or a package that is only a transitive dependency (`npm list -g` without `--depth=0`) must never count as installed.
 - A failing module returns 0 and reports through `track_failed`. `install.sh` runs under `set -e` and `main` calls modules bare, so a non-zero return silently skips the rest of the run, the `~/.zshrc` symlink and the summary included.
 - A new installer module takes three edits: the file, a `source` line in `install/core.sh`, and a call in `main`. Where the call sits decides which machines run it (`LIGHT_MODE`, containers that already ship Node).
-- Symlink a config into the repo only if its tool never writes it back. A tool that rewrites its config does so by rename, which silently swaps the symlink for a plain file. Those configs (Warp, atuin, herdr) are copied once, only when absent.
+- Symlink a config into the repo only if its tool never writes it back. A tool that rewrites its config does so by rename, which silently swaps the symlink for a plain file. Those configs (Warp, atuin) are copied once, only when absent.
 - Running `install.sh` as root outside Docker triggers an interactive new-user creation flow; inside Docker (`/.dockerenv` or `docker` cgroup) it auto-enables `YES_TO_ALL` and stubs `sudo` as passthrough.
 
 ## Conventions

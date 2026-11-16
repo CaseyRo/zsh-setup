@@ -20,7 +20,7 @@ This installs everything on a fresh machine. Safe to re-run - already installed 
 | Data | jq |
 | Editor | helix (`hx`, modal editor + Cobalt2 theme; becomes `$EDITOR`) |
 | Editor tooling (`--dev`) | language servers for shell, TOML, YAML, JSON, Markdown, Python, TS/JS, Go, PHP, Docker; shellcheck runs inline while you type |
-| Dev tools | git, gh (GitHub CLI), git-delta, herdr (AI agent workspace), topgrade (updater) |
+| Dev tools | git, gh (GitHub CLI), git-delta, Herdr desktop + `hc` (herdr-core; AI agent workspace), topgrade (updater) |
 | Languages | mise (Node.js + runtimes), Rust/Cargo, uv + Python |
 | Services | Docker, Tailscale, Copyparty |
 | Fonts | Nerd Fonts (FiraMono, JetBrainsMono, Meslo) - desktop only |
@@ -90,11 +90,7 @@ _Git & dev_
 <table>
   <tr>
     <td align="center"><b>git-delta</b> — better diffs<br><img src="https://user-images.githubusercontent.com/52205/81058545-a5725f80-8e9c-11ea-912e-d21954586a44.png" width="380"></td>
-    <td align="center"><b>herdr</b> — agent workspace<br><img src="docs/gifs/herdr.gif" width="380"></td>
-  </tr>
-  <tr>
     <td align="center"><b>topgrade</b> — update everything<br><img src="docs/gifs/topgrade.gif" width="380"></td>
-    <td></td>
   </tr>
 </table>
 
@@ -161,7 +157,7 @@ Want to dig into any of these? Each links to its source repo.
 |------|--------------|
 | [git-delta](https://github.com/dandavison/delta) | Syntax-highlighted git diffs & pager |
 | [mise](https://github.com/jdx/mise) | Runtime/version manager (Node, Python, …) |
-| [herdr](https://herdr.dev) | Terminal workspace manager for AI coding agents |
+| [Herdr](https://herdr.dev) + [hc](https://github.com/herdrdev/herdr-core) | Desktop app for coding agents; `hc` drives herdr-core, which keeps them running (servers get core only) |
 | [hyperfine](https://github.com/sharkdp/hyperfine) | Command-line benchmarking |
 
 **System & monitoring**

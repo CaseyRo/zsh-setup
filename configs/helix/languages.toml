@@ -39,7 +39,7 @@
 # Config and data formats
 # ============================================================================
 # toml has no formatter for the same reason. taplo collapses the aligned key
-# columns in configs/herdr/config.toml and this directory's palettes into
+# columns in this directory's palettes into
 # single-space form, and align_entries=true disagrees with more files rather
 # than fewer. The taplo language server still runs, giving schema validation,
 # completion and hover.

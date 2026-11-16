@@ -2,7 +2,7 @@
 # Cobalt2 for Helix
 # ============================================================================
 # The house theme, matching configs/warp/themes/Cobalt2.yaml (terminal),
-# configs/herdr/config.toml (workspace chrome) and Cursor's Cobalt2 extension.
+# configs/herdr-app/themes (workspace chrome) and Cursor's Cobalt2 extension.
 #
 # Standalone on purpose — no `inherits`. Inheriting a built-in would leave the
 # unlisted scopes tracking whatever upstream does to that base theme between
