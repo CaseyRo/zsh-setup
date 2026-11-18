@@ -1,7 +1,7 @@
 # ============================================================================
-# ZSH-Setup: casey-claude-setup sync (daily, background)
+# ZSH-Setup: casey-os setup sync (daily, background)
 # ============================================================================
-# Once a day, if ~/dev/casey-claude-setup is behind origin, runs its setup.sh in
+# Once a day, if ~/dev/casey-os is behind origin, runs its setup.sh in
 # the background so fleet Claude Code config (skills, agents, retired-asset
 # prunes) reaches this host without a manual run. setup.sh pulls itself; it
 # refuses to pull over conflicting local edits, and this module never stashes
@@ -12,12 +12,15 @@
 # Log: ${XDG_STATE_HOME:-~/.local/state}/zsh-setup/claude-setup-sync.log
 # ============================================================================
 
-CLAUDE_SETUP_DIR="${CLAUDE_SETUP_DIR:-$HOME/dev/casey-claude-setup}"
+CLAUDE_SETUP_DIR="${CLAUDE_SETUP_DIR:-$HOME/dev/casey-os/setup}"   # casey-claude-setup merged into casey-os, 19 Nov 2026 (COS-232)
 _CS_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh-setup"
 
 _claude_setup_sync() {
     [[ -n "${CLAUDE_SETUP_DISABLE_AUTOSYNC:-}" ]] && return
-    [[ -x "$CLAUDE_SETUP_DIR/setup.sh" ]] || return
+    if [[ ! -x "$CLAUDE_SETUP_DIR/setup.sh" ]]; then
+        [[ -d "$HOME/dev/casey-claude-setup" ]] && echo "[claude-setup] casey-claude-setup is archived; run: gh repo clone CaseyRo/casey-os ~/dev/casey-os && ~/dev/casey-os/setup/setup.sh" >&2
+        return
+    fi
     command -v claude >/dev/null 2>&1 || return
 
     local stamp="$_CS_STATE/claude-setup-sync.last" result="$_CS_STATE/claude-setup-sync.status"
