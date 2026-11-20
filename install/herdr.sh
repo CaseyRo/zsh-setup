@@ -82,3 +82,79 @@ deploy_herdr_app_config() {
         track_installed "Herdr desktop $rel"
     done < <(find "$source_dir" -type f -print0)
 }
+
+# ============================================================================
+# Herdr desktop: the settings this cockpit owns
+# ============================================================================
+# settings.json is Herdr's, not ours: the app rewrites it whenever Casey changes
+# zoom, fonts or alerts in Settings. So this patches the three keys the cockpit
+# decides and leaves the rest of the file alone — copying the whole file would
+# silently revert his own clicks on the next run.
+#   sounds.enabled false  Herdr plays an MP3 every time an agent finishes or
+#                         blocks; with a dozen panes that is all day (Casey,
+#                         20 Nov 2026: "stop the annoying bits of sounds").
+#   font                  Herdr ships plain JetBrains Mono, which has no Nerd
+#                         Font glyphs, so Starship's prompt renders as tofu.
+#                         MesloLGS is the house terminal font (PRODUCT.md).
+#   font_ligatures false  Prompt and diff alignment over ligatures.
+# ============================================================================
+
+patch_herdr_app_settings() {
+    local settings="$HOME/.config/herdr-app/settings.json"
+    [[ -f "$settings" ]] || return 0
+    command_exists python3 || {
+        print_skip "Herdr desktop settings (no python3)"
+        return 0
+    }
+
+    local out
+    if out=$(HERDR_SETTINGS="$settings" python3 - <<'PY'
+import json, os, pathlib, sys
+
+want = {
+    "sounds": {"enabled": False},
+    "font": "MesloLGS Nerd Font Mono",
+    "font_ligatures": False,
+}
+path = pathlib.Path(os.environ["HERDR_SETTINGS"])
+try:
+    cur = json.loads(path.read_text() or "{}")
+except (OSError, ValueError) as err:
+    print(f"unreadable: {err}", file=sys.stderr)
+    raise SystemExit(2)
+if not isinstance(cur, dict):
+    print("not an object", file=sys.stderr)
+    raise SystemExit(2)
+
+changed = []
+for key, value in want.items():
+    if isinstance(value, dict):
+        have = cur.get(key) if isinstance(cur.get(key), dict) else {}
+        if any(have.get(k) != v for k, v in value.items()):
+            cur[key] = {**have, **value}
+            changed.append(key)
+    elif cur.get(key) != value:
+        cur[key] = value
+        changed.append(key)
+
+if changed:
+    # Write-then-rename: Herdr reads this file live.
+    tmp = path.with_suffix(".json.new")
+    tmp.write_text(json.dumps(cur, indent=2) + "\n")
+    tmp.replace(path)
+print(",".join(changed))
+PY
+    ); then
+        if [[ -n "$out" ]]; then
+            print_success "Herdr desktop settings: $out"
+            track_installed "Herdr desktop settings"
+        else
+            print_skip "Herdr desktop settings (already set)"
+            track_skipped "Herdr desktop settings"
+        fi
+    else
+        print_error "Herdr desktop settings patch failed"
+        track_failed "Herdr desktop settings"
+    fi
+    return 0
+}
