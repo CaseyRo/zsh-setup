@@ -645,6 +645,7 @@ main() {
 
         install_herdr
         deploy_herdr_app_config
+        patch_herdr_app_settings
     fi
 
     install_npm_global_packages

@@ -38,11 +38,13 @@ driven from a Keychron macro column and knobs, its look following the house
 - Keys: Cmd+1–9 spaces, Ctrl+1–9 tabs, Cmd+B sidebar, Cmd+Opt+arrows panes.
 - Keychron: M1–M5 jump to spaces 1–5; left knob cycles spaces, press zooms
   the pane (router: ~/dev/keychron-q11/hammerspoon/init.lua).
-- Theme follows HA `input_select.house_mode`: day → moss light
-  (cobalt-cdit-day); evening/night → Cobalt dark (cobalt-cdit-evening);
-  morning/guest/away → macOS Auto appearance
-  (~/dev/keychron-q11/bin/herdr-daylight, every 5 min and on wake). It also
-  sets Claude Code's theme (light-ansi / dark-ansi).
+- Theme: the cockpit layout pins `cobalt-yorizon` (Casey, 20 Nov 2026: "a
+  cobalt theme with a bit of yorizon flavor"). The older moss/Cobalt pair
+  (cobalt-cdit-day, cobalt-cdit-evening) stays in `themes/` for the hosts
+  that run the house-mode switcher — HA `input_select.house_mode` → day:
+  moss light, evening/night: Cobalt dark, morning/guest/away: macOS Auto
+  (`~/dev/keychron-q11/bin/herdr-daylight`, every 5 min and on wake; absent
+  on this Mac). That switcher also sets Claude Code's theme.
 - Herdr does not answer OSC 11, so terminal programs cannot detect the
   background themselves.
 - Copy-on-select via Hammerspoon. Long sessions, daylight to late night.
@@ -56,7 +58,19 @@ driven from a Keychron macro column and knobs, its look following the house
 - Claude Code draws its own UI; only its theme choice is controllable.
 - Prompt: Starship from the shared zsh-setup repo (all hosts), now on an
   ANSI `terminal` palette.
-- Terminal font: MesloLGS Nerd Font Mono (settings.json).
+- Terminal font: MesloLGS Nerd Font Mono (settings.json). Herdr's own default
+  is plain JetBrains Mono, which has no Nerd Font glyphs, so Starship's prompt
+  renders as tofu until this is set.
+- Silent by default (Casey, 20 Nov 2026). `settings.json` → `sounds.enabled:
+  false` stops the done/blocked MP3s; the layout root's `toast: "quiet"` stops
+  every in-app notification; Claude Code's `preferredNotifChannel` is
+  `notifications_disabled` in `~/.claude.json`, because herdr-core reports
+  `TERM_PROGRAM=ghostty` and Claude Code would otherwise post a desktop
+  notification per permission and idle prompt. The sidebar is the only place
+  agent state is announced. `install/herdr.sh` (`patch_herdr_app_settings`)
+  owns the first, the layout owns the second; the Claude Code one lives in
+  Claude's own global config, so a new host sets it once in `/config` →
+  Notifications.
 
 ## Brand Commitments
 
@@ -66,6 +80,10 @@ driven from a Keychron macro column and knobs, its look following the house
   horizon-and-point mark.
 - Cobalt2, as in Casey's Warp setup, is the other half of the mashup
   (navy ground, yellow, the Warp ANSI set).
+- Yorizon, where Casey spends his employed days: lime `#c8e600` on dark olive
+  `#2a2b22`, warm off-white `#eceadf`. In `cobalt-yorizon` the lime is the
+  accent and nothing else — focus, selection, the active space — and the olive
+  is the ink on it. Lime never carries text on a light ground (Yorizon's rule).
 - Casey's ask for daylight: "CDiT green translucent", not white paper.
 - Anti-goals (Casey, 2026-11-04): a generic dev-tool look; busy chrome
   competing with terminal text; brand overload where moss/ochre/serif make
@@ -77,7 +95,10 @@ driven from a Keychron macro column and knobs, its look following the house
 2. Agent state is the loudest signal on screen, and only when it needs Casey.
 3. The brand shows in precise details (ground, one accent, the mark), not
    coverage.
-4. The look follows the house: moss by day, Cobalt in the evening.
+4. The look follows the house: moss by day, Cobalt in the evening — where a
+   host runs the switcher. Everywhere else, Cobalt.
+5. Nothing beeps, chimes or pops. A pane that needs Casey goes ochre in the
+   sidebar and waits; the cockpit never interrupts the room.
 
 ## Accessibility & Inclusion
 
