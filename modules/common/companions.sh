@@ -7,7 +7,9 @@
 # instead of by a hand-shared session link. Separator is "-", not "@":
 # SendMessage parses "@" as a teammate address and refuses the name. The contract is declared in
 # ~/dev/casey-os/setup/companion/companions/<slug>/config.md → Hosts; this file only implements
-# it. Nothing here starts a companion on its own — no timer, watcher, or hook.
+# it. Nothing here starts a companion on its own; the one declared exception is ccy's weekday
+# autostart on the work Mac (casey-os setup/companion/companions/yorizon/orchestration/autostart.sh,
+# launchd de.cdit.yorizon-autostart, Casey 25 Nov 2026), which calls ccy like a person would.
 #
 #   ccc    companion-casey      casey-<host>
 #   ccy    companion-yorizon    yorizon-<host>
@@ -16,7 +18,8 @@
 #
 # Functions, not zsh-abbr abbreviations: they need no ZLE, so they work in Warp
 # too without a mirror list in warp.sh. Extra arguments are passed to claude
-# before the prompt, e.g. `ccc --effort max`.
+# before the prompt, e.g. `ccc --effort max`. CC_COMPANION_MODE=<mode> starts it in that mode
+# (`CC_COMPANION_MODE=brief ccy --model opus` runs /companion-yorizon brief).
 #
 # Model: pass `--model <name>` (or `-m`) to pick it up front, e.g.
 # `ccc --model opus`. Left out, the function asks, offering a per-companion
@@ -69,7 +72,7 @@ _cc_companion() {
     (
         cd "$HOME/dev" || return 1
         claude --remote-control "${slug}-${host}" -n "${slug}-${host}" \
-            "${mem[@]}" --permission-mode auto "$@" "/companion-${slug}"
+            "${mem[@]}" --permission-mode auto "$@" "/companion-${slug}${CC_COMPANION_MODE:+ $CC_COMPANION_MODE}"
     )
 }
 
